@@ -20,7 +20,7 @@ inline void destory(ForwardIterator beg, ForwardIterator end) {
 //≈–∂œ‘™Àÿ «∑Ò”–trivial destructor
 template <class ForwardIterator,class T>
 inline void _destory(ForwardIterator beg, ForwardIterator end, T*) {
-	typedef typename _type_traits<T>::has_trivial_destructor trivial_destrcutor;
+	using trivial_destructor = _type_traits<T>::has_trivial_destructor;
 	_destory_aux(beg, end, trival_destructor());
 }
 
