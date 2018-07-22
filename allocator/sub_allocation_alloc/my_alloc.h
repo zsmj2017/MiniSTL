@@ -132,7 +132,9 @@ char* __default_alloc_template<threads, inst>::end_free = nullptr;
 
 template <bool threads, int inst>
 __default_alloc_template<threads, inst>::obj* volatile
-__default_alloc_template<threads, inst>::free_list[__NFREELISTS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+__default_alloc_template<threads, inst>::free_list[__NFREELISTS] = { 
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+};
 
 
 //当free_list无可用区块时，重新填充空间
