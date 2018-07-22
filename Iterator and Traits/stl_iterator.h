@@ -67,17 +67,18 @@ template<class T>
 using reference_t = typename iterator_traits<T>::reference;
 
 //迭代器属性获取函数
+//以auto推衍返回类型，以下三种均只需要返回val_type，无需考虑剥离reference
 template<class Iterator>
-inline iterator_category_t<Iterator> iterator_category(const Iterator&) {
+inline auto iterator_category(const Iterator&) {
 	return iterator_category_t<Iterator>();
 }
 
 template<class Iterator>
-inline difference_type_t<Iterator> distance_type(const Iterator&) {
+inline auto distance_type(const Iterator&) {
 	return  difference_type_t<Iterator>();
 }
 
 template<class Iterator>
-inline value_type_t<Iterator> value_type(const Iterator&) {
+inline auto value_type(const Iterator&) {
 	return  value_type_t<Iterator>();
 }
