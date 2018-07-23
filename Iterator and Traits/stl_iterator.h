@@ -66,19 +66,49 @@ using pointer_t = typename iterator_traits<T>::pointer;
 template<class T>
 using reference_t = typename iterator_traits<T>::reference;
 
-//迭代器属性获取函数
-//以auto推衍返回类型，以下三种均只需要返回val_type，无需考虑剥离reference
-template<class Iterator>
-inline auto iterator_category(const Iterator&) {
-	return iterator_category_t<Iterator>();
+
+//以下为整组distance函数
+//是否因为迭代构造成本较低，因此直接pass-by-value?
+//例如我觉得可以将random版本形参声明为const&
+template<class InputIterator>
+inline auto __distance(InputIterator first, InputIterator last, input_iterator_tag) {
+	difference_type_t<InputIterator> n = 0;
+	while (first!last)
+		++first, ++n;
+	return n;
 }
 
-template<class Iterator>
-inline auto distance_type(const Iterator&) {
-	return  difference_type_t<Iterator>();
+template<class InputIterator>
+inline auto __distance(InputIterator first,InputIterator last,random_access_iterator_tag) {
+	return (difference_type_t<InputIterator> n = first-last);
+	
 }
 
-template<class Iterator>
-inline auto value_type(const Iterator&) {
-	return  value_type_t<Iterator>();
+template<class InputIterator>
+inline auto distance(InputIterator first,InputIterator last) {
+	return __distance(first, last,iterator_category_t<InputIterator>());
+}
+
+//以下为整组advance函数
+template<class InputIterator,class Distance>
+inline void __advance(InputIterator& i, Distance n, input_iterator_tag) {
+	while (n--) ++i;
+}
+
+template<class InputIterator, class Distance>
+inline void __advance(InputIterator& i, Distance n, bidirectional_iterator_tag) {
+	if (n >= 0)
+		while (n--) ++i;
+	else
+		while (n++) --i;
+}
+
+template<class InputIterator, class Distance>
+inline void __advance(InputIterator& i, Distance n, random_access_iterator_tag) {
+	i += n;
+}
+
+template<class InputIterator, class Distance>
+inline void advance(InputIterator& i, Distance n) {
+	__advance(i, n, iterator_category_t<InputIterator>());
 }
