@@ -1,1 +1,1 @@
-# SGI-STL-Sources(in C++14)
+# SGI-STL-Sources(with some C++14 features)
