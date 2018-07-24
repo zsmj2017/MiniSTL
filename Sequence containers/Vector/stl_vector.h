@@ -90,11 +90,10 @@ public:
 	}
 
 	iterator erase(iterator position) {
-		if (position + 1 != end()) {
+		if (position + 1 != end()) //除却尾端节点外均需复制
 			copy(position + 1, finish, position);
-			pop_back(finish);
-			return position;
-		}
+		pop_back();
+		return position;
 	}
 
 	void resize(size_type new_size, const value_type& value) {
