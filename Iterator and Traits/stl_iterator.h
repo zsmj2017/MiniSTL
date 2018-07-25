@@ -1,15 +1,15 @@
 #pragma once
 
-#include <cstddef> //ptrdiff_t¶¨Òå
+#include <cstddef> //ptrdiff_tå®šä¹‰
 
-//ÎåÖÖµü´úÆ÷ÀàĞÍ
+//äº”ç§è¿­ä»£å™¨ç±»å‹
 struct input_iterator_tag { };
 struct output_iterator_tag { };
 struct forward_iterator_tag : public input_iterator_tag { };
 struct bidirectional_iterator_tag : public forward_iterator_tag { };
 struct random_access_iterator_tag : public bidirectional_iterator_tag { };
 
-//ÎªÁË±ÜÃâÒÅÍü¼ÇÂ¼traits£¬´Ë»ùÀàÒÔ¹©×Ô¶¨Òåiterator¼Ì³ĞÖ®
+//ä¸ºäº†é¿å…é—å¿˜è®°å½•traitsï¼Œæ­¤åŸºç±»ä»¥ä¾›è‡ªå®šä¹‰iteratorç»§æ‰¿ä¹‹
 template<class Category,class T,class Distance = ptrdiff_t,class Pointer = T*,class Reference =T&>
 struct iterator {
 	using iterator_category = Category;
@@ -19,8 +19,8 @@ struct iterator {
 	using reference = Reference;
 };
 
-//traits Õ¹ÏÖIteratorËùÓĞÌØĞÔ
-//Ö®ËùÒÔ²»Ö±½ÓÊ¹ÓÃ±ğÃûÄ£°åÍêÈ«Ìæ´úÊÇÒòÎª´æÔÚÆ«ÌØ»¯°æ±¾£¬£¨ËÆºõ±ğÃûÄ£°åÎŞ·¨Æ«ÌØ»¯£©
+//traits å±•ç°Iteratoræ‰€æœ‰ç‰¹æ€§
+//ä¹‹æ‰€ä»¥ä¸ç›´æ¥ä½¿ç”¨åˆ«åæ¨¡æ¿å®Œå…¨æ›¿ä»£æ˜¯å› ä¸ºå­˜åœ¨åç‰¹åŒ–ç‰ˆæœ¬ï¼Œï¼ˆä¼¼ä¹åˆ«åæ¨¡æ¿æ— æ³•åç‰¹åŒ–ï¼‰
 template <class Iterator>
 struct iterator_traits {
 	using iterator_category = typename Iterator::iterator_category;
@@ -30,7 +30,7 @@ struct iterator_traits {
 	using reference = typename Iterator::Reference;
 };
 
-//Õë¶Ôraw pointerÉè¼ÆµÄÆ«ÌØ»¯°æ±¾
+//é’ˆå¯¹raw pointerè®¾è®¡çš„åç‰¹åŒ–ç‰ˆæœ¬
 template <class T>
 struct iterator_traits<T*> {
 	using iterator_category = random_access_iterator_tag;
@@ -40,7 +40,7 @@ struct iterator_traits<T*> {
 	using reference = T&;
 };
 
-//Õë¶Ôpointer-to-constÉè¼ÆµÄÆ«ÌØ»¯°æ±¾
+//é’ˆå¯¹pointer-to-constè®¾è®¡çš„åç‰¹åŒ–ç‰ˆæœ¬
 template <class T>
 struct iterator_traits<const T*> {
 	using iterator_category = random_access_iterator_tag;
@@ -50,7 +50,7 @@ struct iterator_traits<const T*> {
 	using reference = const T& ;
 };
 
-//ÒÔÏÂÎªÄ£·ÂC++14 type_traits_t¶øÉè¶¨µÄ±ğÃûÄ£°å
+//ä»¥ä¸‹ä¸ºæ¨¡ä»¿C++14 type_traits_tè€Œè®¾å®šçš„åˆ«åæ¨¡æ¿
 template<class T>
 using iterator_category_t = typename iterator_traits<T>::iterator_category;
 
@@ -67,13 +67,13 @@ template<class T>
 using reference_t = typename iterator_traits<T>::reference;
 
 
-//ÒÔÏÂÎªÕû×édistanceº¯Êı
-//ÊÇ·ñÒòÎªµü´ú¹¹Ôì³É±¾½ÏµÍ£¬Òò´ËÖ±½Ópass-by-value?
-//ÀıÈçÎÒ¾õµÃ¿ÉÒÔ½«random°æ±¾ĞÎ²ÎÉùÃ÷Îªconst&
+//ä»¥ä¸‹ä¸ºæ•´ç»„distanceå‡½æ•°
+//æ˜¯å¦å› ä¸ºè¿­ä»£æ„é€ æˆæœ¬è¾ƒä½ï¼Œå› æ­¤ç›´æ¥pass-by-value?
+//ä¾‹å¦‚æˆ‘è§‰å¾—å¯ä»¥å°†randomç‰ˆæœ¬å½¢å‚å£°æ˜ä¸ºconst&
 template<class InputIterator>
 inline auto __distance(InputIterator first, InputIterator last, input_iterator_tag) {
 	difference_type_t<InputIterator> n = 0;
-	while (first!last)
+	while (first!=last)
 		++first, ++n;
 	return n;
 }
@@ -89,7 +89,7 @@ inline auto distance(InputIterator first,InputIterator last) {
 	return __distance(first, last,iterator_category_t<InputIterator>());
 }
 
-//ÒÔÏÂÎªÕû×éadvanceº¯Êı
+//ä»¥ä¸‹ä¸ºæ•´ç»„advanceå‡½æ•°
 template<class InputIterator,class Distance>
 inline void __advance(InputIterator& i, Distance n, input_iterator_tag) {
 	while (n--) ++i;
