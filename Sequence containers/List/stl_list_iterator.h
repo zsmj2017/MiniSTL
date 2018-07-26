@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "stl_list_node.h"
 #include <cstddef>
@@ -16,14 +16,14 @@ struct __list_iterator {
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
-	link_type node;//µü´úÆ÷ÄÚ²¿´æÔÚÒ»¸öraw pointerÖ¸Ïò__list_node
+	link_type node;//è¿­ä»£å™¨å†…éƒ¨å­˜åœ¨ä¸€ä¸ªraw pointeræŒ‡å‘__list_node
 
 	//constructor
 	__list_iterator(link_type x) : node(x) {}
 	__list_iterator() {}
 	__list_iterator(const iterator& x) : node(x.node) {}
 
-	//__list_iteratorÎö¹¹º¯ÊıÎªtrivial
+	//__list_iteratorææ„å‡½æ•°ä¸ºtrivial
 
 	bool operator==(const self&rhs) const { return node == rhs.node; }
 	bool operator!=(const self&rhs) const { return node != rhs.node; }
@@ -34,9 +34,9 @@ struct __list_iterator {
 	//member access
 	pointer operator->() const { return &(operator*()); }
 
-	//×ÔÔö
+	//è‡ªå¢
 	self& operator++() {
-		node = static_cast<link_type>(node->next);//½«__link_node*Ç¿ÖÆ×ªÎªµü´úÆ÷
+		node = static_cast<link_type>(node->next);//å°†__link_node*å¼ºåˆ¶è½¬ä¸ºè¿­ä»£å™¨
 		return *this;
 	}
 
@@ -46,9 +46,9 @@ struct __list_iterator {
 		return temp;
 	}
 
-	//×Ô¼õ
+	//è‡ªå‡
 	self& operator--() {
-		node = static_cast<link_type>(node->prev);//½«__link_node*Ç¿ÖÆ×ªÎªµü´úÆ÷
+		node = static_cast<link_type>(node->prev);//å°†__link_node*å¼ºåˆ¶è½¬ä¸ºè¿­ä»£å™¨
 		return *this;
 	}
 

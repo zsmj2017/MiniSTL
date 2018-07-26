@@ -1,6 +1,6 @@
-#pragma once
+ï»¿#pragma once
 
-//Á½¸öĞÎ²Î±íÕ÷vectorÍ·Î²£¬µ±Ç°ÔªËØÒÑ×÷ÎªvectorÎ²²¿ÔªËØ
+//ä¸¤ä¸ªå½¢å‚è¡¨å¾vectorå¤´å°¾ï¼Œå½“å‰å…ƒç´ å·²ä½œä¸ºvectorå°¾éƒ¨å…ƒç´ 
 template <class RandomAccessIterator>
 inline void push_heap(RandomAccessIterator first, RandomAccessIterator last) {
 	__push_heap_aux(first, last, distance_type(first),value_type(first));
@@ -8,24 +8,24 @@ inline void push_heap(RandomAccessIterator first, RandomAccessIterator last) {
 
 template <class RandomAccessIterator, class Distance, class T>
 inline void __push_heap_aux(RandomAccessIterator first,RandomAccessIterator last, Distance*, T*) {
-	//ÈİÆ÷×îÎ²¶Ë¼´ÎªµÚÒ»¸ö¶´ºÅ(last-first)-1
+	//å®¹å™¨æœ€å°¾ç«¯å³ä¸ºç¬¬ä¸€ä¸ªæ´å·(last-first)-1
 	__push_heap(first, Distance((last - first) - 1), Distance(0),T(*(last - 1)));
 }
 
 template <class RandomAccessIterator, class Distance, class T>
 void __push_heap(RandomAccessIterator first, Distance holeIndex,Distance topIndex, T value) {
-	Distance parent = (holeIndex - 1) / 2;//ÕÒ³ö¸¸½Úµã
-	while (holeIndex > topIndex && *(first + parent) < value) {//ÉĞÎ´µ½´ï¶¥¶ËÇÒÆäÖµ´óÓÚ¸¸½Úµã
-		*(first + holeIndex) = *(first + parent);//Áî¶´ÖµÎª¸¸Öµ
+	Distance parent = (holeIndex - 1) / 2;//æ‰¾å‡ºçˆ¶èŠ‚ç‚¹
+	while (holeIndex > topIndex && *(first + parent) < value) {//å°šæœªåˆ°è¾¾é¡¶ç«¯ä¸”å…¶å€¼å¤§äºçˆ¶èŠ‚ç‚¹
+		*(first + holeIndex) = *(first + parent);//ä»¤æ´å€¼ä¸ºçˆ¶å€¼
 		holeIndex = parent;
-		parent = (holeIndex - 1) / 2;//¸üĞÂ¸¸½Úµã
+		parent = (holeIndex - 1) / 2;//æ›´æ–°çˆ¶èŠ‚ç‚¹
 	}
-	//½áÊøÑ­»·Ê±¸üĞÂ¶´Öµ
+	//ç»“æŸå¾ªç¯æ—¶æ›´æ–°æ´å€¼
 	*(first + holeIndex) = value;
 }
 
 
-//½«heapµÄ¸ù½Úµã£¨×î´óÖµ£©È¡×ß£¨ÆäÊµ·ÅÖÃÓÚvectorÎ²²¿£©
+//å°†heapçš„æ ¹èŠ‚ç‚¹ï¼ˆæœ€å¤§å€¼ï¼‰å–èµ°ï¼ˆå…¶å®æ”¾ç½®äºvectorå°¾éƒ¨ï¼‰
 template <class RandomAccessIterator>
 inline void pop_heap(RandomAccessIterator first,RandomAccessIterator last) {
 	__pop_heap_aux(first, last, value_type(first));
@@ -33,37 +33,37 @@ inline void pop_heap(RandomAccessIterator first,RandomAccessIterator last) {
 
 template <class RandomAccessIterator, class T>
 inline void __pop_heap_aux(RandomAccessIterator first,RandomAccessIterator last, T*) {
-	//ÔÚ[first,last-1)¼äÖ´ĞĞ__pop_heap
+	//åœ¨[first,last-1)é—´æ‰§è¡Œ__pop_heap
 	__pop_heap(first, last - 1, last - 1, T(*(last - 1)), distance_type(first));
 }
 
 template <class RandomAccessIterator, class T, class Distance>
 inline void __pop_heap(RandomAccessIterator first,RandomAccessIterator last,RandomAccessIterator result,T value, Distance*) {
-	*result = *first;//½«Î²¶ËÉèÖÃÎªÈ¡³öÖµ,¶øÔ­±¾µÄÎ²¶ËÖµ±äÎªÁËvalue
+	*result = *first;//å°†å°¾ç«¯è®¾ç½®ä¸ºå–å‡ºå€¼,è€ŒåŸæœ¬çš„å°¾ç«¯å€¼å˜ä¸ºäº†value
 	__adjust_heap(first, Distance(0), Distance(last - first), value);
 }
 
 template <class RandomAccessIterator, class Distance, class T>
 void __adjust_heap(RandomAccessIterator first, Distance holeIndex,Distance len, T value) {
 	Distance topIndex = holeIndex;
-	Distance secondChild = 2 * holeIndex + 2;//¶´µãÓÒ×Ó
-	while (secondChild < len) {//µ±Ç°ÉĞ´æÔÚÓÒ×Ó
-		//×Ô´ËsecondChild´ú±í½Ï´ó×Ó½Úµã
-		if (*(first + secondChild) < *(first + (secondChild - 1)))//ÓÒ×ÓĞ¡ÓÚ×ó×Ó
+	Distance secondChild = 2 * holeIndex + 2;//æ´ç‚¹å³å­
+	while (secondChild < len) {//å½“å‰å°šå­˜åœ¨å³å­
+		//è‡ªæ­¤secondChildä»£è¡¨è¾ƒå¤§å­èŠ‚ç‚¹
+		if (*(first + secondChild) < *(first + (secondChild - 1)))//å³å­å°äºå·¦å­
 			secondChild--;
-		*(first + holeIndex) = *(first + secondChild);//½«¶´µã¸³ÖµÎª½Ï´ó×ÓÖµ
-		holeIndex = secondChild;//¸üĞÂ¶´µã
-		secondChild = 2 * (holeIndex + 1);//ÔÙ´ÎÖ¸Ïò¶´µãÓÒ×Ó
+		*(first + holeIndex) = *(first + secondChild);//å°†æ´ç‚¹èµ‹å€¼ä¸ºè¾ƒå¤§å­å€¼
+		holeIndex = secondChild;//æ›´æ–°æ´ç‚¹
+		secondChild = 2 * (holeIndex + 1);//å†æ¬¡æŒ‡å‘æ´ç‚¹å³å­
 	}
-	if (secondChild == len) {//²»´æÔÚÓÒ×Ó£¬ÁîÆä×ó×ÓÖµÎª¶´Öµ£¬²¢½«¶´ºÅ´«µİÖÁ×ó×Ó£¨×ó×Ó±ØÎª³ıÊ×½ÚµãÍâ×î´óÕß£©
+	if (secondChild == len) {//ä¸å­˜åœ¨å³å­ï¼Œä»¤å…¶å·¦å­å€¼ä¸ºæ´å€¼ï¼Œå¹¶å°†æ´å·ä¼ é€’è‡³å·¦å­ï¼ˆå·¦å­å¿…ä¸ºé™¤é¦–èŠ‚ç‚¹å¤–æœ€å¤§è€…ï¼‰
 		*(first + holeIndex) = *(first + (secondChild - 1));
 		holeIndex = secondChild - 1;
 	}
-	//½«Ô­ÓĞµÄÄ©¶ËÔªËØÌîÈë£¨¸üĞÂÄÇ¸ö¶´
+	//å°†åŸæœ‰çš„æœ«ç«¯å…ƒç´ å¡«å…¥ï¼ˆæ›´æ–°é‚£ä¸ªæ´
 	__push_heap(first, holeIndex, topIndex, value);
 }
 
-//¶ÑÅÅĞò£¨²»¶Ïµ÷ÓÃpop_heap¼´¿É£©
+//å †æ’åºï¼ˆä¸æ–­è°ƒç”¨pop_heapå³å¯ï¼‰
 template <class RandomAccessIterator>
 void sort_heap(RandomAccessIterator first,RandomAccessIterator last) {
 	while (first!=last)
@@ -77,13 +77,13 @@ inline void make_heap(RandomAccessIterator first,RandomAccessIterator last) {
 
 template <class RandomAccessIterator, class T, class Distance>
 void __make_heap(RandomAccessIterator first,RandomAccessIterator last, T*,Distance*) {
-	//±éÀúËùÓĞÓĞ×Ê¸ñÎªrootµÄµã
+	//éå†æ‰€æœ‰æœ‰èµ„æ ¼ä¸ºrootçš„ç‚¹
 	if (last - first < 2) return;
 	Distance len = last - first;
-	//ÕÒµ½ĞèÒªÖØÅÅµÄÍ·²¿£¨¼´Îª×îºóÒ»¸öÓĞ×Ê¸ñÎªrootµÄµã£©
+	//æ‰¾åˆ°éœ€è¦é‡æ’çš„å¤´éƒ¨ï¼ˆå³ä¸ºæœ€åä¸€ä¸ªæœ‰èµ„æ ¼ä¸ºrootçš„ç‚¹ï¼‰
 	Distance holeIndex = (len - 2) / 2;
 	while (true) {
-		//ÖØÅÅÒÔholeIndexÎªÊ×µÄ×ÓÊ÷,lenÒÔ·ÀÔ½½ç
+		//é‡æ’ä»¥holeIndexä¸ºé¦–çš„å­æ ‘,lenä»¥é˜²è¶Šç•Œ
 		__adjust_heap(first, holeIndex, len, T(*(first + holeIndex)));
 		if (holeIndex == 0) return;
 		holeIndex--;

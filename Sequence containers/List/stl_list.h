@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 #include "stl_list_iterator.h"
 
-template<class T,class Alloc=alloc>//Ä¬ÈÏÒÔallocÎª¿Õ¼äÅäÖÃÆ÷
-class list {//Ë«ÏòÑ­»·Á´±í
+template<class T,class Alloc=alloc>//é»˜è®¤ä»¥allocä¸ºç©ºé—´é…ç½®å™¨
+class list {//åŒå‘å¾ªç¯é“¾è¡¨
 protected:
 	using list_node = __list_node<T>;
-	//×¨ÊôÊÊÅäÆ÷£¬Ã¿´ÎÅäÖÃÒ»¸ö½ÚµãµÄ´óĞ¡
+	//ä¸“å±é€‚é…å™¨ï¼Œæ¯æ¬¡é…ç½®ä¸€ä¸ªèŠ‚ç‚¹çš„å¤§å°
 	using list_node_allocator = simple_alloc<list_node, Alloc>;
 public:
 	using link_type = list_node;
@@ -13,10 +13,10 @@ public:
 	using reference = __list_iterator::reference;
 	using size_type = __list_iterator::size_type;
 protected:
-	//ÅäÖÃÓëÊÍ·Ånode
+	//é…ç½®ä¸é‡Šæ”¾node
 	link_type get_node() { return list_node_allocator::alloc(); }
 	void put_node(link_type p) { list_node_allocator::deallocate(p); }
-	//´´½¨ÓëÎö¹¹node
+	//åˆ›å»ºä¸ææ„node
 	link_type create_node(const T& value) {
 		link_type p = get_node();
 		construct(&p->data, value);
@@ -29,13 +29,13 @@ protected:
 protected:
 	list_node node;
 protected:
-	//²úÉúÒ»¸ö¿Õlist
+	//äº§ç”Ÿä¸€ä¸ªç©ºlist
 	void empety_initialized() {
 		node = get_node();
 		node->next = node;
 		node->prev = node;
 	}
-	//ÔÚÖ¸¶¨Î»ÖÃÖ®Ç°²åÈëvalue
+	//åœ¨æŒ‡å®šä½ç½®ä¹‹å‰æ’å…¥value
 	iterator insert(iterator position, const T&value) {
 		link_type temp = create_node(value);
 		temp->next = position.node;
@@ -44,9 +44,9 @@ protected:
 		position.node->prev = temp;
 		return temp;
 	}
-	//É¾³ıÖ¸¶¨Î»ÖÃµÄ½Úµã
+	//åˆ é™¤æŒ‡å®šä½ç½®çš„èŠ‚ç‚¹
 	iterator erase(iterator position) {
-		//¹¹Ôì¾Ö²¿¶ÔÏóÊÇ·ñÓ°ÏìĞ§ÂÊ£¿
+		//æ„é€ å±€éƒ¨å¯¹è±¡æ˜¯å¦å½±å“æ•ˆç‡ï¼Ÿ
 		link_type next_node = static_cast<link_type>(position.node->next);
 		link_type prev_node = static_cast<link_type>(position.node->prev);
 		prev_node->next = next_node;
@@ -54,13 +54,13 @@ protected:
 		destory_node(position.node);
 		return static_cast<iterator>(next_node);
 	}
-	//½«[first,last)Çø¼äÒÆ¶¯ÖÁposÖ®Ç°
+	//å°†[first,last)åŒºé—´ç§»åŠ¨è‡³posä¹‹å‰
 	void transfer(iterator position, iterator first, iterator last) {
 		if (position != last) {
-			//½«Çø¼ä³é³ö
+			//å°†åŒºé—´æŠ½å‡º
 			static_cast<link_type>(last.node->prev)->next = position.node;
 			static_cast<link_type>(first.node->prev)->next = last.node;
-			//Çø¼ä²åÈë
+			//åŒºé—´æ’å…¥
 			static_cast<link_type>(position.node->prev)->next = first.node;
 			link_type temp = position.node->prev;
 			position.node->prev = last.node->prev;
@@ -72,8 +72,8 @@ protected:
 public:
 	list() { empety_initialized(); }
 public:
-	//¾²Ì¬½Ó¿Ú
-	//ÈôÒÔnodeÎªÄ©½Úµã(Ä©½ÚµãËÆºõÎªÉÚ±ø£©£¬ÔòÒÔÏÂÎå¸ö½Ó¿ÚÊ±¼ä¸´ÔÓ¶ÈÎªO(1)
+	//é™æ€æ¥å£
+	//è‹¥ä»¥nodeä¸ºæœ«èŠ‚ç‚¹(æœ«èŠ‚ç‚¹ä¼¼ä¹ä¸ºå“¨å…µï¼‰ï¼Œåˆ™ä»¥ä¸‹äº”ä¸ªæ¥å£æ—¶é—´å¤æ‚åº¦ä¸ºO(1)
 	iterator begin() { return static_cast<link_type>(node->next); }
 	iterator end() { return node; }
 	bool empty() const { return node->next == node; }
@@ -82,11 +82,11 @@ public:
 	
 	size_type size() const {
 		size_type result = 0;
-		distance(begin(), end(), result);//È«¾Öº¯Êı£¬¼ûstl_iterator.h
+		distance(begin(), end(), result);//å…¨å±€å‡½æ•°ï¼Œè§stl_iterator.h
 		return result;
 	}
 public:
-	//¶¯Ì¬½Ó¿Ú
+	//åŠ¨æ€æ¥å£
 	void push_front(const T&value) { insert(begin(), value); }
 	void push_back(const T&value) { insert(end(), value); }
 	void pop_fornt() { erase(begin()); }
@@ -96,13 +96,13 @@ public:
 	}
 	void clear();
 	void remove(const T& value);
-	//Á¬ĞøÈ¥ÖØ
+	//è¿ç»­å»é‡
 	void unique();
-	//½«xÒÆ¶¯ÖÁposÖ®Ç°,x±ØĞë²»Í¬ÓÚ*this
+	//å°†xç§»åŠ¨è‡³posä¹‹å‰,xå¿…é¡»ä¸åŒäº*this
 	void splice(iterator position, list& x);
-	//½«iËùÖ¸ÏòÔªËØÒÆ¶¯ÖÁposÖ®Ç°£¬posÓëi¿ÉÄÜÖ¸ÏòÍ¬Ò»¸ölist
+	//å°†iæ‰€æŒ‡å‘å…ƒç´ ç§»åŠ¨è‡³posä¹‹å‰ï¼Œposä¸iå¯èƒ½æŒ‡å‘åŒä¸€ä¸ªlist
 	void splice(iterator position, list&, iterator i);
-	//½«Á½¸öÓĞĞòµÄlist¹é²¢
+	//å°†ä¸¤ä¸ªæœ‰åºçš„listå½’å¹¶
 	void merge(list& x);
 	void reverse();
 	void sort();
@@ -116,7 +116,7 @@ inline void list<T, Alloc>::clear(){
 		cur = static_cast<link_type>(cur->next);
 		destory_node(temp);
 	}
-	//»Ö¸´Ô­Ê¼×´Ì¬
+	//æ¢å¤åŸå§‹çŠ¶æ€
 	node->next = node;
 	node->prev = node;
 }
@@ -142,7 +142,7 @@ inline void list<T, Alloc>::unique(){
 	while (++next != end) {
 		if (*first == *next) {
 			erase(next);
-			next = first;//ĞŞÕınext
+			next = first;//ä¿®æ­£next
 		}
 		else
 			first = next;
@@ -159,8 +159,8 @@ template<class T, class Alloc>
 inline void list<T, Alloc>::splice(iterator position, list &, iterator i){
 	iterator j = i;
 	++j;
-	//i==pos ×ÔÉíÎŞ·¨²åÓÚ×ÔÉíÖ®Ç°
-	//j==pos ÒÑ´¦ÓÚposÖ®Ç°
+	//i==pos è‡ªèº«æ— æ³•æ’äºè‡ªèº«ä¹‹å‰
+	//j==pos å·²å¤„äºposä¹‹å‰
 	if (position == i || position == j) return;
 	transfer(position, i, j);
 }
@@ -186,10 +186,10 @@ inline void list<T, Alloc>::merge(list& x){
 
 template<class T, class Alloc>
 inline void list<T, Alloc>::reverse(){
-	//¿Õlist»ò½öÓĞÒ»¸öÔªËØ
+	//ç©ºlistæˆ–ä»…æœ‰ä¸€ä¸ªå…ƒç´ 
 	if (node->next == node || node->next->next == node) return;
 	iterator first = begin();
-	++first;//begin×ÔÉí²¢²»ĞèÒªÒÆ¶¯£¬Ëü½«×÷ÎªÖ¸Ê¾Ä©ÔªËØµÄÉÚ±ø£¨È·ÇĞµØËµ£¬×îÖÕbegin.node->next == end.node)
+	++first;//beginè‡ªèº«å¹¶ä¸éœ€è¦ç§»åŠ¨ï¼Œå®ƒå°†ä½œä¸ºæŒ‡ç¤ºæœ«å…ƒç´ çš„å“¨å…µï¼ˆç¡®åˆ‡åœ°è¯´ï¼Œæœ€ç»ˆbegin.node->next == end.node)
 	while (first != end()) {
 		iterator old = first;
 		++first;
@@ -197,13 +197,13 @@ inline void list<T, Alloc>::reverse(){
 	}
 }
 
-//STL list²»¿ÉÊ¹ÓÃSTL sortËã·¨£¬ºóÕßĞèÒªrandomAccessµü´úÆ÷
-//±¾member function²ÉÓÃquick sort£¨È»¶øÎÒ¸Ğ¾õÀàËÆÓÚ¹é²¢ÅÅĞò£©
-//Ëã·¨ÍÆÑÜ¼û https://blog.csdn.net/qq276592716/article/details/7932483
+//STL listä¸å¯ä½¿ç”¨STL sortç®—æ³•ï¼Œåè€…éœ€è¦randomAccessè¿­ä»£å™¨
+//æœ¬member functioné‡‡ç”¨quick sortï¼ˆç„¶è€Œæˆ‘æ„Ÿè§‰ç±»ä¼¼äºå½’å¹¶æ’åºï¼‰
+//ç®—æ³•æ¨è¡è§ https://blog.csdn.net/qq276592716/article/details/7932483
 template<class T, class Alloc>
 inline void list<T, Alloc>::sort(){
 	if (node->next == node || node->next->next == node) return;
-	//ÖĞ½éÊı¾İ´æ·ÅÇø counter[n]ÖĞ×î¶à´æ·Å2^(n+1)¸öÔªËØ£¬Èô´óÓÚÔòÓëcounter[n+1]×÷¹é²¢
+	//ä¸­ä»‹æ•°æ®å­˜æ”¾åŒº counter[n]ä¸­æœ€å¤šå­˜æ”¾2^(n+1)ä¸ªå…ƒç´ ï¼Œè‹¥å¤§äºåˆ™ä¸counter[n+1]ä½œå½’å¹¶
 	list carry;
 	list counter[64];
 	int fill = 0;

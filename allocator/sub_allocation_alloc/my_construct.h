@@ -1,5 +1,5 @@
-#pragma once
-#include "new.h"//ĞèÒªplacement new
+ï»¿#pragma once
+#include "new.h"//éœ€è¦placement new
 
 template <class T1,class T2>
 inline void construct(T1* p, T2 value) {
@@ -11,31 +11,32 @@ inline void destroy(T* p) {
 	p->~T();
 }
 
-//Éè·¨ÀûÓÃtraitsÅúÁ¿Îö¹¹¶ÔÏó
+//è®¾æ³•åˆ©ç”¨traitsæ‰¹é‡ææ„å¯¹è±¡
 template <class ForwardIterator>
 inline void destory(ForwardIterator beg, ForwardIterator end) {
 	_destory(beg, end, value_type(first);
 }
 
-//ÅĞ¶ÏÔªËØÊÇ·ñÓĞtrivial destructor
+//åˆ¤æ–­å…ƒç´ æ˜¯å¦æœ‰trivial destructor
 template <class ForwardIterator,class T>
 inline void _destory(ForwardIterator beg, ForwardIterator end, T*) {
-	using trivial_destructor = _type_traits<T>::has_trivial_destructor;
+	//_type_traitså®ç°è§è¿­ä»£å™¨ä¸€èŠ‚
+	using trivial_destructor = typename _type_traits<T>::has_trivial_destructor;
 	_destory_aux(beg, end, trival_destructor());
 }
 
-//Èç¹ûÔªËØµÄvalue_type²»´æÔÚnon¡ªtrivial destructor
+//å¦‚æœå…ƒç´ çš„value_typeä¸å­˜åœ¨nonâ€”trivial destructor
 template <class ForwardIterator>
 inline void _destory_aux(ForwardIterator beg, ForwardIterator end, _false_type) {
 	for (; beg != end; ++beg)
-		destroy(&*beg);//±Ï¾¹µü´úÆ÷²»ÊÇÕæÕıµÄµØÖ·
+		destroy(&*beg);//æ¯•ç«Ÿè¿­ä»£å™¨ä¸æ˜¯çœŸæ­£çš„åœ°å€
 }
 
-//´æÔÚtrivial destructor
-//Èç¹û¶ÔÏóµÄÎö¹¹º¯ÊıÎŞ¹ØÍ´Ñ÷£¬ÄÇÃ´·´¸´µ÷ÓÃËüÊÇÒ»ÖÖĞ§ÂÊÉÏµÄ¾Ş´óÀË·Ñ
+//å­˜åœ¨trivial destructor
+//å¦‚æœå¯¹è±¡çš„ææ„å‡½æ•°æ— å…³ç—›ç—’ï¼Œé‚£ä¹ˆåå¤è°ƒç”¨å®ƒæ˜¯ä¸€ç§æ•ˆç‡ä¸Šçš„å·¨å¤§æµªè´¹
 template <class ForwardIterator>
 inline void _destroy_aux(ForwardIterator, ForwardIterator,_true_type) {}
 
-//Õë¶Ôchar*¡¢wchar_t*µÄÌØ»¯
+//é’ˆå¯¹char*ã€wchar_t*çš„ç‰¹åŒ–
 inline void destory(char*, char*) {}
 inline void destory(wchar_t*, wchar_t*) {}

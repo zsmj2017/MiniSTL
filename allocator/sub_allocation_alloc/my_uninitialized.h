@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include"my_construct.h"
 
 template <class InputIterator, class ForwardIterator>
@@ -26,7 +26,7 @@ inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputItera
 	return cur;
 }
 
-//Õë¶Ôchar*¡¢wchar_t*´æÔÚÌØ»¯°æ±¾ memmoveÖ±½ÓÒÆ¶¯ÄÚ´æ
+//é’ˆå¯¹char*ã€wchar_t*å­˜åœ¨ç‰¹åŒ–ç‰ˆæœ¬ memmoveç›´æ¥ç§»åŠ¨å†…å­˜
 inline char*  uninitialized_copy(char* first, char* last, char* result) {
 	memmove(result, first, last - first);
 	return result + (last - first);
@@ -64,28 +64,28 @@ inline ForwardIterator  __uninitialized_fill_aux(ForwardIterator first, ForwardI
 
 template<class ForwardIterator, class Size, class T>
 inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const T & x) {
-	//¸ù¾İvalue_typeÈ¡³öfirstµÄvalue_type(Ïê¼ûµü´úÆ÷Ò»ÕÂ£©
+	//æ ¹æ®value_typeå–å‡ºfirstçš„value_type(è¯¦è§è¿­ä»£å™¨ä¸€ç« ï¼‰
 	return __uninitialized_fill_n(first, n, x, value_type(first));
 }
 
 template<class ForwardIterator, class Size, class T, class T1>
 inline ForwardIterator  __uninitialized_fill_n(ForwardIterator first, Size n, const T & x, T1*) {
 	//POD means Plain Old Data
-	//±ØÈ»ÓµÓĞtrivial ctor/dtot/copy/assignmentº¯Êı
+	//å¿…ç„¶æ‹¥æœ‰trivial ctor/dtot/copy/assignmentå‡½æ•°
 	using is_POD = typename __type_traits<T1>::is_POD_type;
 	return __uninitialized_fill_n_aux(first, n, x, is_POD());
 }
 
 template<class ForwardIterator, class Size, class T>
 inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & x,__true_type) {
-	//PODÀàĞÍ¿ÉÖ±½Ó²ÉÓÃ³õÖµÌîĞ´Ê½ÊÖ·¨
-	return fill(first, n, x);//×ª½»¸ß½×º¯ÊıÖ´ĞĞ
+	//PODç±»å‹å¯ç›´æ¥é‡‡ç”¨åˆå€¼å¡«å†™å¼æ‰‹æ³•
+	return fill(first, n, x);//è½¬äº¤é«˜é˜¶å‡½æ•°æ‰§è¡Œ
 }
 
 template<class ForwardIterator, class Size, class T>
 inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & x, __false_type) {
-	//ºöÂÔÒì³£´¦Àí
-	//Ã÷È·Ã÷È·µÄÊÇÒ»µ©Ò»¸ö¶ÔÏó¹¹ÔìÊ§°ÜÔòĞèÒªÎö¹¹ËùÓĞ¶ÔÏó
+	//å¿½ç•¥å¼‚å¸¸å¤„ç†
+	//æ˜ç¡®æ˜ç¡®çš„æ˜¯ä¸€æ—¦ä¸€ä¸ªå¯¹è±¡æ„é€ å¤±è´¥åˆ™éœ€è¦ææ„æ‰€æœ‰å¯¹è±¡
 	ForwardIterator cur = first;
 	for (; n > 0; --n, ++cur) {
 		construct(&*cur, x);

@@ -1,7 +1,7 @@
-#pragma once
+ï»¿#pragma once
 
-//Ä¬ÈÏÒÔdequeÊµÏÖ
-//stack²¢·Çcontainer£¬¶øÊÇadapter
+//é»˜è®¤ä»¥dequeå®ç°
+//stackå¹¶écontainerï¼Œè€Œæ˜¯adapter
 template <class T,class Sequence = deque<T> >
 class stack {
 	//friend template
@@ -13,7 +13,7 @@ public:
 	using reference = Sequence::reference;
 	using const_reference = Sequence::const_reference;
 protected:
-	Sequence c;//µ×²ãÈİÆ÷
+	Sequence c;//åº•å±‚å®¹å™¨
 public:
 	bool empty() const { return c.empty(); }
 	size_type size() const { return c.size(); }

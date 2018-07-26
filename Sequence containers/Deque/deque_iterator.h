@@ -1,16 +1,16 @@
-#pragma once
+ï»¿#pragma once
 
 #include <cstddef>
 
-//»º³åÇø´óĞ¡Éè¶¨º¯Êı£¨ÔÚÔ¤ÉèÇé¿öÏÂ´«»Ø¿ÉÈİÄÉµÄÔªËØ¸öÊı£©
-//Èôn²»Îª0£¬Ôò´«»Øn£¬±íÊ¾ÓÉÓÃ»§×Ô¶¨
-//ÈônÎª0Ôò²ÉÓÃÔ¤ÉèÖµ Ô¤ÉèÖµ¸ù¾İsz£¨ÔªËØ´óĞ¡£©¶ø¶¨
+//ç¼“å†²åŒºå¤§å°è®¾å®šå‡½æ•°ï¼ˆåœ¨é¢„è®¾æƒ…å†µä¸‹ä¼ å›å¯å®¹çº³çš„å…ƒç´ ä¸ªæ•°ï¼‰
+//è‹¥nä¸ä¸º0ï¼Œåˆ™ä¼ å›nï¼Œè¡¨ç¤ºç”±ç”¨æˆ·è‡ªå®š
+//è‹¥nä¸º0åˆ™é‡‡ç”¨é¢„è®¾å€¼ é¢„è®¾å€¼æ ¹æ®szï¼ˆå…ƒç´ å¤§å°ï¼‰è€Œå®š
 inline size_t __deque_buf_size(size_t n, size_t sz){
 	return n ? n : (sz < 512 ? size_t(512 / sz) : size_t(1));
 }
 
 template<class T,class Ref,class Ptr,size_t BufSiz>
-struct __deque_iterator {//Î´¼Ì³Ğstl_iterator
+struct __deque_iterator {//æœªç»§æ‰¿stl_iterator
 	using iterator = __deque_iterator<T, T&, T*, BufSiz>;
 	using const_iterator = __deque_iterator<T, const T&, const T*, BufSiz>;
 
@@ -26,20 +26,21 @@ struct __deque_iterator {//Î´¼Ì³Ğstl_iterator
 
 	using self = __deque_iterator;
 
-	//±£³ÖÓëÈİÆ÷µÄÁ¬½Ó
-	T* cur;//µ±Ç°»º³åÇøµÄµ±Ç°ÔªËØ
-	T* first;//µ±Ç°»º³åÇøÍ·
-	T* last;//µ±Ç°»º³åÇøÎ²(º¬±¸ÓÃ¿Õ¼ä£©
-	map_pointer node;//Ö¸Ïò¹Ü¿ØÖĞĞÄ
 
-	//Ìø×ª»º³åÇø
+	//ä¿æŒä¸å®¹å™¨çš„è¿æ¥ï¼ˆæˆ‘è®¤ä¸ºåº”å½“å°è£…ä»¥ä¸‹å±æ€§ï¼‰
+	T* cur;//å½“å‰ç¼“å†²åŒºçš„å½“å‰å…ƒç´ 
+	T* first;//å½“å‰ç¼“å†²åŒºå¤´
+	T* last;//å½“å‰ç¼“å†²åŒºå°¾(å«å¤‡ç”¨ç©ºé—´ï¼‰
+	map_pointer node;//æŒ‡å‘ç®¡æ§ä¸­å¿ƒ
+
+	//è·³è½¬ç¼“å†²åŒº
 	void set_node(map_pointer new_node) {
 		node = new_node;
 		first = *new_node;
 		last = first + static_cast<difference_type>(buffer_size());
 	}
 
-	//½âÒıÓÃÔËËã·û
+	//è§£å¼•ç”¨è¿ç®—ç¬¦
 	reference operator*() const { return *cur; }
 	pointer operator->() const { return &(operator*()); }
 
@@ -48,8 +49,8 @@ struct __deque_iterator {//Î´¼Ì³Ğstl_iterator
 	}
 
 	self& operator++() {
-		++cur;//µ¥´¿Ö¸ÕëÔËËã
-		if (cur == last) {//ÈôÒÑµÖ´ïÎ²¶Ë
+		++cur;//å•çº¯æŒ‡é’ˆè¿ç®—
+		if (cur == last) {//è‹¥å·²æŠµè¾¾å°¾ç«¯
 			set_node(++node);
 			cur = first;
 		}
@@ -77,15 +78,15 @@ struct __deque_iterator {//Î´¼Ì³Ğstl_iterator
 		return temp;
 	}
 
-	//ÊµÏÖËæ»ú´æÈ¡
+	//å®ç°éšæœºå­˜å–
 	self& operator+=(difference_type n) {
 		difference_type off_set = n + (cur - first);
 		if (off_set >= 0 && off_set < static_cast<difference_type>(buffer_size())) {
-			//²»ĞèÒªÌø×ª
+			//ä¸éœ€è¦è·³è½¬
 			cur += n;
 		}
 		else {
-			//ĞèÒª×¢ÒâµÄÊÇoff_setĞ¡ÓÚ0Ôò±ØÈ»ĞèÒªÌø×ª
+			//éœ€è¦æ³¨æ„çš„æ˜¯off_setå°äº0åˆ™å¿…ç„¶éœ€è¦è·³è½¬
 			difference_type node_offset = off_set > 0 ? off_set / static_cast<difference_type>(buffer_size())
 				: -static_cast<difference_type>((-off_set - 1) / buffer_size()) - 1;
 			node += node_offset;
