@@ -2,6 +2,13 @@
 
 #include <functional>
 
+//Forward declarations of operators == and <, needed for friend declarations.
+template <class Key, class Compare, class Alloc>
+inline bool operator==(const set<Key, Compare, Alloc>& lhs, const set<Key, Compare, Alloc>& rhs);
+
+template <class Key, class Compare, class Alloc>
+inline bool operator<(const set<Key, Compare, Alloc>& lhs, const set<Key, Compare, Alloc>& rhs);
+
 template <class Key, class Compare = less<Key>, class Alloc = alloc>
 class set {
 public:
@@ -145,6 +152,7 @@ template <class Key, class Compare, class Alloc>
 inline bool operator==(const set<Key, Compare, Alloc>& lhs,const set<Key, Compare, Alloc>& rhs) {
 	return lhs.t == rhs.t;
 }
+
 
 template <class Key, class Compare, class Alloc>
 inline bool operator<(const set<Key, Compare, Alloc>& lhs, const set<Key, Compare, Alloc>& rhs) {

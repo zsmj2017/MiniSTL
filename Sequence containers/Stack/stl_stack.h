@@ -2,6 +2,14 @@
 
 //默认以deque实现
 //stack并非container，而是adapter
+
+//Forward declarations of operators == and <, needed for friend declarations.
+template <class T, class Sequence>
+bool operator==(const stack<T, Sequence>&, const stack<T, Sequence>&);
+
+template<class T, class Sequence = deque<T> >
+inline bool operator<(const stack<T, Sequence>&, const stack<Sequence>&)
+
 template <class T,class Sequence = deque<T> >
 class stack {
 	//friend template

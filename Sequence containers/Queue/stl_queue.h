@@ -1,5 +1,12 @@
 ﻿#pragma once
 
+//Forward declarations of operators == and <, needed for friend declarations.
+template <class T, class Sequence>
+bool operator==(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs);
+
+template <class T, class Sequence>
+bool operator<(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs);
+
 template <class T, class Sequence = deque<T> >
 class queue {
 	friend bool operator== <>(const queue& lhs, const queue& rhs);
