@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <functional>
 
@@ -31,9 +31,9 @@ public:
 	};
 
 private:
-	//select1stÎªSGIÀ©³ä¡£ÊÇÒ»¸öº¯Êı¶ÔÏóÄ£°åÀà£¬ÓÃÒÔ·µ»ØpairµÄµÚÒ»¸öÔªËØµÄÒıÓÃ
+	//select1stæ˜¯SGIæ‰©å……çš„ä¸€ä¸ªä»¿å‡½æ•°æ¨¡æ¿ç±»ï¼Œè¿”å›pairçš„ç¬¬ä¸€ä¸ªå…ƒç´ 
 	using rep_type = rb_tree<key_type, value_type, std::select1st<value_type>, key_compare, _Alloc>;
-	rep_type t;  // µ×²ãºìºÚÊ÷
+	rep_type t;
 
 public:
 	using pointer = rep_type::pointer;
@@ -50,7 +50,6 @@ public:
 	using difference_type = rep_type::difference_type;
 	using allocator_type = rep_type::allocator_type;
 
-	//¹¹Ôì¡¢¿½±´
 
 	multimap() :t(key_compare()) {}
 	explicit multimap(const key_compare& comp) :t(comp) {}
@@ -79,12 +78,12 @@ public:
 	bool empty() const { return t.empty(); }
 	size_type size() const { return t.size(); }
 	size_type max_size() const { return t.max_size(); }
-	//multimapµÄoperator[]¾ß±¸²åÈë¹¦ÄÜ
+	//multimapÂµÃ„operator[]Â¾ÃŸÂ±Â¸Â²Ã¥ÃˆÃ«Â¹Â¦Ã„Ãœ
 	value_type& operator[](const key_type& k) {
 		return (*(insert(value_type(k, data_type())).first)).second
 	}
 
-	//µ÷ÓÃrb-tree½Ó¿Ú
+
 	void swap(multimap<Key, T, Compare, Alloc>& x) { t.swap(x.t); }
 
 	// insert/erase
