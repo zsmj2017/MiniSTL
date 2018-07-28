@@ -3,6 +3,10 @@
 #include <functional>
 
 //Forward declarations of operators == and <, needed for friend declarations.
+
+template <class Key, class Compare, class Alloc>
+class map;
+
 template <class Key, class Compare, class Alloc>
 inline bool operator==(const map<Key, Compare, Alloc>& lhs, const map<Key, Compare, Alloc>& rhs);
 

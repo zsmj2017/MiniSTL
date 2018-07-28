@@ -4,6 +4,10 @@
 //stack并非container，而是adapter
 
 //Forward declarations of operators == and <, needed for friend declarations.
+
+template <clas T,class Sequence>
+class stack;
+
 template <class T, class Sequence>
 bool operator==(const stack<T, Sequence>&, const stack<T, Sequence>&);
 
