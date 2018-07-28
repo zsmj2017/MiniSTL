@@ -35,7 +35,7 @@ public:
 	using const_pointer = rep_type::const_pointer;
 	using reference = rep_type::const_reference;
 	using const_reference = rep_type const_reference;
-	using iterator = Rep_type::const_iterator;
+	using iterator = rep_type::const_iterator;
 	using const_iterator = rep_type::const_iterator;
 	using reverse_iterator = rep_type::const_reverse_iterator;
 	using const_reverse_iterator = rep_type::const_reverse_iterator;
@@ -44,7 +44,7 @@ public:
 	using difference_type = rep_type::difference_type;
 	using allocator_type = rep_type::allocator_type;
 
-	// allocation/deallocation
+	//构造与拷贝
 
 	// set只能使用RB-tree的insert-unique(),不能使用insert-equal() 
 	set():t(key_compare()) {}
