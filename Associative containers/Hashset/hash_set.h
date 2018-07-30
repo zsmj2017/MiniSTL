@@ -14,24 +14,22 @@ private:
 	ht rep;//底层数据结构
 
 public:
-	using key_type = ht::key_type;
-	using value_type = ht::value_type;
-	using hasher = ht::hasher;
-	using key_equal = ht::key_equal;
+	using key_type = typename ht::key_type;
+	using value_type = typename ht::value_type;
+	using hasher = typename ht::hasher;
+	using key_equal = typename ht::key_equal;
 	
 	//显然，set的键值无法修改，采取const形式
-	using pointer = ht::const_pointer;
-	using const_pointer = ht::const_pointer;
-	using reference = ht::const_reference;
-	using const_reference = ht::const_reference;
-	using iterator = ht::const_iterator;
-	using const_iterator = ht::const_iterator;
-	using reverse_iterator = ht::const_reverse_iterator;
-	using const_reverse_iterator = ht::const_reverse_iterator;
+	using pointer = typename ht::const_pointer;
+	using const_pointer = typename ht::const_pointer;
+	using reference = typename ht::const_reference;
+	using const_reference = typename ht::const_reference;
+	using iterator = typename ht::const_iterator;
+	using const_iterator = typename ht::const_iterator;
 
-	using size_type = ht::size_type;
-	using difference_type = ht::difference_type;
-	using allocator_type = ht::allocator_type;
+	using size_type = typename ht::size_type;
+	using difference_type = typename ht::difference_type;
+	using allocator_type = typename ht::allocator_type;
 
 	hasher hash_funct() const { return rep.hash_funct(); }
 	key_equal key_eq() const { return rep.key_eq(); }
