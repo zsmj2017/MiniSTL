@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-
 template <class Value,class HashFcn,class EqualKey,class Alloc>
 class hash_set;
 
@@ -102,7 +101,6 @@ public:
 		rep.insert_unique(f, l);
 	}
 
-
 public:
 	size_type size() const { return rep.size(); }
 	size_type max_size() const { return rep.max_size(); }
@@ -128,7 +126,7 @@ public:
 		rep.insert_unique(f, l);
 	}
 	pair<iterator, bool> insert_noresize(const value_type& obj){
-		pair<typename _Ht::iterator, bool> p = rep.insert_unique_noresize(obj);
+		pair<typename ht::iterator, bool> p = rep.insert_unique_noresize(obj);
 		return pair<iterator, bool>(p.first, p.second);
 	}
 
