@@ -39,7 +39,7 @@ public:
 	using pointer = typename rep_type::pointer;
 	using const_pointer = typename rep_type::const_pointer;
 	using reference = typename rep_type::reference;
-	using const_reference = typename rep_type const_reference;
+	using const_reference = typename rep_type:: const_reference;
 	using iterator = typename rep_type::iterator;
 	using const_iterator = typename rep_type::const_iterator;
 	using reverse_iterator = typename rep_type::reverse_iterator;
