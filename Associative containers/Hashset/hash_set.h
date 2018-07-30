@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 
-template <class Value,class HashFcn = hash<Value>,class EqualKey = equal_to<Value>,class Alloc = alloc >
+template <class Value,class HashFcn,class EqualKey,class Alloc>
 class hash_set;
 
 template <class Value, class HashFcn, class EqualKey, class Alloc>
 inline bool operator==(const hash_set<Value, HashFcn, EqualKey, Alloc>& lhs,const hash_set<Value, HashFcn, EqualKey, Alloc>& rhs);
 
-template <class Value, class HashFcn, class EqualKey, class Alloc>
+template <class Value,class HashFcn = hash<Value>,class EqualKey = equal_to<Value>,class Alloc = alloc>
 class hash_set{
 private:
 	using ht = hashtable<Value, Value, HashFcn, identity<Value>, EqualKey, Alloc>;
@@ -106,7 +106,6 @@ public:
 
 
 public:
-
 	size_type size() const { return rep.size(); }
 	size_type max_size() const { return rep.max_size(); }
 	bool empty() const { return rep.empty(); }
@@ -116,7 +115,6 @@ public:
 	iterator end() const { return rep.end(); }
 
 public:
-
 	pair<iterator, bool> insert(const value_type& obj){
 		pair<typename ht::iterator, bool> p =rep.insert_unique(obj);
 		return pair<iterator, bool>(p.first, p.second);
