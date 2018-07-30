@@ -31,18 +31,18 @@ private:
 public:
 	//set禁止修改键值，因此其迭代器与指针均为const iterator或const_ptr，引用亦为const
 	//set迭代器无法执行任何写入操作
-	using pointer = rep_type::const_pointer;
-	using const_pointer = rep_type::const_pointer;
-	using reference = rep_type::const_reference;
-	using const_reference = rep_type const_reference;
-	using iterator = rep_type::const_iterator;
-	using const_iterator = rep_type::const_iterator;
-	using reverse_iterator = rep_type::const_reverse_iterator;
-	using const_reverse_iterator = rep_type::const_reverse_iterator;
+	using pointer = typename rep_type::const_pointer;
+	using const_pointer = typename rep_type::const_pointer;
+	using reference = typename rep_type::const_reference;
+	using const_reference = typename rep_type const_reference;
+	using iterator = typename rep_type::const_iterator;
+	using const_iterator = typename rep_type::const_iterator;
+	using reverse_iterator = typename rep_type::const_reverse_iterator;
+	using const_reverse_iterator = typename rep_type::const_reverse_iterator;
 
-	using size_type = rep_type::size_type;
-	using difference_type = rep_type::difference_type;
-	using allocator_type = rep_type::allocator_type;
+	using size_type = typename rep_type::size_type;
+	using difference_type = typename rep_type::difference_type;
+	using allocator_type = typename rep_type::allocator_type;
 
 	//构造与拷贝
 

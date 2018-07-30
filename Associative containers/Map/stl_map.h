@@ -38,19 +38,19 @@ private:
 	rep_type t;  // 底层红黑树
 
 public:
-	using pointer = rep_type::pointer;
-	using const_pointer = rep_type::const_pointer;
-	using reference = rep_type::reference;
-	using const_reference = rep_type const_reference;
-	using iterator = rep_type::iterator;
-	using const_iterator = rep_type::const_iterator;
-	using reverse_iterator = rep_type::reverse_iterator;
-	using const_reverse_iterator = rep_type::const_reverse_iterator;
+	using pointer = typename rep_type::pointer;
+	using const_pointer = typename rep_type::const_pointer;
+	using reference = typename rep_type::reference;
+	using const_reference = typename rep_type const_reference;
+	using iterator = typename rep_type::iterator;
+	using const_iterator = typename rep_type::const_iterator;
+	using reverse_iterator = typename rep_type::reverse_iterator;
+	using const_reverse_iterator = typename rep_type::const_reverse_iterator;
 
 
-	using size_type = rep_type::size_type;
-	using difference_type = rep_type::difference_type;
-	using allocator_type = rep_type::allocator_type;
+	using size_type = typename rep_type::size_type;
+	using difference_type = typename rep_type::difference_type;
+	using allocator_type = typename rep_type::allocator_type;
 
 	//构造、拷贝
 
