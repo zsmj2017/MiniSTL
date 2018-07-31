@@ -49,7 +49,7 @@ inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b,T*) {
 
 template <class InputIterator1,class InputIterator2>
 bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1, 
-							InputIterator2 first2, InputIterator2 last2) {
+	InputIterator2 first2, InputIterator2 last2) {
 	for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
 		if (*first1 < *first2)
 			return true;
@@ -61,7 +61,7 @@ bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
 
 template <class InputIterator1, class InputIterator2, class Compare>
 bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
-							InputIterator2 first2, InputIterator2 last2, Compare comp) {
+	InputIterator2 first2, InputIterator2 last2, Compare comp) {
 	for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
 		if (comp(*first1,*first2))
 			return true;
@@ -74,7 +74,7 @@ bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
 //针对原始指针const unsigned char*的全特化版本
 inline bool
 lexicographical_compare(const unsigned char* first1, const unsigned char* last1,
-						const unsigned char* first2, const unsigned char* last2) {
+	const unsigned char* first2, const unsigned char* last2) {
 	const size_t len1 = last1 - first1;
 	const size_t len2 = last2 - first2;
 	//先比较长度相同的段落
@@ -106,7 +106,7 @@ inline const T& min(const T& a, const T& b, Compare comp) {
 //显然要求序列1长于序列2
 template <class InputIterator1, class InputIterator2>
 pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
-											InputIterator2 first2, InputIterator2 last2) {
+	InputIterator2 first2, InputIterator2 last2) {
 	while (first1 != last1 && *first1 == *first2) {
 		++first1, ++first2;
 	}
@@ -115,7 +115,7 @@ pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterat
 
 template <class InputIterator1, class InputIterator2, class BinaryPredicate>
 pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
-											InputIterator2 first2, InputIterator2 last2, BinaryPredicate binary_pred) {
+	InputIterator2 first2, InputIterator2 last2, BinaryPredicate binary_pred) {
 	while (first1 != last1 && binary_pred(*first1,*first2)) {
 		++first1, ++first2;
 	}
