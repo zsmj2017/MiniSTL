@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <cstddef> // ptrdiff_t
+
 //不能保证长度相等
 template <class InputIterator1,class InputIterator2>
 inline bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2) {
@@ -126,3 +128,81 @@ inline void swap(T& a, T& b) {
 	a = b;
 	b = temp;
 }
+
+template <class InputIterator,class OutputIterator>
+inline OutputIterator copy(InputIterator first, InputIterator last, OutputIterator result) {
+	return __copy_dispatch<InputIterator, OutputIterator>(first, last, result);//__copy_dispatch是一个仿函数对象
+}
+
+//针对指针的偏特化
+inline char* copy(const char* first, const char* last, const char* result) {
+	memmove(result, first, last - first);
+	return result + (last - first);
+}
+
+inline wchar_t* copy(const wchar_t* first, const wchar_t* last, wchar_t* result) {
+	memmove(result, first, sizeof(wchar_t)*(last - first);
+	return result + (last - first);
+}
+
+template <class InputIterator, class OutputIterator>
+inline struct __copy_dispatch(InputIterator first, InputIterator last, OutputIterator result) {//仿函数对象
+	OutputIterator operator()(first, last, result) {
+		return __copy(first, last, result, iterator_category(first));
+	}
+}
+
+//偏特化处理
+template <class T>
+struct __copy_dispatch<T*, T*> {
+	T* operator()(T* first, T* last, T* result) {
+		using t = typename __type_traits<T>::has_trivial_assignment_operator;
+		return __copy_t(first, last, result, t());
+	}
+};
+
+//偏特化处理
+template <class T>
+struct __copy_dispatch<const T*, T*> {
+	T* operator()(const T* first, const T* last, T* result) {
+		using t = typename __type_traits<T>::has_trivial_assignment_operator;
+		return __copy_t(first, last, result, t());
+	}
+};
+
+//InputIterator
+template <class InputIterator, class OutputIterator>
+inline OutputIterator __copy(InputIterator first, InputIterator last, OutputIterator result,input_iterator_tag) {
+	for (; first != last; ++first, ++result)//迭代器判同，速度较慢
+		*result = *first;
+	return result;
+}
+
+//RandomIterator
+template <class InputIterator, class OutputIterator>
+inline OutputIterator __copy(InputIterator first, InputIterator last, OutputIterator result, random_access_iterator_tag) {
+	return __copy_d(first, last, result, distance_type(first));//再细分函数以便复用
+}
+
+template <class InputIterator, class OutputIterator, class Distance>
+inline OutputIterator __copy_d(InputIterator first, InputIterator last, OutputIterator result, Distance*) {
+	for (Distance n = last - first; n > 0; --n, ++first, ++result)//以n决定循环次数，速度较快
+		*result = *first;
+	return result;
+}
+
+//具备trivial copy assignment operator，可执行memmove
+template <class T>
+inline T* __copy_t(const T* first, const T* last, T* result, __true_type) {
+	memmove(result, first, sizeof(T)*(last - first));
+	return result+last-first;
+}
+
+
+//原始指针是一种random_access_iterator
+template <class T>
+inline T* __copy_t(const T* first, const T* last, T* result, __false_type) {
+	return __copy_d(first, last, result, static_cast<ptrdiff_t*>(nullptr));
+}
+
+//copy_backward的实现与copy类似，本篇出于时间原因，并不列出
