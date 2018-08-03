@@ -594,3 +594,217 @@ OutputIterator unique_copy(InputIterator first, InputIterator last, OutputIterat
 			*++result = *first;
 	return ++result;
 }
+
+
+//lower_bound:二分查找的一个版本，返回指向第一个不小于value的元素的迭代器。亦可认为是第一个可插入位置
+//存在接受二元比较符的版本二，出于时间原因，略去不表
+template <class ForwardIterator,class T>
+inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value) {
+	return __lower_bound(first, last, value, distance_type(first), iterator_category(first));
+}
+
+template <class ForwardIterator, class T,class Distance>
+ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*, forward_iterator_tag) {
+	Distance len = 0;
+	distance(first, last, len);//求取长度
+	Distance half;
+	ForwardIterator middle;
+
+	while (len > 0) {
+		half = len >> 1;
+		middle = first;
+		advance(middle, half);//令middle指向中间位置
+		if (*middle < value) {
+			first = middle;
+			++first;//令first指向middle下一位置
+			len = len - half - 1;
+		}
+		else
+			len = half;
+	}
+	return first;
+}
+
+template <class RandomAccessIterator, class T, class Distance>
+RandomAccessIterator __lower_bound(RandomAccessIterator first, RandomAccessIterator last, const T& value, Distance*, random_access_iterator_tag) {
+	Distance len = last - first;
+	Distance half;
+	RandomAccessIterator middle;
+
+	while (len > 0) {
+		half = len >> 1;
+		middle = first;
+		middle = first + half;
+		if (*middle < value) {
+			first = middle + 1;
+			len = len - half - 1;
+		}
+		else
+			len = half;
+	}
+	return first;
+}
+
+//upper_bound:二分查找的一个版本，返回可插入的最后一个位置
+//存在接受二元比较符的版本二，出于时间原因，略去不表
+template <class ForwardIterator, class T>
+inline ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last, const T& value) {
+	return __upper_bound(first, last, value, distance_type(first), iterator_category(first));
+}
+
+template <class ForwardIterator, class T, class Distance>
+ForwardIterator __upper_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*, forward_iterator_tag) {
+	Distance len = 0;
+	distance(first, last, len);//求取长度
+	Distance half;
+	ForwardIterator middle;
+
+	while (len > 0) {
+		half = len >> 1;
+		middle = first;
+		advance(middle, half);//令middle指向中间位置
+		if (value < *middle)
+			len = half;
+		else {
+			first = middle;
+			++first;
+			len = len - half - 1;
+		}
+	}
+	return first;
+}
+
+template <class RandomAccessIterator, class T, class Distance>
+RandomAccessIterator __upper_bound(RandomAccessIterator first, RandomAccessIterator last, const T& value, Distance*, random_access_iterator_tag) {
+	Distance len = last - first;
+	Distance half;
+	RandomAccessIterator middle;
+
+	while (len > 0) {
+		half = len >> 1;
+		middle = first;
+		middle = first + half;
+		if (value < *middle)
+			len = half;
+		else {
+			first = middle + 1;
+			len = len - half - 1;
+		}
+	}
+	return first;
+}
+
+//binary_search:在区间内查找元素，存在则返回true，否则返回false
+//本质上只需要调用lower_bound即可
+template <class ForwardIterator, class T>
+bool binary_search(ForwardIterator first, ForwardIterator last, const T& value) {
+	ForwardIterator i = lower_bound(first, last, value);
+	return i != last && !(value < *i);//这里用的是等价判定而非相等判定
+}
+
+//next_permutation:字典序下的下一个排列
+//算法精要：从后向前，找出一组相邻元素，记第一元素为*i,第二元素为*ii,此二者满足*i<*ii
+//再次从后向前，找出第一个大于*i的元素,记为*j，将i与j对调，再将ii之后的元素颠倒重排即可
+template <class BidirectionIterator>
+bool next_permutation(BidirectionIterator first, BidirectionIterator last) {
+	//以下为边界判定
+	if (first == last)
+		return false;
+	BidirectionIterator i = first;
+	++i;
+	if (i == last)//仅有一个元素
+		return false;
+
+	i = last;
+	--i;
+	for (;;) {
+		BidirectionIterator ii = i;
+		--i;
+		if (*i < *ii) {
+			BidirectionIterator j = last;
+			while (!(*i < *--j));//此时j必然存在，最不济也是ii
+			iter_swap(i, j);
+			reverse(ii, last);
+			return true;
+		}
+		if (i == first) {//i已移动至队首且尚未找到ii，直接颠倒全部
+			reverse(first, last);
+			return false;
+		}
+	}
+}
+
+//pre_permutation:字典序下的上一个排列
+//算法精要：从后向前，找出一组相邻元素，记第一元素为*i,第二元素为*ii,此二者满足*i>*ii
+//再次从后向前，找出第一个小于*i的元素,记为*j，将i与j对调，再将ii之后的元素颠倒重排即可
+template <class BidirectionIterator>
+bool pre_permutation(BidirectionIterator first, BidirectionIterator last) {
+	//以下为边界判定
+	if (first == last)
+		return false;
+	BidirectionIterator i = first;
+	++i;
+	if (i == last)//仅有一个元素
+		return false;
+
+	i = last;
+	--i;
+	for (;;) {
+		BidirectionIterator ii = i;
+		--i;
+		if (*i > *ii) {
+			BidirectionIterator j = last;
+			while (!(*j--<*i));//此时j必然存在，最不济也是ii
+			iter_swap(i, j);
+			reverse(ii, last);
+			return true;
+		}
+		if (i == first) {//i已移动至队首且尚未找到ii，直接颠倒全部
+			reverse(first, last);
+			return false;
+		}
+	}
+}
+
+//random_shuffle:将区间[first,last)内的元素随机重排，即对于存在N个元素的区间，从N！的可能性中挑出一种
+//存在两个版本：一个采用内部随机数生成器，另一个则是产生随机数的仿函数，值得注意的是仿函数pass-by-reference而非value，因为该仿函数存在局部状态
+template <class RandomAccessIterator>
+inline void random_shuffle(RandomAccessIterator first, RandomAccessIterator last) {
+	__random_shuffle(first, last, distance_type(first));
+}
+
+template <class RandomAccessIterator, class Distance>
+void __random_shuffle(RandomAccessIterator first, RandomAccessIterator last,Distance*) {
+	if (first == last)
+		return;
+	for (RandomAccessIterator i = first + 1; i != last; ++i)
+		iter_swap(i, first + Distance(rand() % ((i - first) + 1)));
+}
+
+template <class RandomAccessIterator, class RandomNumberGenerator>
+void __random_shuffle(RandomAccessIterator first, RandomAccessIterator last, RandomNumberGenerator& rand) {
+	if (first == last)
+		return;
+	for (RandomAccessIterator i = first + 1; i != last; ++i)
+		iter_swap(i, first+rand(i-first+1));
+}
+
+//partial_sort:接收迭代器first,middle,last，使序列中的middle-first个元素以递增序置于[first,middle)中
+//算法精要：将[first,middle)做成最大堆，然后将[middle，last)中的元素与max-heap中的元素比较
+//若小于最大值，交换位置，并重新维持max-heap （在算法中的直接体现为pop_heap)
+//因此当走完[first,last)时较大元素已被抽离[first,middle),最后再次以sort_heap对[first,middle)作出排序
+template <class RandomAccessIterator>
+inline void partial_sort(RandomAccessIterator first, RandomAccessIterator middle, RandomAccessIterator last) {
+	__partial_sort(first, middle, last);
+}
+
+template <class RandomAccessIterator, class T>
+inline void partial_sort(RandomAccessIterator first, RandomAccessIterator middle, RandomAccessIterator last, T*) {
+	make_heap(first, middle);//见heap_algorithm.h
+	for (RandomAccessIterator i = middle; i != last; ++i)
+		if (*i < *first)
+			__pop_heap(first, middle, i, T(*i), distance_type(first));
+	sort_heap(first, middle);
+}
+
+//partial_sort_copy：其行为类似于partial_sort,此处略过不表
