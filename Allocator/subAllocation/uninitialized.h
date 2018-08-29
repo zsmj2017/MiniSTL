@@ -8,7 +8,7 @@ inline ForwardIterator uninitialized_copy(InputIterator first, InputIterator las
 
 template<class InputIterator, class ForwardIterator, class T>
 inline ForwardIterator  __uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result, T *) {
-	using is_POD =typename  __type_traits<T>::is_POD_type;
+	using is_POD = typename  __type_traits<T>::is_POD_type;
 	return __uninitialized_copy_aux(first, last, result, is_POD());
 }
 
@@ -20,9 +20,8 @@ inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputItera
 template<class InputIterator, class ForwardIterator, class T>
 inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, __false_type) {
 	ForwardIterator cur = result;
-	for (; first != last; ++cur,++first) {
+	for (; first != last; ++cur,++first)
 		construct(&*cur, *first);
-	}
 	return cur;
 }
 
@@ -56,9 +55,8 @@ inline ForwardIterator  __uninitialized_fill_aux(ForwardIterator first, ForwardI
 template<class ForwardIterator, class T>
 inline ForwardIterator  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, __false_type) {
 	ForwardIterator cur = first;
-	for (:cur != last; ++cur) {
+	for (:cur != last; ++cur)
 		construct(&*cur, value);
-	}
 	return cur;
 }
 
@@ -87,9 +85,8 @@ inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n
 	//忽略异常处理
 	//明确明确的是一旦一个对象构造失败则需要析构所有对象
 	ForwardIterator cur = first;
-	for (; n > 0; --n, ++cur) {
+	for (; n > 0; --n, ++cur)
 		construct(&*cur, x);
-	}
 	return cur;
 }
 
