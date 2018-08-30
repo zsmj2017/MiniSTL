@@ -1,5 +1,5 @@
-﻿#pragma once
-#include "new.h"//需要placement new
+#pragma once
+#include "new.h"// placement new
 
 template <class T1,class T2>
 inline void construct(T1* p, T2 value) {
