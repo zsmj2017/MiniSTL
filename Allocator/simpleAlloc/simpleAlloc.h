@@ -10,7 +10,7 @@ namespace simpleAlloc {
 template<class T>
 inline T* _allocate(ptrdiff_t size, T*) {
 	std::set_new_handler(nullptr);
-	T* tmp = static_cast<T*>(::operator new(static_cast<size_t>(size * sizeof(T)));
+	T* tmp = static_cast<T*>(::operator new(static_cast<size_t>(size * sizeof(T))));
 	if (tmp==nullptr) {
 		std::cerr << "out of memory";
 		exit(-1);
@@ -29,7 +29,7 @@ inline void _construct(T1* p, const T2& value) {
 }
 
 template<class T>
-ininle void _destory(T* p) {
+inline void _destory(T* p) {
 	p->~T();
 }
 
