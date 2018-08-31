@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <cstddef> //ptrdiff_t定义
+#include <iostream>
 
 //五种迭代器类型
 struct input_iterator_tag { };
@@ -68,10 +69,8 @@ using reference_t = typename iterator_traits<T>::reference;
 
 
 //以下为整组distance函数
-//是否因为迭代构造成本较低，因此直接pass-by-value?
-//例如我觉得可以将random版本形参声明为const&
 template<class InputIterator>
-inline auto __distance(InputIterator first, InputIterator last, input_iterator_tag) {
+inline difference_type_t<InputIterator> __distance(InputIterator first, InputIterator last, input_iterator_tag) {
 	difference_type_t<InputIterator> n = 0;
 	while (first!=last)
 		++first, ++n;
@@ -79,13 +78,12 @@ inline auto __distance(InputIterator first, InputIterator last, input_iterator_t
 }
 
 template<class InputIterator>
-inline auto __distance(InputIterator first,InputIterator last,random_access_iterator_tag) {
-	return (difference_type_t<InputIterator> n = first-last);
-	
+inline difference_type_t<InputIterator> __distance(InputIterator first,InputIterator last,random_access_iterator_tag) {
+	return first-last;
 }
 
 template<class InputIterator>
-inline auto distance(InputIterator first,InputIterator last) {
+inline difference_type_t<InputIterator> distance(InputIterator first,InputIterator last) {
 	return __distance(first, last,iterator_category_t<InputIterator>());
 }
 
@@ -131,7 +129,7 @@ public:
 	using reference = void;
 
 public:
-	explicit back_insert_iterator(Container& x):container(x) {}
+	explicit back_insert_iterator(Container& value):container(x) {}
 	back_insert_iterator& operator=(const typename Container::value_type& value) {
 		container->push_back(value);//本质上是调用了push_back
 		return *this;
@@ -163,7 +161,7 @@ public:
 	using reference = void;
 
 public:
-	explicit front_insert_iterator(Container& x) :container(x) {}
+	explicit front_insert_iterator(Container& value) :container(x) {}
 	front_insert_iterator& operator=(const typename Container::value_type& value) {
 		container->push_front(value);
 		return *this;
@@ -194,7 +192,7 @@ public:
 	using reference = void;
 
 public:
-	insert_iterator(Container& x,typename Container::iterator i) :container(x),iter(i) {}
+	insert_iterator(Container& value,typename Container::iterator i) :container(x),iter(i) {}
 	insert_iterator& operator=(const typename Container::value_type& value) {
 		container->insert(iter, value);//调用insert
 		++iter;//保证insert_iterator永远与目标贴合
@@ -230,8 +228,8 @@ public:
 
 public:
 	reverse_iterator() {}
-	explicit reverse_iterator(iterator_type x):current(x){}
-	reverse_iterator(const self& x):current(x.current) {}
+	explicit reverse_iterator(iterator_type value):current(x){}
+	reverse_iterator(const self& value):current(x.current) {}
 
 	iterator_type base() const { return current; }
 	reference operator*() const {
@@ -286,19 +284,10 @@ public:
 
 //stream:input_stream,output_stream
 
-//forward declaration
-template <class T, class Distance = ptrdiff_t>
-class istream_iterator;
-
-template<class T,class Distance>
-bool operator==<T, Distance>(const istream_iterator<T, Distance>& lhs, const istream_iterator<T, Distance>& rhs);
-
 template <class T,class Distance = ptrdiff_t>
 class istream_iterator {
-	friend bool operator==<>(const istream_iterator<T, Distance>& lhs, const istream_iterator<T, Distance>& lhs);
-
 protected:
-	istream * stream;
+	std::istream * stream;
 	T value;
 	bool end_marker;
 	void read() {
@@ -316,7 +305,7 @@ public:
 	using reference = const T&;
 
 	istream_iterator() :stream(&cin), end_marker(false) {}
-	istream_iterator(istream &s) :stream(&s) { read(); }
+	istream_iterator(std::istream &s) :stream(&s) { read(); }
 
 	reference operator*() const { return value; }
 	pointer operator->() const { return &(operator*()); }
@@ -336,7 +325,7 @@ public:
 template <class T>
 class ostream_iterator {
 protected:
-	ostream * stream;
+	std::ostream * stream;
 	const char* interval;//输出间隔符
 
 public:
@@ -347,7 +336,7 @@ public:
 	using reference = void;
 
 	ostream_iterator() :stream(&cin), interval(nullptr) {}
-	ostream_iterator(ostream &s,const char* c) :stream(&s),interval(c) {}
+	ostream_iterator(std::ostream& s,const char* c) :stream(&s),interval(c) {}
 
 	ostream_iterator& operator=(const T& value) {
 		*stream << value;
@@ -359,3 +348,4 @@ public:
 	ostream_iterator& operator++() { return *this; }
 	ostream_iterator operator++(int) { return *this; }
 };
+
