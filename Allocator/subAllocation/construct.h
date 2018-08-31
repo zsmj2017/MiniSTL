@@ -16,15 +16,8 @@ inline void destroy(T* p) {
 // 设法利用traits批量析构对象
 template <class ForwardIterator>
 inline void destory(ForwardIterator beg, ForwardIterator end) {
-	_destory(beg, end, value_type(first));
-}
-
-// 判断元素是否有trivial destructor
-template <class ForwardIterator,class T>
-inline void _destory(ForwardIterator beg, ForwardIterator end, T*) {
-	// _type_traits实现见迭代器一节
-	using trivial_destructor = typename _type_traits<T>::has_trivial_destructor;
-	_destory_aux(beg, end, trivial_destructor());
+	using is_POD_type = typename _type_traits<ForwardIterator>::is_POD_type;
+	_destroy_aux(beg, end, is_POD_type());
 }
 
 // 如果元素的value_type不存在non—trivial destructor
