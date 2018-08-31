@@ -7,16 +7,16 @@
 template <class InputIterator, class ForwardIterator>
 inline ForwardIterator uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result) {
 	using isPODType = typename _type_traits<value_type_t<InputIterator> >::is_POD_type;
-	return __uninitialized_copy(first, last, result, isPODType());
+	return __uninitialized_copy_aux(first, last, result, isPODType());
 }
 
-template<class InputIterator, class ForwardIterator, class T>
+template<class InputIterator, class ForwardIterator>
 inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, _true_type) {
 	memcpy(result, first, (last - first) * sizeof(*first));
 	return result + (last - first);
 }
 
-template<class InputIterator, class ForwardIterator, class T>
+template<class InputIterator, class ForwardIterator>
 inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, _false_type) {
 	ForwardIterator cur = result;
 	for (; first != last; ++cur,++first)
