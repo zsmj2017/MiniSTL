@@ -3,7 +3,7 @@
 #include <new> // bad_alloc
 
 //一级配置器
-class __malloc_alloc_template {
+class __malloc_alloc {
 public:
 	//alias declaration
 	using malloc_handler = void(*)();
@@ -39,9 +39,9 @@ public:
 };
 
 //定义handler
-typename __malloc_alloc_template::malloc_handler __malloc_alloc_template::__malloc_alloc_oom_handler= nullptr;
+typename __malloc_alloc::malloc_handler __malloc_alloc::__malloc_alloc_oom_handler= nullptr;
 
-void* __malloc_alloc_template::oom_malloc(size_t n){
+void* __malloc_alloc::oom_malloc(size_t n){
 	malloc_handler new_alloc_handler;
 	void* result;
 	for (;;) {//不断尝试释放、配置
@@ -55,7 +55,7 @@ void* __malloc_alloc_template::oom_malloc(size_t n){
 	}
 }
 
-void* __malloc_alloc_template::oom_realloc(void* p, size_t n){
+void* __malloc_alloc::oom_realloc(void* p, size_t n){
 	malloc_handler new_alloc_handler;
 	void* result;
 	for (;;) {
@@ -69,7 +69,7 @@ void* __malloc_alloc_template::oom_realloc(void* p, size_t n){
 	}
 }
 
-using malloc_alloc = __malloc_alloc_template;
+using malloc_alloc = __malloc_alloc;
 
 //freelist参数设定
 //区块上调边界，区块上限，freelist个数
@@ -78,7 +78,7 @@ enum  __freelist_setting
 {__ALIGN=8, __MAX_BYTES = 128, __NFREELISTS = __MAX_BYTES / __ALIGN};
 
 //第二级配置器
-class __default_alloc_template {
+class __default_alloc {
 private:
 	//将bytes上调至8的倍数
 	//tips:将x扩大至y的整数倍，取 (x+y-1)&~(y-1)
@@ -115,12 +115,14 @@ public:
 };
 
 //以下为static data member的定义
-char* __default_alloc_template::start_free = nullptr;
+char* __default_alloc::start_free = nullptr;
 
-char* __default_alloc_template::end_free = nullptr;
+char* __default_alloc::end_free = nullptr;
 
-__default_alloc_template::obj* volatile
-__default_alloc_template::free_list[__NFREELISTS] = { 
+size_t __default_alloc::heap_size = 0;
+
+__default_alloc::obj* volatile
+__default_alloc::free_list[__NFREELISTS] = { 
 	nullptr, nullptr, nullptr, nullptr, 
 	nullptr, nullptr, nullptr, nullptr, 
 	nullptr, nullptr, nullptr, nullptr, 
@@ -131,7 +133,7 @@ __default_alloc_template::free_list[__NFREELISTS] = {
 //当free_list无可用区块时，重新填充空间
 //新空间取自内存池，默认获取20个节点(区块）
 //若内存池不足，则获取的将小于20
-void* __default_alloc_template::refill(size_t n){
+void* __default_alloc::refill(size_t n){
 	int nobjs = 20;
 	//尝试调用chunk_alloc,注意nobjs以pass-by-reference传入
 	char* chunk = chunk_alloc(n, nobjs);
@@ -159,7 +161,7 @@ void* __default_alloc_template::refill(size_t n){
 }
 
 //默认size为8的整数倍
-char* __default_alloc_template::chunk_alloc(size_t size, int & nobjs){
+char* __default_alloc::chunk_alloc(size_t size, int & nobjs){
 	char* result;
 	size_t total_bytes = size * nobjs;
 	size_t bytes_left = end_free - start_free;//内存池剩余空间
@@ -214,7 +216,7 @@ char* __default_alloc_template::chunk_alloc(size_t size, int & nobjs){
 	}
 }
 
-void* __default_alloc_template::allocate(size_t n){
+void* __default_alloc::allocate(size_t n){
 	obj* volatile *my_free_list;
 	obj* result;
 	//若n大于128,则采用第一级适配器
@@ -233,7 +235,7 @@ void* __default_alloc_template::allocate(size_t n){
 	return(result);
 }
 
-void __default_alloc_template::deallocate(void * p, size_t n){
+void __default_alloc::deallocate(void * p, size_t n){
 	//p不可为nullptr
 	obj* q = static_cast<obj*>(p);
 	obj* volatile* my_free_list;
@@ -247,7 +249,7 @@ void __default_alloc_template::deallocate(void * p, size_t n){
 	*my_free_list = q;
 }
 
-void* __default_alloc_template::reallocate(void * p, size_t old_sz, size_t new_sz){
+void* __default_alloc::reallocate(void * p, size_t old_sz, size_t new_sz){
 	deallocate(p, old_sz);
 	p = allocate(new_sz);
 	return p;

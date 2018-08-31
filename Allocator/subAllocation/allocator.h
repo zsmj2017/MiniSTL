@@ -3,7 +3,8 @@
 #include "alloc.h"
 #include "construct.h"
 
-template<class T,class Alloc>
+//默认二级适配器
+template<class T,class Alloc= __default_alloc_template>
 class allocator{
 public:
 	using value_type = T;
