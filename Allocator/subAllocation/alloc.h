@@ -247,9 +247,8 @@ void __default_alloc_template::deallocate(void * p, size_t n){
 	*my_free_list = q;
 }
 
-template<bool threads, int inst>
-inline void* __default_alloc_template<threads, inst>::reallocate(void * p, size_t old_sz, size_t new_sz){
-	deallocate(ptr, old_sz);
-	ptr = allocate(new_sz);
-	return ptr;
+void* __default_alloc_template::reallocate(void * p, size_t old_sz, size_t new_sz){
+	deallocate(p, old_sz);
+	p = allocate(new_sz);
+	return p;
 }

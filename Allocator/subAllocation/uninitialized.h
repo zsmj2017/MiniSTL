@@ -1,5 +1,7 @@
 ﻿#pragma once
-#include"my_construct.h"
+#include "construct.h"
+#include "typeTraits.h"
+#include <cstring> // memove
 
 template <class InputIterator, class ForwardIterator>
 inline ForwardIterator uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result) {
@@ -8,7 +10,7 @@ inline ForwardIterator uninitialized_copy(InputIterator first, InputIterator las
 
 template<class InputIterator, class ForwardIterator, class T>
 inline ForwardIterator  __uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result, T *) {
-	using is_POD = typename  __type_traits<T>::is_POD_type;
+	using is_POD = typename  _type_traits<T>::is_POD_type;
 	return __uninitialized_copy_aux(first, last, result, is_POD());
 }
 
@@ -43,7 +45,7 @@ inline ForwardIterator uninitialized_fill(ForwardIterator first, ForwardIterator
 
 template<class ForwardIterator, class T, class T1>
 inline ForwardIterator  __uninitialized_fill(ForwardIterator first, ForwardIterator last, const T& value, T1*) {
-	using is_POD = typename __type_traits<T1>::is_POD_type;
+	using is_POD = typename _type_traits<T1>::is_POD_type;
 	return __uninitialized_fill_aux(first, last, value, is_POD());
 }
 
@@ -70,7 +72,7 @@ template<class ForwardIterator, class Size, class T, class T1>
 inline ForwardIterator  __uninitialized_fill_n(ForwardIterator first, Size n, const T & x, T1*) {
 	//POD means Plain Old Data
 	//必然拥有trivial ctor/dtot/copy/assignment函数
-	using is_POD = typename __type_traits<T1>::is_POD_type;
+	using is_POD = typename _type_traits<T1>::is_POD_type;
 	return __uninitialized_fill_n_aux(first, n, x, is_POD());
 }
 
