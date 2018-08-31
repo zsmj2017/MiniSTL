@@ -9,7 +9,7 @@ namespace{
 	};
 	template<class Ta, class Tb>
 	struct IfThenElse < false, Ta, Tb > {
-			sing result = Tb;
+		using result = Tb;
 	};
 }
 
@@ -90,20 +90,22 @@ struct _type_traits<unsigned short>{
 };
 
 template<>
-struct _type_traits<int>{
+struct _type_traits<int> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
 	using has_trivial_destructor = _true_type;
 	using is_POD_type = _true_type;
+};
 
 template<>
-struct _type_traits<unsigned int>{
+struct _type_traits<unsigned int> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
 	using has_trivial_destructor = _true_type;
 	using is_POD_type = _true_type;
+};
 
 template<>
 struct _type_traits<long>{
