@@ -3,45 +3,49 @@
 #include <cstddef> // ptrdiff_t
 #include "allocator.h"
 #include "uninitialized.h"
+#include "stl_iterator.h"
 
-//alloc为SGI STL默认空间配置器
+// alloc为SGI STL默认空间配置器
 template<class T,class Alloc = allocator<T> >
 class vector {
 public:
-	//嵌套类型别名定义
+	// 嵌套类型别名定义
 	using value_type = T;
 	using pointer = value_type* ;
-	using iterator = value_type* ;//vector迭代器为普通指针
+	using iterator = value_type* ;// vector迭代器为普通指针
+	using const_iterator = value_type* ;
+	using r_iterator = reverse_iterator<iterator>;
+	using const_r_iterator = reverse_iterator<const_iterator>;
 	using reference = value_type& ;
+	using const_reference = const value_type& ;
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
-protected:
-	//内存配置、批量构造函数
-
+private:
+	// 内存配置、批量构造函数
 	using data_allocator = Alloc;
 
 	iterator start;
 	iterator finish;
-	iterator end_of_stroage;//可用空间尾部
+	iterator end_of_stroage;// 可用空间尾部
 
-	//插入接口，内含扩容操作
+	// 插入接口，内含扩容操作
 	void insert_aux(iterator position, const value_type& value);
 
-	//释放本vector所占用的内存
+	// 释放本vector所占用的内存
 	void deallocate() {
 		if (start)
 			data_allocator::deallocate(start, end_of_stroage - start);
 	}
 
-	//获取并初始化内存区域
+	// 获取并初始化内存区域
 	void fill_initialize(size_type n, const value_type& value) {
 		start = allocate_and_fill(n, value);
 		finish = start + n;
 		end_of_stroage = finish;
 	}
 
-	//配置空间并填满内容(具体实现见allocator）
+	// 配置空间并填满内容(具体实现见allocator）
 	iterator allocate_and_fill(size_type n, const value_type& value) {
 		iterator result = data_allocator::allocate(n);
 		uninitialized_fill_n(result, n, value);
@@ -49,26 +53,41 @@ protected:
 	}
 
 public:
-	//构造与析构函数
+	// ctor && dtor
 	vector() :start(nullptr), finish(nullptr), end_of_stroage(nullptr) {}
-	vector(size_type n, const value_type &value) { fill_initialize(n, value); }
-	vector(long n, const value_type &value) { fill_initialize(n, value); }
 	explicit vector(size_type n) { fill_initialize(n, value_type()); }
+	vector(size_type n, const value_type &value) { fill_initialize(n, value); }
+	vector(const vector&);
+	vector(vector&&) noexcept;
+
 	~vector() {
 		destory(start, finish);//全局函数，见allocator
 		deallocate();
 	}
 
 public:
+	vector& operator=(const vector v) const;
+	vector& operator=(vector&&) noexcept;
+
+public:
 	//静态可写接口
 	iterator begin() { return start; }
 	iterator end() { return finish; }
-	reference operator[](size_type n) { return *(start + n); }
+	r_iterator rbegin() { return r_iterator(start); }
+	r_iterator rend() { return r_iterator(end); }
+	reference operator[](const size_type n) { return *(start + n); }
 	reference front() { return *begin(); }
 	reference back() { return *(end() - 1); }
 
 public:
 	//静态只读接口
+	const_iterator begin() const { return start; }
+	const_iterator end() const { return end; }
+	const_iterator cbegin() const { return start; }
+	const_iterator cend() const { return end; }
+	const_r_iterator crbegin() const { return const_r_iterator(start); }
+	const_r_iterator crend() const { return const_r_iterator(end); }
+	const_reference operator[](const size_type n) const  { return *(start + n); }
 	size_type size() const { return static_cast<size_type>(finish - start); }
 	size_type capacity() const { return static_cast<size_type>(end_of_stroage - start); }
 	bool empty() const { return start == finish; }
