@@ -21,11 +21,13 @@
  &emsp;二级空间适配器(alloc.h):100%  
  
  &emsp;内存基本处理工具(uninitialized.h):100%  
+ 
  2. **迭代器与traits编程技法（iterator && traits)**
 
  &emsp;iterator_traits（iterator.h):100%  
  
  &emsp;type_traits(type_traits.h):100%  
+ 
  3. **序列式容器（sequence containers)**
 
  &emsp;vector（stl_vector.h):50%  
@@ -42,7 +44,8 @@
  
  &emsp;priority_queue(priority_queue.h):50%  
  
- &emsp;slist(slist.h):50%
+ &emsp;slist(slist.h):50%  
+ 
  4. **关联式容器(associattive containers)**
 
  &emsp;RB-TREE（rb_tree.h):50%  
@@ -62,6 +65,7 @@
  &emsp;hashmultiset(hash_multiset.h):50%  
  
  &emsp;hashmultimap(hash_multimap.h):50%  
+ 
  5. **算法（algorithm)**
 
  &emsp;数值算法（stl_numeric.h):100%  
@@ -70,7 +74,8 @@
  
  &emsp;set相关算法(stl_algoset.h):100%  
  
- &emsp;其他算法(stl_algo.h):100%
+ &emsp;其他算法(stl_algo.h):100%  
+ 
  6. **仿函数（function object)**
 
  &emsp;算术、关系运算、逻辑运算仿函数（stl_function.h):100%
