@@ -2,6 +2,7 @@
 #include "construct.h"
 #include "typeTraits.h"
 #include "stl_iterator.h"
+#include "stl_algo.h" // fill && fill_n(has not implemented)
 #include <cstring> // memove
 
 template <class InputIterator, class ForwardIterator>
@@ -36,22 +37,21 @@ inline wchar_t* uninitialized_copy(wchar_t* first, wchar_t* last, wchar_t* resul
 }
 
 template <class ForwardIterator, class T>
-inline ForwardIterator uninitialized_fill(ForwardIterator first, ForwardIterator last, const T& value) {
-	using isPODType = typename _type_traits<value_type_t<InputIterator> >::is_POD_type;
-	return __uninitialized_fill_aux(first, last, result, isPODType());
+inline void uninitialized_fill(ForwardIterator first, ForwardIterator last, const T& value) {
+	using isPODType = typename _type_traits<value_type_t<ForwardIterator> >::is_POD_type;
+	__uninitialized_fill_aux(first, last, value, isPODType());
 }
 
 template<class ForwardIterator, class T>
-inline ForwardIterator  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, _true_type) {
-	return memset(first, value, (last - first) * sizeof(*first));
+inline void  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, _true_type) {
+	std::fill(first, last, value);
 }
 
 template<class ForwardIterator, class T>
-inline ForwardIterator  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, _false_type) {
+void  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, _false_type) {
 	ForwardIterator cur = first;
 	for (;cur != last; ++cur)
 		construct(&*cur, value);
-	return cur;
 }
 
 template<class ForwardIterator, class Size, class T>
@@ -62,13 +62,11 @@ inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const
 
 template<class ForwardIterator, class Size, class T>
 inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & value,_true_type) {
-	//POD类型可直接采用初值填写式手法
-	memset(first, value, n);
-	return first + n;
+	return std::fill_n(first,n,value);
 }
 
 template<class ForwardIterator, class Size, class T>
-inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & value, _false_type) {
+ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & value, _false_type) {
 	//忽略异常处理
 	//明确明确的是一旦一个对象构造失败则需要析构所有对象
 	ForwardIterator cur = first;
