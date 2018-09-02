@@ -4,8 +4,8 @@
 #include "construct.h"
 
 //默认二级适配器
-template<class T,class Alloc= __default_alloc_template>
-class allocator{
+template<class T,class Alloc= __default_alloc>
+class simpleAlloc{
 public:
 	using value_type = T;
 	using pointer = T * ;
@@ -27,44 +27,44 @@ public:
 };
 
 template<class T,class Alloc>
-T *allocator<T,Alloc>::allocate() {
+T *simpleAlloc<T,Alloc>::allocate() {
 	return static_cast<T *>(Alloc::allocate(sizeof(T)));
 }
 
 template<class T, class Alloc>
-T *allocator<T, Alloc>::allocate(size_t n) {
+T *simpleAlloc<T, Alloc>::allocate(size_t n) {
 	if (n == 0) return 0;
 	return static_cast<T *>(Alloc::allocate(sizeof(T) * n));
 }
 
 template<class T, class Alloc>
-void allocator<T, Alloc>::deallocate(T *ptr) {
+void simpleAlloc<T, Alloc>::deallocate(T *ptr) {
 	Alloc::deallocate(static_cast<void *>(ptr), sizeof(T));
 }
 
 template<class T, class Alloc>
-void allocator<T, Alloc>::deallocate(T *ptr, size_t n) {
+void simpleAlloc<T, Alloc>::deallocate(T *ptr, size_t n) {
 	if (n == 0) return;
 	Alloc::deallocate(static_cast<void *>(ptr), sizeof(T)* n);
 }
 
 template<class T, class Alloc>
-void allocator<T, Alloc>::construct(T *ptr) {
+void simpleAlloc<T, Alloc>::construct(T *ptr) {
 	new(ptr)T();
 }
 
 template<class T, class Alloc>
-void allocator<T, Alloc>::construct(T *ptr, const T& value) {
+void simpleAlloc<T, Alloc>::construct(T *ptr, const T& value) {
 	new(ptr)T(value);
 }
 
 template<class T, class Alloc>
-void allocator<T, Alloc>::destroy(T *ptr) {
+void simpleAlloc<T, Alloc>::destroy(T *ptr) {
 	ptr->~T();
 }
 
 template<class T, class Alloc>
-void allocator<T, Alloc>::destroy(T *first, T *last) {
+void simpleAlloc<T, Alloc>::destroy(T *first, T *last) {
 	for (; first != last; ++first)
 		first->~T();
 }
