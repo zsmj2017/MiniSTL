@@ -1,9 +1,10 @@
 ﻿#pragma once
+#include "stl_iterator.h"
 
 //adjacent_find:找出一组满足条件的相邻元素
 template <class ForwardIterator>
 ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last) {
-	if (first == last) retuen last;
+	if (first == last) return last;
 	ForwardIterator next = first;
 	while (++next != last) {
 		if (*first == *next) return first;
@@ -14,10 +15,10 @@ ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last) {
 
 template <class ForwardIterator, class BinaryPredicate>
 ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last, BinaryPredicate binary_pred) {
-	if (first == last) retuen last;
+	if (first == last) return last;
 	ForwardIterator next = first;
 	while (++next != last) {
-		if (binary_pred(*first,*next) return first;
+		if (binary_pred(*first,*next)) return first;
 		else first = next;
 	}
 	return last;
@@ -40,7 +41,7 @@ typename iterator_traits<InputIterator>::difference_type
 count_if(InputIterator first, InputIterator last, Predicate pred) {
 	typename iterator_traits<InputIterator>::difference_type count = 0;
 	for (; first != last; ++first)
-		if (pred(*first)
+		if (pred(*first))
 			count++;
 	return count;
 }
@@ -70,7 +71,7 @@ find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first
 }
 
 template <class ForwardIterator1, class ForwardIterator2>
-ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2
+ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2,
 							forward_iterator_tag,forward_iterator_tag) {
 	if (first2 == last2)
 		return last1;
@@ -90,7 +91,7 @@ ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator1 last1, For
 }
 
 template <class BidirectionalIterator1, class BidirectionalIterator2>
-BidirectionalIterator1 __find_end(BidirectionalIterator1 first1, BidirectionalIterator1 last1, BidirectionalIterator1 first2, BidirectionalIterator1 last2
+BidirectionalIterator1 __find_end(BidirectionalIterator1 first1, BidirectionalIterator1 last1, BidirectionalIterator1 first2, BidirectionalIterator1 last2,
 						bidirectional_iterator_tag, bidirectional_iterator_tag) {
 	//采用反向迭代器
 	using reviter1 = reverse_iterator<BidirectionalIterator1>;
@@ -189,7 +190,7 @@ ForwardIterator max_element(ForwardIterator first, ForwardIterator last, Compare
 		return first;
 	ForwardIterator result = first;
 	while (++first != last)
-		if (comp(*result,*first)
+		if (comp(*result,*first))
 			result = first;
 	return result;
 }
@@ -320,7 +321,7 @@ OutputIterator replace_copy(InputIterator first, InputIterator last, OutputItera
 template <class ForwardIterator, class Predicate, class T>
 ForwardIterator replace_if(ForwardIterator first, ForwardIterator last, Predicate pred, const T& new_value) {
 	for (; first != last; ++first)
-		if (pred(*first) *first = new_value;
+		if (pred(*first)) *first = new_value;
 }
 
 //replace_copy_if:在replace_copy的基础上加入了谓词
@@ -410,7 +411,7 @@ void __rotate(RandomAccesslIterator first, RandomAccesslIterator middle, RandomA
 //gcd:求取最大公约数（效率不如减损术）
 template <class EuclideanRingElement>
 EuclideanRingElement __gcd(EuclideanRingElement m, EuclideanRingElement n) {
-	while (n!0) {
+	while (n!=0) {
 		EuclideanRingElement t = m % n;
 		m = n;
 		n = t;
@@ -944,7 +945,8 @@ void __unguarded_insertion_sort_aux(RandomAccessIterator first, RandomAccessIter
 		__unguarded_linear_insert(i, T(*i));
 }
 
-//以下为RW STL sort,并不设立阈值而是采用纯粹的快排
+/*
+// 以下为RW STL sort,并不设立阈值而是采用纯粹的快排
 template <class RandomAccessIterator>
 inline void sort(RandomAccessIterator first, RandomAccessIterator last) {
 	if (!(first == last)) {
@@ -972,16 +974,17 @@ inline void __quick_sort_loop_aux(RandomAccessIterator first, RandomAccessIterat
 		}
 	}
 }
+*/
 
 //equal_range:本质上返回了lower_bound与upper_bound组成的pair
 template <class ForwardIterator,class T>
-inline pair<ForwardIterator, ForwardIterator>
+inline std::pair<ForwardIterator, ForwardIterator>
 equal_range(ForwardIterator first, ForwardIterator last, const T& value) {
 	return __equal_range(first, last, value, distance_type(first), iterator_category(first));
 }
 
 template <class RandomAccessIterator, class T, class Distance>
-inline pair<RandomAccessIterator, RandomAccessIterator>
+inline std::pair<RandomAccessIterator, RandomAccessIterator>
 __equal_range(RandomAccessIterator first, RandomAccessIterator last, const T& value, Distance*, random_access_iterator_tag) {
 	Distance len = last - first;
 	Distance half;
@@ -1007,7 +1010,7 @@ __equal_range(RandomAccessIterator first, RandomAccessIterator last, const T& va
 }
 
 template <class ForwardIterator, class T, class Distance>
-inline pair<ForwardIterator, ForwardIterator>
+inline std::pair<ForwardIterator, ForwardIterator>
 __equal_range(ForwardIterator first, ForwardIterator last, const T& value, Distance*, forward_iterator_tag) {
 	Distance len = 0;
 	distance(first, last, len);
@@ -1098,7 +1101,7 @@ void __merge_adaptive(BidirectionalIterator first, BidirectionalIterator middle,
 	}
 }
 
-template <class BidirectionalIterator1,class BidirectionalIterator2,Distance>
+template <class BidirectionalIterator1,class BidirectionalIterator2,class Distance>
 BidirectionalIterator1 __rotate_adaptive(BidirectionalIterator1 first, BidirectionalIterator1 middle, BidirectionalIterator1 last,
 										Distance len1, Distance len2, BidirectionalIterator2 buffer, Distance buffer_size) {
 	BidirectionalIterator2 buffer_end;
@@ -1134,7 +1137,7 @@ void __nth_element(RandomAccessIterator first, RandomAccessIterator nth, RandomA
 	while (last - first > 3) {
 		//三点中值法分割
 		//返回一个迭代器，指向分割后右侧的第一个元素
-		RandomAccessIterator cut = __unguarded_partition(first, last, T(__median(*first, *(first + (last - first) / 2, *(last - 1))));
+		RandomAccessIterator cut = __unguarded_partition(first, last, T(__median(*first, *(first + (last - first) / 2, *(last - 1)))));
 		if (cut <= nth)
 			first = cut;//右端起点<=nth,再次对右侧分割
 		else
