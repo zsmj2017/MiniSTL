@@ -5,8 +5,9 @@
 #include "uninitialized.h"
 #include "stl_iterator.h"
 
+namespace MiniSTL {
 // use sub_allocator as default allocator
-template<class T,class Alloc = simpleAlloc<T> >
+template<class T, class Alloc = simpleAlloc<T> >
 class vector {
 public:
 	template<class T, class Alloc>
@@ -16,28 +17,23 @@ public:
 
 public:// alias declarartions
 	using value_type = T;
-	using pointer = value_type* ;
-	using iterator = value_type* ;// iterator is raw pointer
-	using const_iterator = value_type* ;
+	using pointer = value_type * ;
+	using iterator = value_type * ;// iterator is raw pointer
+	using const_iterator = value_type * ;
 	using r_iterator = reverse_iterator<iterator>;
 	using const_r_iterator = reverse_iterator<const_iterator>;
-	using reference = value_type& ;
-	using const_reference = const value_type& ;
+	using reference = value_type & ;
+	using const_reference = const value_type&;
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
-private: // allocate and construct aux functions 
-	using data_allocator = Alloc;
-
+private: // iterator to indicate the vector's memory location
 	iterator start;
 	iterator finish;
 	iterator end_of_storage;
 
-	void insert_aux(iterator position, const value_type& value);
-
-	void deallocate() {
-		if (start) data_allocator::deallocate(start, end_of_storage - start);
-	}
+private: // allocate and construct aux functions 
+	using data_allocator = Alloc;
 
 	void fill_initialize(size_type n, const value_type& value) {
 		start = allocate_and_fill(n, value);
@@ -59,149 +55,110 @@ private: // allocate and construct aux functions
 		return start;
 	}
 
-	void destroy_and_deallocate() {
-		destroy(start, finish);
+	void deallocate() noexcept {
+		if (start) data_allocator::deallocate(start, end_of_storage - start);
+	}
+
+	void destroy_and_deallocate()noexcept {
+		destroy(start, finish); // destroy in "construct.h"
 		deallocate();
 	}
 
-	void swap(vector&);
+private: // aux_interface
+	void swap(vector&) noexcept;
+	void insert_aux(iterator position, const value_type& value);
 
-public:
-	// ctor && dtor
+public:// ctor && dtor
 	vector() :start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
 	explicit vector(size_type n) { fill_initialize(n, value_type()); }
 	vector(size_type n, const value_type &value) { fill_initialize(n, value); }
 	template<class InputIterator>
 	vector(InputIterator first, InputIterator last) { allocate_and_copy(first, last); }
 	vector(std::initializer_list<T>);
-	vector(const vector&);
+	vector(const vector& rhs) { allocate_and_copy(rhs.start, rhs.finish); }
 	vector(vector&&) noexcept;
 
 	~vector() {
-		destroy(start, finish);//全局函数，见allocator
+		destroy(start, finish); // destory in "construct.h"
 		deallocate();
 	}
 
-public:
-	vector& operator=(const vector&);
+public:// copy assignment operator
+	vector & operator=(const vector&);
 	vector& operator=(std::initializer_list<value_type>);
 	vector& operator=(vector&&) noexcept;
 
-public:
-	//静态可写接口
-	iterator begin() { return start; }
-	iterator end() { return finish; }
-	r_iterator rbegin() { return r_iterator(start); }
-	r_iterator rend() { return r_iterator(end); }
-	reference operator[](const size_type n) { return *(start + n); }
-	reference front() { return *begin(); }
-	reference back() { return *(end() - 1); }
+public: // getter
+	const_iterator begin() const noexcept { return start; }
+	const_iterator end() const noexcept { return end; }
+	const_iterator cbegin() const noexcept { return start; }
+	const_iterator cend() const noexcept { return end; }
+	const_r_iterator crbegin() const noexcept { return const_r_iterator(start); }
+	const_r_iterator crend() const noexcept { return const_r_iterator(end); }
+	const_reference operator[](const size_type n) const noexcept { return *(start + n); }
+	size_type size() const noexcept { return static_cast<size_type>(finish - start); }
+	size_type capacity() const noexcept { return static_cast<size_type>(end_of_storage - start); }
+	bool empty() const noexcept { return start == finish; }
 
-public:
-	//静态只读接口
-	const_iterator begin() const { return start; }
-	const_iterator end() const { return end; }
-	const_iterator cbegin() const { return start; }
-	const_iterator cend() const { return end; }
-	const_r_iterator crbegin() const { return const_r_iterator(start); }
-	const_r_iterator crend() const { return const_r_iterator(end); }
-	const_reference operator[](const size_type n) const  { return *(start + n); }
-	size_type size() const { return static_cast<size_type>(finish - start); }
-	size_type capacity() const { return static_cast<size_type>(end_of_storage - start); }
-	bool empty() const { return start == finish; }
-	bool operator== (const vector&) const;
-	bool operator!= (const vector&) const;
+public: // setter
+	iterator begin() noexcept { return start; }
+	iterator end() noexcept { return finish; }
+	r_iterator rbegin() noexcept { return r_iterator(start); }
+	r_iterator rend() noexcept { return r_iterator(end); }
+	reference operator[](const size_type n) noexcept { return *(start + n); }
+	reference front() noexcept { return *begin(); }
+	reference back() noexcept { return *(end() - 1); }
 
-public:
-	//动态接口
-	void push_back(const value_type&value) {
-		if (finish != end_of_storage) {
-			construct(finish, value);//全局函数
-			++finish;
-		}
-		else
-			insert_aux(end(), value);
-	}
 
-	void pop_back() {
-		--finish;
-		destroy(finish);
-	}
+public: //  interface for size and capacity
+	void resize(size_type, const value_type&);
+	void resize(size_type new_size) { resize(new_size, value_type()); }
+	void reserve(size_type);
+	void shrink_to_fit() { vector temp(*this); swap(temp); }
 
-	iterator erase(iterator first, iterator last) {
-		iterator i = copy(last, finish, first);
-		destroy(i, finish);// 此时i即等价于new_finish
-		finish -= (last - first);
-		return first;
-	}
+public: // compare operator(member function)
+	bool operator== (const vector&) const noexcept;
+	bool operator!= (const vector& rhs) const noexcept { return !(*this == rhs); }
 
-	iterator erase(iterator position) {
-		if (position + 1 != end()) // 除却尾端节点外均需复制
-			copy(position + 1, finish, position);
-		pop_back();
-		return position;
-	}
+public: // interface for back operation
+	void push_back(const value_type&);
+	void pop_back() {--finish;destroy(finish);}
 
-	void resize(size_type new_size, const value_type& value) {
-		if (new_size < size()) {
-			erase(begin() + new_size, end());
-		}
-		else
-			insert(end(), new_size - size(), value);
-	}
-
-	void resize(size_type new_size) {
-		resize(new_size, value_type());
-	}
-
-	void reserve(size_type new_capacity) {
-		if (new_capacity <= capacity()) return;
-		T* new_start = data_allocator::allocate(new_capacity);
-		T* new_finish = uninitialized_copy(start, finish, new_start);
-		destroy_and_deallocate();
-		start = new_start;
-		finish = new_finish;
-		end_of_storage = start + new_capacity;
-	}
-
+public: // interface for insert and erase
+	iterator erase(iterator, iterator);
+	iterator erase(iterator) { return erase(position, position + 1); }
 	void insert(iterator, size_type, const value_type&);
 	iterator insert(iterator, const value_type&);
-
-	void shrink_to_fit() { vector temp(*this); swap(temp); }
 };
 
 template<class T, class Alloc>
-void vector<T, Alloc>::insert_aux(iterator position, const value_type& value){
-	if (finish != end_of_storage) {
-		//当前存在备用空间
-		construct(finish, *(finish - 1));// 以最后一个元素为初值构造元素于finish
+void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
+	if (finish != end_of_storage) {// needn't expand
+		construct(finish, *(finish - 1));
 		++finish;
 		value_type value_copy = value;// STL copy in copy out
 		// copy_backward needs _SCL_SECURE_NO_WARNINGS
-		std::copy_backward(position, finish - 2, finish - 1);//将[pos,finish-2)copy至finish-1处（finish-1为目的终点）
+		std::copy_backward(position, finish - 2, finish - 1);
 		*position = value_copy;
 	}
-	else {
-		//扩容
+	else {// expand
 		const size_type old_size = size();
-		const size_type new_size = old_size ? 2 * old_size : 1;//2倍大小
+		const size_type new_size = old_size ? 2 * old_size : 1; // new_cap=2*old_cap
 		iterator new_start = data_allocator::allocate(new_size);
 		iterator new_finish = new_start;
-		try{
-			new_finish = uninitialized_copy(start,position,new_start);//复制前半段
+		try {
+			new_finish = uninitialized_copy(start, position, new_start);//复制前半段
 			construct(new_finish, value);
 			++new_finish;
 			new_finish = uninitialized_copy(position, finish, new_finish);//复制后半段
 		}
-		catch(std::exception&){
+		catch (std::exception&) {
 			//commit or rollback
 			destroy(new_start, new_finish);
 			data_allocator::deallocate(new_start, new_size);
 			throw;
 		}
-		//释放原有vector
 		destroy_and_deallocate();
-		//调整迭代器指向新vector
 		start = new_start;
 		finish = new_finish;
 		end_of_storage = new_start + new_size;
@@ -209,7 +166,7 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value){
 }
 
 template<class T, class Alloc>
-inline void vector<T, Alloc>::swap(vector &rhs){
+inline void vector<T, Alloc>::swap(vector &rhs) {
 	using std::swap;
 	swap(start, rhs.start);
 	swap(finish, rhs.finish);
@@ -217,12 +174,7 @@ inline void vector<T, Alloc>::swap(vector &rhs){
 }
 
 template<class T, class Alloc>
-inline vector<T, Alloc>::vector(const vector &rhs){
-	allocate_and_copy(rhs.start, rhs.finish);
-}
-
-template<class T, class Alloc>
-inline vector<T, Alloc>::vector(vector &&rhs) noexcept{
+inline vector<T, Alloc>::vector(vector &&rhs) noexcept {
 	start = rhs.start;
 	finish = rhs.finish;
 	end_of_storage = rhs.end_of_storage;
@@ -230,33 +182,53 @@ inline vector<T, Alloc>::vector(vector &&rhs) noexcept{
 }
 
 template<class T, class Alloc>
-inline vector<T, Alloc>& vector<T, Alloc>::operator=(const vector &rhs){
+inline vector<T, Alloc>& vector<T, Alloc>::operator=(const vector &rhs) {
 	vector temp(rhs);
 	swap(temp);
 	return *this;
 }
 
 template<class T, class Alloc>
-inline vector<T,Alloc> & vector<T, Alloc>::operator=(std::initializer_list<value_type> il){
+inline vector<T, Alloc> & vector<T, Alloc>::operator=(std::initializer_list<value_type> il) {
 	destroy_and_deallocate();
 	start = allocate_and_copy(il.begin(), il.end());
 	finish = end_of_storage = start + (il.end() - il.begin());
 }
 
 template<class T, class Alloc>
-inline vector<T, Alloc> & vector<T, Alloc>::operator=(vector &&rhs) noexcept{
+inline vector<T, Alloc> & vector<T, Alloc>::operator=(vector &&rhs) noexcept {
 	if (this != &rhs) {
 		destroy_and_deallocate();
 		start = rhs.start;
 		finish = rhs.finish;
-		end_of_storage_= rhs.end_of_storage;
+		end_of_storage_ = rhs.end_of_storage;
 		rhs.start = rhs.finish = rhs.end_of_storage = nullptr;
 	}
 	return *this;
 }
 
 template<class T, class Alloc>
-bool vector<T, Alloc>::operator==(const vector &rhs) const{
+inline void vector<T, Alloc>::resize(size_type new_size, const value_type & value){
+	if (new_size < size())
+		erase(begin() + new_size, end());
+	else
+		insert(end(), new_size - size(), value);
+}
+
+template<class T, class Alloc>
+inline void vector<T, Alloc>::reserve(size_type new_capacity){
+	if (new_capacity <= capacity())
+		return;
+	T* new_start = data_allocator::allocate(new_capacity);
+	T* new_finish = uninitialized_copy(start, finish, new_start);
+	destroy_and_deallocate();
+	start = new_start;
+	finish = new_finish;
+	end_of_storage = start + new_capacity;
+}
+
+template<class T, class Alloc>
+bool vector<T, Alloc>::operator==(const vector &rhs) const {
 	if (size() != rhs.size()) {
 		return false;
 	}
@@ -271,46 +243,61 @@ bool vector<T, Alloc>::operator==(const vector &rhs) const{
 }
 
 template<class T, class Alloc>
-inline bool vector<T, Alloc>::operator!=(const vector &rhs) const{
+inline bool vector<T, Alloc>::operator!=(const vector &rhs) const {
 	return !(operator==(rhs));
 }
 
 template<class T, class Alloc>
-void vector<T, Alloc>::insert(iterator position, size_type n, const value_type & value){
+inline void vector<T, Alloc>::push_back(const value_type & value){
+	if (finish != end_of_storage) {
+		construct(finish, value);
+		++finish;
+	}
+	else
+		insert_aux(end(), value);
+}
+
+template<class T, class Alloc>
+inline typename vector<T,Alloc>::iterator vector<T, Alloc>::erase(iterator first, iterator last){
+	iterator i = copy(last, finish, first);
+	destroy(i, finish);
+	finish -= (last - first);
+	return first;
+}
+
+template<class T, class Alloc>
+void vector<T, Alloc>::insert(iterator position, size_type n, const value_type & value) {
 	if (n) {
-		if (static_cast<size_type>(end_of_storage - finish) >= n) {
-			//备用空间充足
+		if (static_cast<size_type>(end_of_storage - finish) >= n) {// needn't expand
 			value_type value_copy = value;
 			const size_type elems_after = finish - position;
 			iterator old_finish = finish;
 			if (elems_after > n) {
-				//插入点后元素个数m>=插入元素个数n
-				uninitialized_copy(finish - n, finish, finish);//先复制后n个元素
+				uninitialized_copy(finish - n, finish, finish);
 				finish += n;
 				// copy_backward needs _SCL_SECURE_NO_WARNINGS
-				std::copy_backward(position, old_finish - n, old_finish);//复制m-n个元素
+				std::copy_backward(position, old_finish - n, old_finish);
 				fill(position, position + n, value_copy);
 			}
 			else {
-				uninitialized_fill_n(finish, n - elems_after, value_copy);//以m-n个value填充末尾
+				uninitialized_fill_n(finish, n - elems_after, value_copy);
 				finish += n - elems_after;
-				uninitialized_copy(position, old_finish, finish);//将m个填充至最末尾
+				uninitialized_copy(position, old_finish, finish);
 				finish += elems_after;
-				fill(position, old_finish,value_copy);//补足m
+				fill(position, old_finish, value_copy);//补足m
 			}
 		}
-		else {
-			//需要扩容
+		else { // expand
 			const size_type old_size = size();
-			const size_type new_size = old_size + (old_size>n?old_size:n);
+			const size_type new_size = old_size + (old_size > n ? old_size : n);
 			iterator new_start = data_allocator::allocate(new_size);
 			iterator new_finish = new_start;
-			try{
-				new_finish = uninitialized_copy(start,position,new_start);
+			try {
+				new_finish = uninitialized_copy(start, position, new_start);
 				new_finish = uninitialized_fill_n(new_finish, n, value);
 				new_finish = uninitialized_copy(position, finish, new_finish);
 			}
-			catch(std::exception&){
+			catch (std::exception&) {
 				destroy(new_start, new_finish);
 				data_allocator::deallocate(new_start, new_size);
 				throw;
@@ -324,24 +311,26 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 }
 
 template<class T, class Alloc>
-inline typename vector<T,Alloc>::iterator vector<T, Alloc>::insert(iterator position, const value_type &value){
+inline typename vector<T, Alloc>::iterator vector<T, Alloc>::insert(iterator position, const value_type &value) {
 	difference_type diff = position - begin();
 	insert(position, 1, value);
 	return begin() + diff;
 }
 
 template<class T, class Alloc>
-inline bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs){
+inline vector<T, Alloc>::vector(std::initializer_list<T> il) {
+	start = allocate_and_copy(il.begin(), il.end());
+	finish = end_of_storage = start + (il.end() - il.begin());
+}
+
+template<class T, class Alloc>
+inline bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 	return lhs.operator==(rhs);
 }
 
 template<class T, class Alloc>
-inline bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs){
-	return !(lhs==rhs);
+inline bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+	return !(lhs == rhs);
 }
 
-template<class T, class Alloc>
-inline vector<T, Alloc>::vector(std::initializer_list<T> il){
-	start = allocate_and_copy(il.begin(), il.end());
-	finish = end_of_storage = start +(il.end() - il.begin());
-}
+}// endnamespace::MiniSTL
