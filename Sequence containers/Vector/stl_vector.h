@@ -31,19 +31,18 @@ private: // allocate and construct aux functions
 
 	iterator start;
 	iterator finish;
-	iterator end_of_stroage;
+	iterator end_of_storage;
 
 	void insert_aux(iterator position, const value_type& value);
 
 	void deallocate() {
-		if (start)
-			data_allocator::deallocate(start, end_of_stroage - start);
+		if (start) data_allocator::deallocate(start, end_of_storage - start);
 	}
 
 	void fill_initialize(size_type n, const value_type& value) {
 		start = allocate_and_fill(n, value);
 		finish = start + n;
-		end_of_stroage = finish;
+		end_of_storage = finish;
 	}
 
 	iterator allocate_and_fill(size_type n, const value_type& value) {
@@ -56,12 +55,12 @@ private: // allocate and construct aux functions
 	iterator allocate_and_copy(InputIterator first, InputIterator last) {
 		start = data_allocator::allocate(last - first);
 		finish = uninitialized_copy(first, last, start);
-		end_of_stroage = finish;
+		end_of_storage = finish;
 		return start;
 	}
 
-	void destory_and_deallocate() {
-		destory(start, finish);
+	void destroy_and_deallocate() {
+		destroy(start, finish);
 		deallocate();
 	}
 
@@ -69,11 +68,12 @@ private: // allocate and construct aux functions
 
 public:
 	// ctor && dtor
-	vector() :start(nullptr), finish(nullptr), end_of_stroage(nullptr) {}
+	vector() :start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
 	explicit vector(size_type n) { fill_initialize(n, value_type()); }
 	vector(size_type n, const value_type &value) { fill_initialize(n, value); }
 	template<class InputIterator>
 	vector(InputIterator first, InputIterator last) { allocate_and_copy(first, last); }
+	vector(std::initializer_list<T>);
 	vector(const vector&);
 	vector(vector&&) noexcept;
 
@@ -83,7 +83,8 @@ public:
 	}
 
 public:
-	vector& operator=(const vector&) const;
+	vector& operator=(const vector&);
+	vector& operator=(std::initializer_list<value_type>);
 	vector& operator=(vector&&) noexcept;
 
 public:
@@ -106,7 +107,7 @@ public:
 	const_r_iterator crend() const { return const_r_iterator(end); }
 	const_reference operator[](const size_type n) const  { return *(start + n); }
 	size_type size() const { return static_cast<size_type>(finish - start); }
-	size_type capacity() const { return static_cast<size_type>(end_of_stroage - start); }
+	size_type capacity() const { return static_cast<size_type>(end_of_storage - start); }
 	bool empty() const { return start == finish; }
 	bool operator== (const vector&) const;
 	bool operator!= (const vector&) const;
@@ -114,7 +115,7 @@ public:
 public:
 	//动态接口
 	void push_back(const value_type&value) {
-		if (finish != end_of_stroage) {
+		if (finish != end_of_storage) {
 			construct(finish, value);//全局函数
 			++finish;
 		}
@@ -154,21 +155,24 @@ public:
 	}
 
 	void reserve(size_type new_capacity) {
-		if (n <= capacity()) return;
-		T* new_start = data_allocator::allocate(n);
+		if (new_capacity <= capacity()) return;
+		T* new_start = data_allocator::allocate(new_capacity);
 		T* new_finish = uninitialized_copy(start, finish, new_start);
-		destory_and_deallocate();
+		destroy_and_deallocate();
 		start = new_start;
 		finish = new_finish;
-		end_of_storage = start + n;
+		end_of_storage = start + new_capacity;
 	}
 
-	void insert(iterator position, size_type n, const value_type& value);
+	void insert(iterator, size_type, const value_type&);
+	iterator insert(iterator, const value_type&);
+
+	void shrink_to_fit() { vector temp(*this); swap(temp); }
 };
 
 template<class T, class Alloc>
 void vector<T, Alloc>::insert_aux(iterator position, const value_type& value){
-	if (finish != end_of_stroage) {
+	if (finish != end_of_storage) {
 		//当前存在备用空间
 		construct(finish, *(finish - 1));// 以最后一个元素为初值构造元素于finish
 		++finish;
@@ -196,11 +200,11 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value){
 			throw;
 		}
 		//释放原有vector
-		destory_and_deallocate();
+		destroy_and_deallocate();
 		//调整迭代器指向新vector
 		start = new_start;
 		finish = new_finish;
-		end_of_stroage = new_start + new_size;
+		end_of_storage = new_start + new_size;
 	}
 }
 
@@ -221,21 +225,28 @@ template<class T, class Alloc>
 inline vector<T, Alloc>::vector(vector &&rhs) noexcept{
 	start = rhs.start;
 	finish = rhs.finish;
-	end_of_stroage = rhs.end_of_stroage;
-	rhs.start = rhs.finish = rhs.end_of_stroage = nullptr;
+	end_of_storage = rhs.end_of_storage;
+	rhs.start = rhs.finish = rhs.end_of_storage = nullptr;
 }
 
 template<class T, class Alloc>
-inline vector<T, Alloc>& vector<T, Alloc>::operator=(const vector &rhs) const{
+inline vector<T, Alloc>& vector<T, Alloc>::operator=(const vector &rhs){
 	vector temp(rhs);
 	swap(temp);
 	return *this;
 }
 
 template<class T, class Alloc>
+inline vector<T,Alloc> & vector<T, Alloc>::operator=(std::initializer_list<value_type> il){
+	destroy_and_deallocate();
+	start = allocate_and_copy(il.begin(), il.end());
+	finish = end_of_storage = start + (il.end() - il.begin());
+}
+
+template<class T, class Alloc>
 inline vector<T, Alloc> & vector<T, Alloc>::operator=(vector &&rhs) noexcept{
 	if (this != &rhs) {
-		destory_and_deallocate();
+		destroy_and_deallocate();
 		start = rhs.start;
 		finish = rhs.finish;
 		end_of_storage_= rhs.end_of_storage;
@@ -267,23 +278,23 @@ inline bool vector<T, Alloc>::operator!=(const vector &rhs) const{
 template<class T, class Alloc>
 void vector<T, Alloc>::insert(iterator position, size_type n, const value_type & value){
 	if (n) {
-		if (static_cast<size_type>(end_of_stroage - finish) >= n) {
+		if (static_cast<size_type>(end_of_storage - finish) >= n) {
 			//备用空间充足
 			value_type value_copy = value;
 			const size_type elems_after = finish - position;
 			iterator old_finish = finish;
 			if (elems_after > n) {
 				//插入点后元素个数m>=插入元素个数n
-				unitialized_copy(finish - n, finish, finish);//先复制后n个元素
+				uninitialized_copy(finish - n, finish, finish);//先复制后n个元素
 				finish += n;
 				// copy_backward needs _SCL_SECURE_NO_WARNINGS
 				std::copy_backward(position, old_finish - n, old_finish);//复制m-n个元素
 				fill(position, position + n, value_copy);
 			}
 			else {
-				unitialized_fill_n(finish, n - eles_after, value_copy);//以m-n个value填充末尾
+				uninitialized_fill_n(finish, n - elems_after, value_copy);//以m-n个value填充末尾
 				finish += n - elems_after;
-				unitialized_copy(position, old_finish, finish);//将m个填充至最末尾
+				uninitialized_copy(position, old_finish, finish);//将m个填充至最末尾
 				finish += elems_after;
 				fill(position, old_finish,value_copy);//补足m
 			}
@@ -291,25 +302,32 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 		else {
 			//需要扩容
 			const size_type old_size = size();
-			const size_type new_size = oldsize + max(oldsize, n);
+			const size_type new_size = old_size + (old_size>n?old_size:n);
 			iterator new_start = data_allocator::allocate(new_size);
-			iterator new_finish = newstart;
+			iterator new_finish = new_start;
 			try{
-				new_finish = unitialized_copy(start,position,new_start);
-				new_finish = unitialized_fill_n(new_finish, n, value);
-				new_finish = unitialized_copy(position, finish, new_finish);
+				new_finish = uninitialized_copy(start,position,new_start);
+				new_finish = uninitialized_fill_n(new_finish, n, value);
+				new_finish = uninitialized_copy(position, finish, new_finish);
 			}
 			catch(std::exception&){
 				destroy(new_start, new_finish);
 				data_allocator::deallocate(new_start, new_size);
 				throw;
 			}
-			destory_and_deallocate();
+			destroy_and_deallocate();
 			start = new_start;
 			finish = new_finish;
-			end_of_stroage = new_start + new_size;
+			end_of_storage = new_start + new_size;
 		}
 	}
+}
+
+template<class T, class Alloc>
+inline typename vector<T,Alloc>::iterator vector<T, Alloc>::insert(iterator position, const value_type &value){
+	difference_type diff = position - begin();
+	insert(position, 1, value);
+	return begin() + diff;
 }
 
 template<class T, class Alloc>
@@ -320,4 +338,10 @@ inline bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
 template<class T, class Alloc>
 inline bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs){
 	return !(lhs==rhs);
+}
+
+template<class T, class Alloc>
+inline vector<T, Alloc>::vector(std::initializer_list<T> il){
+	start = allocate_and_copy(il.begin(), il.end());
+	finish = end_of_storage = start +(il.end() - il.begin());
 }
