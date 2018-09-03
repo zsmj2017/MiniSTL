@@ -2,8 +2,9 @@
 #include "construct.h"
 #include "typeTraits.h"
 #include "stl_iterator.h"
-#include "stl_algo.h" // fill && fill_n(has not implemented)
 #include <cstring> // memove
+
+namespace MiniSTL {
 
 template <class InputIterator, class ForwardIterator>
 inline ForwardIterator uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result) {
@@ -20,7 +21,7 @@ inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputItera
 template<class InputIterator, class ForwardIterator>
 inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, _false_type) {
 	ForwardIterator cur = result;
-	for (; first != last; ++cur,++first)
+	for (; first != last; ++cur, ++first)
 		construct(&*cur, *first);
 	return cur;
 }
@@ -50,7 +51,7 @@ inline void  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator las
 template<class ForwardIterator, class T>
 void  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, _false_type) {
 	ForwardIterator cur = first;
-	for (;cur != last; ++cur)
+	for (; cur != last; ++cur)
 		construct(&*cur, value);
 }
 
@@ -61,8 +62,8 @@ inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const
 }
 
 template<class ForwardIterator, class Size, class T>
-inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & value,_true_type) {
-	return std::fill_n(first,n,value);
+inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & value, _true_type) {
+	return std::fill_n(first, n, value);
 }
 
 template<class ForwardIterator, class Size, class T>
@@ -75,3 +76,4 @@ ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const
 	return cur;
 }
 
+}

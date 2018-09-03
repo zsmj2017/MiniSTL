@@ -3,7 +3,9 @@
 #include <new> // placement new
 #include "typeTraits.h"
 
-template <class T1,class T2>
+namespace MiniSTL {
+
+template <class T1, class T2>
 inline void construct(T1* p, T2 value) {
 	new(p) T1(value);
 }
@@ -30,8 +32,10 @@ inline void _destroy_aux(ForwardIterator beg, ForwardIterator end, _false_type) 
 // 存在trivial destructor
 // 如果对象的析构函数无关痛痒，那么反复调用它是一种效率上的巨大浪费
 template <class ForwardIterator>
-inline void _destroy_aux(ForwardIterator, ForwardIterator,_true_type) {}
+inline void _destroy_aux(ForwardIterator, ForwardIterator, _true_type) {}
 
 // 针对char*、wchar_t*的特化
 inline void destroy(char*, char*) {}
 inline void destroy(wchar_t*, wchar_t*) {}
+
+} // end namesapce::MiniSTL

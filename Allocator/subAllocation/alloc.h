@@ -2,36 +2,40 @@
 #include <cstdlib> // malloc and free
 #include <new> // bad_alloc
 
+namespace MiniSTL {
+
 //一级配置器
 class __malloc_alloc {
 public:
 	//alias declaration
 	using malloc_handler = void(*)();
-
 private:
 	//以下函数指针用以处理内存不足的情况
 	static void* oom_malloc(size_t);
 	static void* oom_realloc(void*, size_t);
-	static malloc_handler __malloc_alloc_oom_handler;	
+	static malloc_handler __malloc_alloc_oom_handler;
 
 public:
 	static void* allocate(size_t n) {
 		void* result = malloc(n);
-		if (result==nullptr) 
+		if (result == nullptr)
 			result = oom_malloc(n);
 		return result;
 	}
+
 	static void deallocate(void* p, size_t /*n*/) {
 		free(p);
 	}
-	static void* reallocate(void* p, size_t /*old_sz*/,size_t new_sz) {
+
+	static void* reallocate(void* p, size_t /*old_sz*/, size_t new_sz) {
 		void* result = realloc(p, new_sz);
-		if (result=nullptr) 
+		if (result = nullptr)
 			oom_realloc(p, new_sz);
 		return result;
 	}
+
 	//模拟set_new_handler 原因在于并未使用new与delete配置内存，因此无法使用set_new_handler
-	static malloc_handler set_malloc_handler(malloc_handler f){
+	static malloc_handler set_malloc_handler(malloc_handler f) {
 		malloc_handler old = __malloc_alloc_oom_handler;
 		__malloc_alloc_oom_handler = f;
 		return old;
@@ -39,23 +43,23 @@ public:
 };
 
 //定义handler
-typename __malloc_alloc::malloc_handler __malloc_alloc::__malloc_alloc_oom_handler= nullptr;
+typename __malloc_alloc::malloc_handler __malloc_alloc::__malloc_alloc_oom_handler = nullptr;
 
-void* __malloc_alloc::oom_malloc(size_t n){
+void* __malloc_alloc::oom_malloc(size_t n) {
 	malloc_handler new_alloc_handler;
 	void* result;
 	for (;;) {//不断尝试释放、配置
 		new_alloc_handler = __malloc_alloc_oom_handler;
 		if (!new_alloc_handler)
-			throw std::bad_alloc(); 
+			throw std::bad_alloc();
 		(*new_alloc_handler)();//调用handler，试图释放内存
 		result = malloc(n);
-		if (result) 
+		if (result)
 			return result;
 	}
 }
 
-void* __malloc_alloc::oom_realloc(void* p, size_t n){
+void* __malloc_alloc::oom_realloc(void* p, size_t n) {
 	malloc_handler new_alloc_handler;
 	void* result;
 	for (;;) {
@@ -64,7 +68,7 @@ void* __malloc_alloc::oom_realloc(void* p, size_t n){
 			throw std::bad_alloc();
 		(*new_alloc_handler)();
 		result = realloc(p, n);
-		if (result) 
+		if (result)
 			return result;
 	}
 }
@@ -74,8 +78,9 @@ using malloc_alloc = __malloc_alloc;
 //freelist参数设定
 //区块上调边界，区块上限，freelist个数
 //Effective C++所述enum惯用法
-enum  __freelist_setting
-{__ALIGN=8, __MAX_BYTES = 128, __NFREELISTS = __MAX_BYTES / __ALIGN};
+enum  __freelist_setting{
+	__ALIGN = 8, __MAX_BYTES = 128, __NFREELISTS = __MAX_BYTES / __ALIGN
+};
 
 //第二级配置器
 class __default_alloc {
@@ -114,18 +119,14 @@ public:
 	static void* reallocate(void *p, size_t old_sz, size_t new_sz);
 };
 
-//以下为static data member的定义
 char* __default_alloc::start_free = nullptr;
-
 char* __default_alloc::end_free = nullptr;
-
 size_t __default_alloc::heap_size = 0;
-
 __default_alloc::obj* volatile
-__default_alloc::free_list[__NFREELISTS] = { 
-	nullptr, nullptr, nullptr, nullptr, 
-	nullptr, nullptr, nullptr, nullptr, 
-	nullptr, nullptr, nullptr, nullptr, 
+__default_alloc::free_list[__NFREELISTS] = {
+	nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr,
 	nullptr, nullptr, nullptr, nullptr
 };
 
@@ -133,7 +134,7 @@ __default_alloc::free_list[__NFREELISTS] = {
 //当free_list无可用区块时，重新填充空间
 //新空间取自内存池，默认获取20个节点(区块）
 //若内存池不足，则获取的将小于20
-void* __default_alloc::refill(size_t n){
+void* __default_alloc::refill(size_t n) {
 	int nobjs = 20;
 	//尝试调用chunk_alloc,注意nobjs以pass-by-reference传入
 	char* chunk = chunk_alloc(n, nobjs);
@@ -142,7 +143,7 @@ void* __default_alloc::refill(size_t n){
 	obj* current_obj, *next_obj;
 
 	//若只获取了一个区块则直接分配给调用者，不加入free_list
-	if (1 == nobjs) 
+	if (1 == nobjs)
 		return(chunk);
 	my_free_list = free_list + FREELIST_INDEX(n);
 
@@ -151,17 +152,17 @@ void* __default_alloc::refill(size_t n){
 	//引导free_list指向内存池分配的空间
 	//chunk指向的内存直接分给用户，free_list指向剩下（19或更少）的区块
 	*my_free_list = next_obj = reinterpret_cast<obj*>(chunk + n);
-	for (int i = 1;i!=nobjs-1; ++i) {
+	for (int i = 1; i != nobjs - 1; ++i) {
 		current_obj = next_obj;
 		next_obj = reinterpret_cast<obj*>(reinterpret_cast<char*>(next_obj) + n);
-	    current_obj->free_list_link = next_obj;
+		current_obj->free_list_link = next_obj;
 	}
 	next_obj->free_list_link = nullptr;
 	return result;
 }
 
 //默认size为8的整数倍
-char* __default_alloc::chunk_alloc(size_t size, int & nobjs){
+char* __default_alloc::chunk_alloc(size_t size, int & nobjs) {
 	char* result;
 	size_t total_bytes = size * nobjs;
 	size_t bytes_left = end_free - start_free;//内存池剩余空间
@@ -181,14 +182,13 @@ char* __default_alloc::chunk_alloc(size_t size, int & nobjs){
 	}
 	else {
 		//内存池一个区块都无法提供
-		size_t bytes_to_get = 2 * total_bytes + ROUND_UP(heap_size >> 4);//向heap申请诸如的内存，heap_size将随着配置次数增加而增加
+		size_t bytes_to_get = 2 * total_bytes + ROUND_UP(heap_size >> 4);//向heap申请注入的内存，heap_size将随着配置次数增加而增加
 		if (bytes_left > 0) {
 			//当前内存池还有一部分内存，为了不浪费分配给free_list
 			obj* volatile *my_free_list = free_list + FREELIST_INDEX(bytes_left);
 			reinterpret_cast<obj*>(start_free)->free_list_link = *my_free_list;
 			*my_free_list = reinterpret_cast<obj*>(start_free);
 		}
-
 		//配置heap空间以补充内存池
 		start_free = static_cast<char*>(malloc(bytes_to_get));
 		if (!start_free) {
@@ -198,7 +198,7 @@ char* __default_alloc::chunk_alloc(size_t size, int & nobjs){
 			for (int i = size; i <= __MAX_BYTES; i += __ALIGN) {
 				my_free_list = free_list + FREELIST_INDEX(i);
 				p = *my_free_list;
-				if (p==nullptr) {
+				if (p == nullptr) {
 					//存在足以分配的区块
 					*my_free_list = p->free_list_link;//抽离当前区块
 					start_free = reinterpret_cast<char*>(p);
@@ -216,16 +216,16 @@ char* __default_alloc::chunk_alloc(size_t size, int & nobjs){
 	}
 }
 
-void* __default_alloc::allocate(size_t n){
+void* __default_alloc::allocate(size_t n) {
 	obj* volatile *my_free_list;
 	obj* result;
 	//若n大于128,则采用第一级适配器
-	if (n >__MAX_BYTES)
+	if (n > __MAX_BYTES)
 		return(malloc_alloc::allocate(n));
 	//选择采用第几区块
 	my_free_list = free_list + FREELIST_INDEX(n);
 	result = *my_free_list;
-	if (result==nullptr) {
+	if (result == nullptr) {
 		//未找到可用free_list，准备填充free_list
 		void *r = refill(ROUND_UP(n));
 		return r;
@@ -235,12 +235,12 @@ void* __default_alloc::allocate(size_t n){
 	return(result);
 }
 
-void __default_alloc::deallocate(void * p, size_t n){
+void __default_alloc::deallocate(void * p, size_t n) {
 	//p不可为nullptr
 	obj* q = static_cast<obj*>(p);
 	obj* volatile* my_free_list;
 	//呼叫第一级适配器
-	if (n >__MAX_BYTES)
+	if (n > __MAX_BYTES)
 		malloc_alloc::deallocate(p, n);
 	//寻找对应的free list
 	my_free_list = free_list + FREELIST_INDEX(n);
@@ -249,8 +249,10 @@ void __default_alloc::deallocate(void * p, size_t n){
 	*my_free_list = q;
 }
 
-void* __default_alloc::reallocate(void * p, size_t old_sz, size_t new_sz){
+void* __default_alloc::reallocate(void * p, size_t old_sz, size_t new_sz) {
 	deallocate(p, old_sz);
 	p = allocate(new_sz);
 	return p;
 }
+
+}// end namespace::MiniSTL

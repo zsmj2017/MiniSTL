@@ -3,15 +3,17 @@
 #include <cstddef> //ptrdiff_t定义
 #include <iostream>
 
+namespace MiniSTL {
+
 //五种迭代器类型
-struct input_iterator_tag { };
-struct output_iterator_tag { };
-struct forward_iterator_tag : public input_iterator_tag { };
-struct bidirectional_iterator_tag : public forward_iterator_tag { };
-struct random_access_iterator_tag : public bidirectional_iterator_tag { };
+struct input_iterator_tag {};
+struct output_iterator_tag {};
+struct forward_iterator_tag :public input_iterator_tag {};
+struct bidirectional_iterator_tag :public forward_iterator_tag {};
+struct random_access_iterator_tag :public bidirectional_iterator_tag {};
 
 //为了避免遗忘记录traits，此基类以供自定义iterator继承之
-template<class Category,class T,class Distance = ptrdiff_t,class Pointer = T*,class Reference =T&>
+template<class Category, class T, class Distance = ptrdiff_t, class Pointer = T * , class Reference = T & >
 struct iterator {
 	using iterator_category = Category;
 	using value_type = T;
@@ -37,8 +39,8 @@ struct iterator_traits<T*> {
 	using iterator_category = random_access_iterator_tag;
 	using value_type = T;
 	using difference_type = ptrdiff_t;
-	using pointer = T*;
-	using reference = T&;
+	using pointer = T * ;
+	using reference = T & ;
 };
 
 //针对pointer-to-const设计的偏特化版本
@@ -47,8 +49,8 @@ struct iterator_traits<const T*> {
 	using iterator_category = random_access_iterator_tag;
 	using value_type = T;
 	using difference_type = ptrdiff_t;
-	using pointer = const T* ;
-	using reference = const T& ;
+	using pointer = const T*;
+	using reference = const T&;
 };
 
 //以下为模仿C++14 type_traits_t而设定的别名模板
@@ -72,23 +74,23 @@ using reference_t = typename iterator_traits<T>::reference;
 template<class InputIterator>
 inline difference_type_t<InputIterator> __distance(InputIterator first, InputIterator last, input_iterator_tag) {
 	difference_type_t<InputIterator> n = 0;
-	while (first!=last)
+	while (first != last)
 		++first, ++n;
 	return n;
 }
 
 template<class InputIterator>
-inline difference_type_t<InputIterator> __distance(InputIterator first,InputIterator last,random_access_iterator_tag) {
-	return first-last;
+inline difference_type_t<InputIterator> __distance(InputIterator first, InputIterator last, random_access_iterator_tag) {
+	return first - last;
 }
 
 template<class InputIterator>
-inline difference_type_t<InputIterator> distance(InputIterator first,InputIterator last) {
-	return __distance(first, last,iterator_category_t<InputIterator>());
+inline difference_type_t<InputIterator> distance(InputIterator first, InputIterator last) {
+	return __distance(first, last, iterator_category_t<InputIterator>());
 }
 
 //以下为整组advance函数
-template<class InputIterator,class Distance>
+template<class InputIterator, class Distance>
 inline void __advance(InputIterator& i, Distance n, input_iterator_tag) {
 	while (n--) ++i;
 }
@@ -129,7 +131,7 @@ public:
 	using reference = void;
 
 public:
-	explicit back_insert_iterator(Container& value):container(x) {}
+	explicit back_insert_iterator(Container& value) :container(x) {}
 	back_insert_iterator& operator=(const typename Container::value_type& value) {
 		container->push_back(value);//本质上是调用了push_back
 		return *this;
@@ -192,7 +194,7 @@ public:
 	using reference = void;
 
 public:
-	insert_iterator(Container& value,typename Container::iterator i) :container(x),iter(i) {}
+	insert_iterator(Container& value, typename Container::iterator i) :container(x), iter(i) {}
 	insert_iterator& operator=(const typename Container::value_type& value) {
 		container->insert(iter, value);//调用insert
 		++iter;//保证insert_iterator永远与目标贴合
@@ -207,7 +209,7 @@ public:
 
 template <class Container, class Iterator>
 inline insert_iterator<Container> inserter(Container &x, Iterator i) {
-	return insert_iterator<Container>(x,i);
+	return insert_iterator<Container>(x, i);
 }
 
 //reverse
@@ -228,8 +230,8 @@ public:
 
 public:
 	reverse_iterator() {}
-	explicit reverse_iterator(iterator_type value):current(x){}
-	reverse_iterator(const self& value):current(x.current) {}
+	explicit reverse_iterator(iterator_type value) :current(x) {}
+	reverse_iterator(const self& value) :current(x.current) {}
 
 	iterator_type base() const { return current; }
 	reference operator*() const {
@@ -278,13 +280,13 @@ public:
 		current += n;
 		return *this;
 	}
-	
+
 	reference operator[](difference_type n) const { return *(*this + n); }
 };
 
 //stream:input_stream,output_stream
 
-template <class T,class Distance = ptrdiff_t>
+template <class T, class Distance = ptrdiff_t>
 class istream_iterator {
 protected:
 	std::istream * stream;
@@ -336,7 +338,7 @@ public:
 	using reference = void;
 
 	ostream_iterator() :stream(&cin), interval(nullptr) {}
-	ostream_iterator(std::ostream& s,const char* c) :stream(&s),interval(c) {}
+	ostream_iterator(std::ostream& s, const char* c) :stream(&s), interval(c) {}
 
 	ostream_iterator& operator=(const T& value) {
 		*stream << value;
@@ -349,3 +351,4 @@ public:
 	ostream_iterator operator++(int) { return *this; }
 };
 
+}// end namespace::MiniSTL

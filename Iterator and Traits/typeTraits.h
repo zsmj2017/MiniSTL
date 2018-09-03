@@ -1,6 +1,8 @@
 #pragma once
 
-namespace{
+namespace MiniSTL {
+
+namespace {
 	template<bool, class Ta, class Tb>
 	struct IfThenElse;
 	template<class Ta, class Tb>
@@ -18,7 +20,7 @@ struct _false_type { };
 
 // 默认自定义类型均为non-POD类型
 template<class T>
-struct _type_traits{
+struct _type_traits {
 	using has_trivial_default_constructor = _false_type;
 	using has_trivial_copy_constructor = _false_type;
 	using has_trivial_assignment_operator = _false_type;
@@ -27,7 +29,7 @@ struct _type_traits{
 };
 
 template<>
-struct _type_traits<bool>{
+struct _type_traits<bool> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -36,7 +38,7 @@ struct _type_traits<bool>{
 };
 
 template<>
-struct _type_traits<char>{
+struct _type_traits<char> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -45,7 +47,7 @@ struct _type_traits<char>{
 };
 
 template<>
-struct _type_traits<unsigned char>{
+struct _type_traits<unsigned char> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -54,7 +56,7 @@ struct _type_traits<unsigned char>{
 };
 
 template<>
-struct _type_traits<signed char>{
+struct _type_traits<signed char> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -63,7 +65,7 @@ struct _type_traits<signed char>{
 };
 
 template<>
-struct _type_traits<wchar_t>{
+struct _type_traits<wchar_t> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -72,7 +74,7 @@ struct _type_traits<wchar_t>{
 };
 
 template<>
-struct _type_traits<short>{
+struct _type_traits<short> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -81,7 +83,7 @@ struct _type_traits<short>{
 };
 
 template<>
-struct _type_traits<unsigned short>{
+struct _type_traits<unsigned short> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -108,7 +110,7 @@ struct _type_traits<unsigned int> {
 };
 
 template<>
-struct _type_traits<long>{
+struct _type_traits<long> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -117,7 +119,7 @@ struct _type_traits<long>{
 };
 
 template<>
-struct _type_traits<unsigned long>{
+struct _type_traits<unsigned long> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -126,7 +128,7 @@ struct _type_traits<unsigned long>{
 };
 
 template<>
-struct _type_traits<long long>{
+struct _type_traits<long long> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -135,7 +137,7 @@ struct _type_traits<long long>{
 };
 
 template<>
-struct _type_traits<unsigned long long>{
+struct _type_traits<unsigned long long> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -144,7 +146,7 @@ struct _type_traits<unsigned long long>{
 };
 
 template<>
-struct _type_traits<float>{
+struct _type_traits<float> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -153,7 +155,7 @@ struct _type_traits<float>{
 };
 
 template<>
-struct _type_traits<double>{
+struct _type_traits<double> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -162,7 +164,7 @@ struct _type_traits<double>{
 };
 
 template<>
-struct _type_traits<long double>{
+struct _type_traits<long double> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -171,7 +173,7 @@ struct _type_traits<long double>{
 };
 
 template<class T>
-struct _type_traits<T*>{
+struct _type_traits<T*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -180,7 +182,7 @@ struct _type_traits<T*>{
 };
 
 template<class T>
-struct _type_traits<const T*>{
+struct _type_traits<const T*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -189,7 +191,7 @@ struct _type_traits<const T*>{
 };
 
 template<>
-struct _type_traits<char*>{
+struct _type_traits<char*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -198,7 +200,7 @@ struct _type_traits<char*>{
 };
 
 template<>
-struct _type_traits<unsigned char*>{
+struct _type_traits<unsigned char*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -207,7 +209,7 @@ struct _type_traits<unsigned char*>{
 };
 
 template<>
-struct _type_traits<signed char*>{
+struct _type_traits<signed char*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -216,7 +218,7 @@ struct _type_traits<signed char*>{
 };
 
 template<>
-struct _type_traits<const char*>{
+struct _type_traits<const char*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -225,7 +227,7 @@ struct _type_traits<const char*>{
 };
 
 template<>
-struct _type_traits<const unsigned char*>{
+struct _type_traits<const unsigned char*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
@@ -234,10 +236,11 @@ struct _type_traits<const unsigned char*>{
 };
 
 template<>
-struct _type_traits<const signed char*>{
+struct _type_traits<const signed char*> {
 	using has_trivial_default_constructor = _true_type;
 	using has_trivial_copy_constructor = _true_type;
 	using has_trivial_assignment_operator = _true_type;
 	using has_trivial_destructor = _true_type;
 	using is_POD_type = _true_type;
 };
+}

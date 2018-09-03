@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "stl_iterator.h"
 
+namespace MiniSTL{
+
 //adjacent_find:找出一组满足条件的相邻元素
 template <class ForwardIterator>
 ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last) {
@@ -1159,3 +1161,5 @@ void mergesort(BidirectionalIter first, BidirectionalIter last) {
 		inplace_merge(first, middle, last);
 	}
 }
+
+}// end namespace::MiniSTL

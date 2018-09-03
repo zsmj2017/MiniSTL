@@ -3,9 +3,10 @@
 #include "alloc.h"
 #include "construct.h"
 
+namespace MiniSTL {
 //默认二级适配器
-template<class T,class Alloc= __default_alloc>
-class simpleAlloc{
+template<class T, class Alloc = __default_alloc>
+class simpleAlloc {
 public:
 	using value_type = T;
 	using pointer = T * ;
@@ -26,8 +27,8 @@ public:
 	static void destroy(T *first, T *last);
 };
 
-template<class T,class Alloc>
-T *simpleAlloc<T,Alloc>::allocate() {
+template<class T, class Alloc>
+T *simpleAlloc<T, Alloc>::allocate() {
 	return static_cast<T *>(Alloc::allocate(sizeof(T)));
 }
 
@@ -67,4 +68,5 @@ template<class T, class Alloc>
 void simpleAlloc<T, Alloc>::destroy(T *first, T *last) {
 	for (; first != last; ++first)
 		first->~T();
+}
 }
