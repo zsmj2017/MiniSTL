@@ -11,17 +11,17 @@ template<class T, class Alloc = simpleAlloc<T> >
 class vector {
 public:
 	template<class T, class Alloc>
-	friend bool operator == (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+	friend bool operator == (const vector<T, Alloc>&, const vector<T, Alloc>&);
 	template<class T, class Alloc>
-	friend bool operator != (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+	friend bool operator != (const vector<T, Alloc>&, const vector<T, Alloc>&);
 
 public:// alias declarartions
 	using value_type = T;
 	using pointer = value_type * ;
 	using iterator = value_type * ;// iterator is raw pointer
 	using const_iterator = value_type * ;
-	using r_iterator = reverse_iterator<iterator>;
-	using const_r_iterator = reverse_iterator<const_iterator>;
+	using reverse_iterator = MiniSTL::reverse_iterator<iterator>;
+	using const_reverse_iterator = MiniSTL::reverse_iterator<const_iterator>;
 	using reference = value_type & ;
 	using const_reference = const value_type&;
 	using size_type = size_t;
@@ -90,11 +90,11 @@ public:// copy assignment operator
 
 public: // getter
 	const_iterator begin() const noexcept { return start; }
-	const_iterator end() const noexcept { return end; }
+	const_iterator end() const noexcept { return finish; }
 	const_iterator cbegin() const noexcept { return start; }
-	const_iterator cend() const noexcept { return end; }
-	const_r_iterator crbegin() const noexcept { return const_r_iterator(start); }
-	const_r_iterator crend() const noexcept { return const_r_iterator(end); }
+	const_iterator cend() const noexcept { return finish; }
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(finish); }
+	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(start); }
 	const_reference operator[](const size_type n) const noexcept { return *(start + n); }
 	size_type size() const noexcept { return static_cast<size_type>(finish - start); }
 	size_type capacity() const noexcept { return static_cast<size_type>(end_of_storage - start); }
@@ -103,8 +103,8 @@ public: // getter
 public: // setter
 	iterator begin() noexcept { return start; }
 	iterator end() noexcept { return finish; }
-	r_iterator rbegin() noexcept { return r_iterator(start); }
-	r_iterator rend() noexcept { return r_iterator(end); }
+	reverse_iterator rbegin() noexcept { return reverse_iterator(finish); }
+	reverse_iterator rend() noexcept { return reverse_iterator(start); }
 	reference operator[](const size_type n) noexcept { return *(start + n); }
 	reference front() noexcept { return *begin(); }
 	reference back() noexcept { return *(end() - 1); }
@@ -114,7 +114,7 @@ public: //  interface for size and capacity
 	void resize(size_type, const value_type&);
 	void resize(size_type new_size) { resize(new_size, value_type()); }
 	void reserve(size_type);
-	void shrink_to_fit() { vector temp(*this); swap(temp); }
+	void shrink_to_fit() noexcept { vector temp(*this); swap(temp); }
 
 public: // compare operator(member function)
 	bool operator== (const vector&) const noexcept;
@@ -166,7 +166,7 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
 }
 
 template<class T, class Alloc>
-inline void vector<T, Alloc>::swap(vector &rhs) {
+inline void vector<T, Alloc>::swap(vector &rhs) noexcept {
 	using std::swap;
 	swap(start, rhs.start);
 	swap(finish, rhs.finish);
@@ -228,7 +228,7 @@ inline void vector<T, Alloc>::reserve(size_type new_capacity){
 }
 
 template<class T, class Alloc>
-bool vector<T, Alloc>::operator==(const vector &rhs) const {
+bool vector<T, Alloc>::operator==(const vector &rhs) const noexcept{
 	if (size() != rhs.size()) {
 		return false;
 	}
@@ -240,11 +240,6 @@ bool vector<T, Alloc>::operator==(const vector &rhs) const {
 				return false;
 		return true;
 	}
-}
-
-template<class T, class Alloc>
-inline bool vector<T, Alloc>::operator!=(const vector &rhs) const {
-	return !(operator==(rhs));
 }
 
 template<class T, class Alloc>
