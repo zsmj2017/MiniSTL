@@ -183,7 +183,7 @@ inline front_insert_iterator<Container> front_inserter(Container &x) {
 template <class Container>
 class insert_iterator {
 protected:
-	Container * container;//底层容器
+	Container* container;//底层容器
 	typename Container::iterator iter;
 
 public:
@@ -212,25 +212,29 @@ inline insert_iterator<Container> inserter(Container &x, Iterator i) {
 	return insert_iterator<Container>(x, i);
 }
 
-//reverse
 template <class Iterator>
 class reverse_iterator {
+	template<class Iterator>
+	friend bool operator == (const reverse_iterator<Iterator>&, const reverse_iterator<Iterator>&);
+	template<class Iterator>
+	friend bool operator != (const reverse_iterator<Iterator>&, const reverse_iterator<Iterator>&);
+
 protected:
 	Iterator current;//与之对应的正向迭代器
 
 public:
-	using iterator_category = typename Iterator::iterator_category;
-	using value_type = typename Iterator::value_type;
-	using difference_type = typename Iterator::difference_type;
-	using pointer = typename Iterator::pointer;
-	using reference = typename Iterator::reference;
+	using iterator_category = iterator_category_t<Iterator>;
+	using value_type = value_type_t<Iterator>;
+	using difference_type = difference_type_t<Iterator>;
+	using pointer = pointer_t<Iterator>;
+	using reference = reference_t<Iterator>;
 
 	using iterator_type = Iterator;//正向迭代器
 	using self = reverse_iterator;//反向迭代器
 
 public:
 	reverse_iterator() {}
-	explicit reverse_iterator(iterator_type value) :current(x) {}
+	explicit reverse_iterator(iterator_type value) :current(value) {}
 	reverse_iterator(const self& value) :current(x.current) {}
 
 	iterator_type base() const { return current; }
@@ -282,7 +286,21 @@ public:
 	}
 
 	reference operator[](difference_type n) const { return *(*this + n); }
+
+	bool operator==(const self& rhs) const { return current == rhs.current;}
+	bool operator!=(const self& rhs) const { return !((*this) == rhs); }
 };
+
+
+template<class Iterator>
+inline bool operator==(const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs){
+	return lhs.operator==(rhs);
+}
+
+template<class Iterator>
+inline bool operator!=(const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return !(lhs == rhs);
+}
 
 //stream:input_stream,output_stream
 
