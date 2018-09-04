@@ -54,20 +54,20 @@ struct iterator_traits<const T*> {
 };
 
 //以下为模仿C++14 type_traits_t而设定的别名模板
-template<class T>
-using iterator_category_t = typename iterator_traits<T>::iterator_category;
+template<class Iterator>
+using iterator_category_t = typename iterator_traits<Iterator>::iterator_category;
 
-template<class T>
-using value_type_t = typename iterator_traits<T>::value_type;
+template<class Iterator>
+using value_type_t = typename iterator_traits<Iterator>::value_type;
 
-template<class T>
-using difference_type_t = typename iterator_traits<T>::difference_type;
+template<class Iterator>
+using difference_type_t = typename iterator_traits<Iterator>::difference_type;
 
-template<class T>
-using pointer_t = typename iterator_traits<T>::pointer;
+template<class Iterator>
+using pointer_t = typename iterator_traits<Iterator>::pointer;
 
-template<class T>
-using reference_t = typename iterator_traits<T>::reference;
+template<class Iterator>
+using reference_t = typename iterator_traits<Iterator>::reference;
 
 
 //以下为整组distance函数
@@ -115,7 +115,6 @@ inline void advance(InputIterator& i, Distance n) {
 
 //以下为三种迭代器适配器
 //insert,reverse,stream
-
 
 //insert:back_insert,fornt_insert,insert
 template <class Container>
