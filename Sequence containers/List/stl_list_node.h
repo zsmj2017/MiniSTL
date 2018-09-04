@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+namespace MiniSTL {
+
 template <class T>
 struct __list_node {
 	using void_pointer = void*;
@@ -7,3 +9,5 @@ struct __list_node {
 	void_pointer next;
 	T data;
 };
+
+}// end namespace::MiniSTL

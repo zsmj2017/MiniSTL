@@ -1,9 +1,12 @@
 ﻿#pragma once
 
 #include "stl_list_node.h"
+#include "stl_iterator.h"
 #include <cstddef>
 
-template<class T,class Ref,class Ptr>
+namespace MiniSTL {
+
+template<class T, class Ref, class Ptr>
 struct __list_iterator {
 	using iterator = __list_iterator<T, T&, T*>;
 	using self = __list_iterator<T, Ref, Ptr>;
@@ -58,3 +61,5 @@ struct __list_iterator {
 		return temp;
 	}
 };
+
+}// end namespace::MiniSTL
