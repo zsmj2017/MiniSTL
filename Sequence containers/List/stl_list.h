@@ -9,8 +9,9 @@ template<class T, class Alloc = simpleAlloc<T> >
 class list {
 public:// alias declarations
 	using iterator = __list_iterator<T, T&, T*>;
-	//TO DO:ADD CONST_ITERATOR && CONST_REVERSE_ITERATOR
+	using const_iterator = __list_iterator<T, const T&, const T*>;
 	using reverse_iterator = MiniSTL::reverse_iterator<iterator>;
+	using const_reverse_iterator = MiniSTL::reverse_iterator<const_iterator>;
 	using value_type = typename __list_iterator<T, T&, T*>::value_type;
 	using pointer = typename __list_iterator<T, T&, T*>::pointer;
 	using reference = typename __list_iterator<T, T&, T*>::reference;
@@ -44,6 +45,10 @@ public:// ctor && dtor
 public:// getter
 	bool empty() const noexcept { return node->next == node; }
 	size_type size() const noexcept { return distance(begin(), end());}
+	const_iterator cbegin() const noexcept {return static_cast<link_type>(node->next);}
+	const_iterator cend() const noexcept  { return node; }
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
+	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(cbegin()); }
 
 public:// setter
 	iterator begin() noexcept { return static_cast<link_type>(node->next); }
