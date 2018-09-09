@@ -27,7 +27,7 @@ private: // interface about allocate/deallocate litsNode
 	link_type create_node(const T&);
 	void destroy_node(link_type p) { destroy(&(p->data));put_node(p);}
 
-private: // data member(tail)
+private: // only data member(tail)
 	link_type node;
 
 private:// aux_interface
@@ -38,6 +38,8 @@ private:// aux_interface
 
 public:// ctor && dtor
 	list() { empety_initialized(); }
+	explicit list(size_type, const value_type& value = value_type());
+	list(std::initializer_list<T>);
 	~list() { clear(); put_node(node); }
 
 public:// getter
@@ -59,8 +61,10 @@ public:// setter
 public:// interafce about insert && erase
 	iterator insert(iterator, const value_type&);
 	void insert(iterator, size_type, const value_type&);
-	template <class InputIterator>
-	void insert(iterator, InputIterator, InputIterator);
+	template<class InputIterator>
+	void insert(iterator,InputIterator, InputIterator);
+	// without this,InputIterator can be deduced as int
+	void insert(iterator, int, int);
 	iterator erase(iterator);
 	iterator erase(iterator, iterator);
 	void push_front(const T&value) { insert(begin(), value); }
@@ -110,6 +114,20 @@ inline void list<T, Alloc>::insert(iterator position, size_type n, const value_t
 }
 
 template<class T, class Alloc>
+template<class InputIterator>
+inline void list<T, Alloc>::insert(iterator position, InputIterator first, InputIterator last){
+	for (--last; first != last; --last)
+		position = insert(position, *last);
+	insert(position, *last);
+}
+
+template<class T, class Alloc>
+inline void list<T, Alloc>::insert(iterator position, int n, int value){
+	for (int i = n; i != 0; --i)
+		position = insert(position, value);
+}
+
+template<class T, class Alloc>
 inline typename list<T, Alloc>::iterator list<T, Alloc>::erase(iterator position){
 	link_type next_node = static_cast<link_type>(position.node->next);
 	link_type prev_node = static_cast<link_type>(position.node->prev);
@@ -144,6 +162,13 @@ template<class T, class Alloc>
 inline void list<T, Alloc>::swap(list & rhs) noexcept{
 	using std::swap;
 	swap(node, rhs.node);
+}
+
+template<class T, class Alloc>
+inline list<T, Alloc>::list(size_type n, const value_type & value){
+	empety_initialized();
+	while (n--)
+		push_back(value);
 }
 
 template<class T, class Alloc>
@@ -257,14 +282,6 @@ inline void list<T, Alloc>::sort() {
 	for (int i = 1; i < fill; ++i)
 		counter[i].merge(counter[i - 1]);
 	swap(counter[fill - 1]);
-}
-
-template<class T, class Alloc>
-template<class InputIterator>
-inline void list<T, Alloc>::insert(iterator position, InputIterator first, InputIterator last){
-	for (--last; first != last; --last)
-		position = insert(position, *last);
-	insert(position, *last);
 }
 
 }// end namespace::MiniSTL
