@@ -1,4 +1,4 @@
-﻿MiniSTL
+﻿﻿MiniSTL
 =======
 本仓库原是《STL源码剖析》一书的代码合集，并在其基础上运用部分C++11特性进行了代码改写。最终希望根据SGI STL SOURCE完成一个简易STL标准库。
 
@@ -32,7 +32,7 @@
 
  &emsp;vector(stl_vector.h):100%  
 
- &emsp;list(stl_list.h):50%   
+ &emsp;list(stl_list.h):100%   
 
  &emsp;deque(stl_deque.h):50%  
 
