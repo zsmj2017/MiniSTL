@@ -125,21 +125,21 @@ inline typename list<T, Alloc>::iterator list<T, Alloc>::insert(iterator positio
 }
 
 template<class T, class Alloc>
-inline void list<T, Alloc>::insert(iterator position, size_type n, const value_type& value){
+void list<T, Alloc>::insert(iterator position, size_type n, const value_type& value){
 	for (size_type i = n; i != 0; --i)
 		position = insert(position, value);
 }
 
 template<class T, class Alloc>
 template<class InputIterator>
-inline void list<T, Alloc>::insert(iterator position, InputIterator first, InputIterator last){
+void list<T, Alloc>::insert(iterator position, InputIterator first, InputIterator last){
 	for (--last; first != last; --last)
 		position = insert(position, *last);
 	insert(position, *last);
 }
 
 template<class T, class Alloc>
-inline void list<T, Alloc>::insert(iterator position, int n, int value){
+void list<T, Alloc>::insert(iterator position, int n, int value){
 	for (int i = n; i != 0; --i)
 		position = insert(position, value);
 }
@@ -155,7 +155,7 @@ inline typename list<T, Alloc>::iterator list<T, Alloc>::erase(iterator position
 }
 
 template<class T, class Alloc>
-inline typename list<T, Alloc>::iterator list<T, Alloc>::erase(iterator first, iterator last){
+typename list<T, Alloc>::iterator list<T, Alloc>::erase(iterator first, iterator last){
 	iterator res;
 	while(first!=last)
 		res = erase(first++);
@@ -182,14 +182,14 @@ inline void list<T, Alloc>::swap(list & rhs) noexcept{
 }
 
 template<class T, class Alloc>
-inline list<T, Alloc>::list(size_type n, const value_type & value){
+list<T, Alloc>::list(size_type n, const value_type & value){
 	empety_initialized();
 	while (n--)
 		push_back(value);
 }
 
 template<class T, class Alloc>
-inline list<T, Alloc>::list(const list &rhs){
+list<T, Alloc>::list(const list &rhs){
 	empety_initialized();
 	for (auto it = rhs.cbegin(); it != rhs.cend(); ++it)
 		push_back(*it);
@@ -219,7 +219,7 @@ inline list<T, Alloc>& list<T, Alloc>::operator=(list&& rhs) noexcept{
 }
 
 template<class T, class Alloc>
-inline void list<T, Alloc>::clear() {
+void list<T, Alloc>::clear() {
 	link_type cur = static_cast<link_type>(node->next);
 	while (cur != node) {
 		link_type temp = cur;
@@ -232,7 +232,7 @@ inline void list<T, Alloc>::clear() {
 }
 
 template<class T, class Alloc>
-inline void list<T, Alloc>::remove(const T& value) {
+void list<T, Alloc>::remove(const T& value) {
 	iterator first = begin();
 	iterator last = end();
 	while (first != last) {
@@ -244,7 +244,7 @@ inline void list<T, Alloc>::remove(const T& value) {
 }
 
 template<class T, class Alloc>
-inline void list<T, Alloc>::unique() {
+void list<T, Alloc>::unique() {
 	iterator first = begin();
 	iterator last = end();
 	if (first == last) return;
@@ -276,7 +276,7 @@ inline void list<T, Alloc>::splice(iterator position, list &, iterator i) {
 }
 
 template<class T, class Alloc>
-inline void list<T, Alloc>::merge(list& x) {
+void list<T, Alloc>::merge(list& x) {
 	iterator first1 = begin();
 	iterator last1 = end();
 	iterator first2 = x.begin();
@@ -295,7 +295,7 @@ inline void list<T, Alloc>::merge(list& x) {
 }
 
 template<class T, class Alloc>
-inline void list<T, Alloc>::reverse() {
+void list<T, Alloc>::reverse() {
 	//空list或仅有一个元素
 	if (node->next == node || static_cast<link_type>(node->next)->next == node) return;
 	iterator first = begin();
@@ -309,7 +309,7 @@ inline void list<T, Alloc>::reverse() {
 
 // More information can be seen at https://blog.csdn.net/qq276592716/article/details/7932483
 template<class T, class Alloc>
-inline void list<T, Alloc>::sort() {
+void list<T, Alloc>::sort() {
 	if (node->next == node || static_cast<link_type>(node->next)->next == node) return;
 	//中介数据存放区 counter[n]中最多存放2^(n+1)个元素，若大于则与counter[n+1]作归并
 	list carry;
