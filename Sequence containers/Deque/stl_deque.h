@@ -3,6 +3,7 @@
 #include "deque_iterator.h"
 #include "allocator.h"
 #include "uninitialized.h"
+#include "stl_algobase.h"
 
 namespace MiniSTL {
 
@@ -22,9 +23,9 @@ private:// Internal alias declarations
 	using map_allocator = simpleAlloc<pointer>;
 
 private://  data member
-	iterator start;//第一个节点
-	iterator finish;//最后一个节点
-	map_pointer map;//指向节点的指针
+	iterator start;// 第一个节点
+	iterator finish;// 最后一个节点
+	map_pointer map;// 指向节点的指针
 	size_type map_size;
 
 private://Internal member function
@@ -32,35 +33,37 @@ private://Internal member function
 	size_type buffer_size() const { return iterator::buffer_size(); }
 	value_type* allocate_node() {return data_allocator::allocate(__deque_buf_size(sizeof(value_type)));}
 	void deallocate_node(value_type* p) { data_allocator::deallocate(p, __deque_buf_size(sizeof(value_type)));}
-	void create_map_and_nodes(size_type n);
-	void fill_initialized(size_type n, const value_type&value);
-	void reallocate_map(size_type nodes_to_add, bool add_at_front);
-	void reverse_map_at_back(size_type nodes_to_add);
+	void create_map_and_nodes(size_type);
+	void fill_initialized(size_type, const value_type&value=value_type());
+	void reallocate_map(size_type, bool);
+	void reverse_map_at_back(size_type nodes_to_add = 1);
 	void reverse_map_at_front(size_type nodes_to_add=1);
-	void push_back_aux(const value_type&value);
-	void push_front_aux(const value_type&value);
+	void push_back_aux(const value_type&);
+	void push_front_aux(const value_type&);
 	void pop_back_aux();
 	void pop_front_aux();
-	iterator insert_aux(iterator pos, const value_type&value);
+	iterator insert_aux(iterator, const value_type&);
 
 public:// Ctor
 	deque(int n, const value_type& value) :start(), finish(), map(nullptr), map_size(0) {
 		fill_initialized(n, value);
 	}
 
-public://静态操作接口
+public:// setter
 	iterator begin() { return start; }
 	iterator end() { return finish; }
 	reference operator[](size_type n) {return start[static_cast<difference_type>(n)];}
 	reference front() { return *start; }
 	reference back() { return *(finish - 1); }
-	size_type size() const { return finish - start; }
-	size_type max_size() const { return static_cast<size_type>(-1); }
-	bool empty() const { return finish == start; }
 
-public:
-	void push_back(const value_type&value);
-	void push_front(const value_type&value);
+public:// getter
+	size_type size() const noexcept { return finish - start; }
+	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
+	bool empty() const noexcept { return finish == start; }
+
+public:// interface about insert and erase
+	void push_back(const value_type&);
+	void push_front(const value_type&);
 	void pop_back();
 	void pop_front();
 	void clear();
@@ -74,7 +77,7 @@ void deque<T, Alloc, BufSiz>::create_map_and_nodes(size_type n) {
 	//所需节点数（整除则多配置一个）
 	size_type num_nodes = n / iterator::buffer_size() + 1;
 	//一个map至少管理8个节点，至多管理num_nodes+2个
-	map_size = initial_map_size()>num_nodes + 2? initial_map_size(): num_nodes + 2;
+	map_size = max(initial_map_size(),num_nodes+2);
 	map = map_allocator::allocate(map_size);
 	//令nstart与nfinish指向map所拥有的全部node的中部,以便日后扩充头尾
 	map_pointer nstart = map + (map_size - num_nodes) / 2;
@@ -96,7 +99,7 @@ void deque<T, Alloc, BufSiz>::create_map_and_nodes(size_type n) {
 }
 
 template<class T, class Alloc, size_t BufSiz>
-inline void deque<T, Alloc, BufSiz>::fill_initialized(size_type n, const value_type & value) {
+void deque<T, Alloc, BufSiz>::fill_initialized(size_type n, const value_type & value) {
 	create_map_and_nodes(n);
 	map_pointer cur;
 	try {
@@ -124,10 +127,10 @@ inline void deque<T, Alloc, BufSiz>::reallocate_map(size_type nodes_to_add, bool
 		if (new_nstart < start.node)//整体前移
 			copy(start.node, finish.node + 1, new_nstart);
 		else//整体后移
-			copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);
+			std::copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);
 	}
 	else {
-		size_type new_map_size = map_size + std::max(map_size, nodes_to_add) + 2;
+		size_type new_map_size = map_size + max(map_size, nodes_to_add) + 2;
 		//分配新空间
 		map_pointer new_map = map_allocator::allocate(new_map_size);
 		new_nstart = new_map + (new_map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
@@ -193,16 +196,16 @@ inline void deque<T, Alloc, BufSiz>::push_front_aux(const value_type& value) {
 
 template<class T, class Alloc, size_t BufSiz>
 inline void deque<T, Alloc, BufSiz>::pop_back_aux() {
-	deallocate(finish.first);
+	data_allocator::deallocate(finish.first);
 	finish.set_node(finish.node - 1);
 	finish.cur = finish.last - 1;
-	destory(finish.cur);
+	destroy(finish.cur);
 }
 
 template<class T, class Alloc, size_t BufSiz>
 inline void deque<T, Alloc, BufSiz>::pop_front_aux() {
 	destroy(start.cur);
-	deallocate(start.first);
+	data_allocator::deallocate(start.first);
 	start.set_node(finish.node + 1);
 	start.cur = start.first;
 }
@@ -226,7 +229,7 @@ deque<T, Alloc, BufSiz>::insert_aux(iterator pos, const value_type & value) {
 		iterator back1 = finish - 1;;
 		iterator back2 = back1 - 1;
 		pos = start + index;
-		copy_backward(pos, back2, back1);
+		std::copy_backward(pos, back2, back1);
 	}
 	*pos = x_copy;
 	return pos;
@@ -268,7 +271,7 @@ inline void deque<T, Alloc, BufSiz>::pop_back() {
 template<class T, class Alloc, size_t BufSiz>
 inline void deque<T, Alloc, BufSiz>::pop_front() {
 	if (start.cur != start.last - 1) {
-		destory(start.cur);
+		destroy(start.cur);
 		++start.cur;
 	}
 	else
@@ -300,7 +303,7 @@ deque<T, Alloc, BufSiz>::erase(iterator pos) {
 	iterator next = pos + 1;
 	difference_type index = pos - start;//清除点前的元素个数
 	if (index < size() / 2) {//后移开销较低
-		copy_backward(start, pos, pos);
+		std::copy_backward(start, pos, pos);
 		pop_front();
 	}
 	else {
@@ -321,7 +324,7 @@ deque<T, Alloc, BufSiz>::erase(iterator first, iterator last) {
 		difference_type n = last - first; //清除区间长度
 		difference_type elems_before = first - start; //前方元素个数
 		if (elems_before < (size() - n) / 2) {//后移开销较低
-			copy_backward(start, first, last);
+			std::copy_backward(start, first, last);
 			iterator new_start = start + n;//标记新起点
 			destroy(start, new_start);//析构多余元素
 			//释放多余缓冲区
@@ -359,5 +362,3 @@ deque<T, Alloc, BufSiz>::insert(iterator pos, const value_type& value) {
 		returninsert_aux(pos, value);
 }
 }
-
-
