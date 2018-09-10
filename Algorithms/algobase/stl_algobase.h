@@ -133,25 +133,9 @@ inline void swap(T& a, T& b) {
 }
 
 template <class InputIterator, class OutputIterator>
-inline OutputIterator copy(InputIterator first, InputIterator last, OutputIterator result) {
-	return __copy_dispatch<InputIterator, OutputIterator>(first, last, result);//__copy_dispatch是一个仿函数对象
-}
-
-//针对指针的偏特化
-inline char* copy(const char* first, const char* last, char* result) {
-	memmove(result, first, last - first);
-	return result + (last - first);
-}
-
-inline wchar_t* copy(const wchar_t* first, const wchar_t* last, wchar_t* result) {
-	memmove(result, first, sizeof(wchar_t)*(last - first));
-	return result + (last - first);
-}
-
-template <class InputIterator, class OutputIterator>
-struct __copy_dispatch{//仿函数对象
+struct __copy_dispatch {//仿函数对象
 	OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) {
-		return __copy(first, last, result, iterator_category(first));
+		return __copy(first, last, result, iterator_category_t<InputIterator>());
 	}
 };
 
@@ -172,6 +156,22 @@ struct __copy_dispatch<const T*, T*> {
 		return __copy_t(first, last, result, t());
 	}
 };
+
+template <class InputIterator, class OutputIterator>
+inline OutputIterator copy(InputIterator first, InputIterator last, OutputIterator result) {
+	return __copy_dispatch<InputIterator, OutputIterator>()(first, last, result); // __copy_dispatch是一个仿函数对象
+}
+
+//针对指针的偏特化
+inline char* copy(const char* first, const char* last, char* result) {
+	memmove(result, first, last - first);
+	return result + (last - first);
+}
+
+inline wchar_t* copy(const wchar_t* first, const wchar_t* last, wchar_t* result) {
+	memmove(result, first, sizeof(wchar_t)*(last - first));
+	return result + (last - first);
+}
 
 //InputIterator
 template <class InputIterator, class OutputIterator>
@@ -198,7 +198,7 @@ inline OutputIterator __copy_d(InputIterator first, InputIterator last, OutputIt
 template <class T>
 inline T* __copy_t(const T* first, const T* last, T* result, _true_type) {
 	memmove(result, first, sizeof(T)*(last - first));
-	return result + last - first;
+	return result + (last - first);
 }
 
 
