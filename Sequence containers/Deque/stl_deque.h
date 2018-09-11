@@ -13,22 +13,25 @@ public:// alias declarations
 	using value_type = T;
 	using pointer = T* ;
 	using reference = T& ;
+	using const_reference = const T&;
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
-	using iterator = __deque_iterator<T, T&, T*, BufSiz>;
+	using iterator = typename __deque_iterator<T,T&,T*, BufSiz>::iterator;
+	using reverse_iterator = MiniSTL::reverse_iterator<iterator>;
+	using const_iterator = typename __deque_iterator<T, T&, T*, BufSiz>::const_iterator;
 
 private:// Internal alias declarations
 	using map_pointer = pointer* ;
 	using data_allocator = simpleAlloc<value_type>;
 	using map_allocator = simpleAlloc<pointer>;
 
-private://  data member
+private:// data member
 	iterator start;// 第一个节点
 	iterator finish;// 最后一个节点
 	map_pointer map;// 指向节点的指针
 	size_type map_size;
 
-private://Internal member function
+private:// Internal member function
 	size_type initial_map_size() { return 8U; }
 	size_type buffer_size() const { return iterator::buffer_size(); }
 	value_type* allocate_node() {return data_allocator::allocate(__deque_buf_size(sizeof(value_type)));}
@@ -37,26 +40,31 @@ private://Internal member function
 	void fill_initialized(size_type, const value_type&value=value_type());
 	void reallocate_map(size_type, bool);
 	void reverse_map_at_back(size_type nodes_to_add = 1);
-	void reverse_map_at_front(size_type nodes_to_add=1);
+	void reverse_map_at_front(size_type nodes_to_add = 1);
 	void push_back_aux(const value_type&);
 	void push_front_aux(const value_type&);
 	void pop_back_aux();
 	void pop_front_aux();
 	iterator insert_aux(iterator, const value_type&);
 
-public:// Ctor
-	deque(int n, const value_type& value) :start(), finish(), map(nullptr), map_size(0) {
-		fill_initialized(n, value);
-	}
+public:// ctor && dtor
+	deque(int n, const value_type& value) :start(), finish(), map(nullptr), map_size(0) { fill_initialized(n, value); }
+	~deque();
 
 public:// setter
 	iterator begin() { return start; }
 	iterator end() { return finish; }
+	reverse_iterator rbegin() { return reverse_iterator(finish); }
+	reverse_iterator rend() { return reverse_iterator(start); }
 	reference operator[](size_type n) {return start[static_cast<difference_type>(n)];}
 	reference front() { return *start; }
 	reference back() { return *(finish - 1); }
 
 public:// getter
+	// TO DO:Add const_iterator
+	// const_iterator cbegin() const noexcept { return start; }
+	// const_iterator cend() const noexcept { return finish}
+	const_reference operator[](size_type n) const { return start[static_cast<difference_type>(n)]; }
 	size_type size() const noexcept { return finish - start; }
 	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
 	bool empty() const noexcept { return finish == start; }
@@ -231,8 +239,14 @@ deque<T, Alloc, BufSiz>::insert_aux(iterator pos, const value_type & value) {
 		pos = start + index;
 		std::copy_backward(pos, back2, back1);
 	}
-	*pos = x_copy;
+	*pos = value_copy;
 	return pos;
+}
+
+template<class T, class Alloc, size_t BufSiz>
+inline deque<T, Alloc, BufSiz>::~deque(){
+	clear();
+	map_allocator::deallocate(map,map_size);
 }
 
 template<class T, class Alloc, size_t BufSiz>
@@ -343,7 +357,6 @@ deque<T, Alloc, BufSiz>::erase(iterator first, iterator last) {
 		}
 		return start + elems_before;
 	}
-
 }
 
 template<class T, class Alloc, size_t BufSiz>
