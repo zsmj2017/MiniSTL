@@ -12,14 +12,11 @@ inline size_t __deque_buf_size(size_t sz) {
 	return sz < 512 ? size_t(512 / sz) : size_t(1);
 }
 
-template<class T, class Ref, class Ptr, size_t BufSiz>
+template<class T, class Ref, class Ptr, size_t BufSiz=0>
 struct __deque_iterator {
 	// alias declarartions
 	using iterator = __deque_iterator<T, T&, T*, BufSiz>;
 	using const_iterator = __deque_iterator<T, const T&, const T*, BufSiz>;
-
-	static size_t buffer_size() { return __deque_buf_size(sizeof(T)); }
-
 	using iterator_category = random_access_iterator_tag;
 	using value_type = T;
 	using pointer = Ptr;
@@ -27,15 +24,29 @@ struct __deque_iterator {
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 	using map_pointer = T**;
-
 	using self = __deque_iterator;
 
 
 	// 保持与容器的连接
-	T* cur;//当前缓冲区的当前元素
-	T* first;//当前缓冲区头
-	T* last;//当前缓冲区尾(含备用空间）
+	value_type* cur;//当前缓冲区的当前元素
+	value_type* first;//当前缓冲区头
+	value_type* last;//当前缓冲区尾(含备用空间）
 	map_pointer node;//指向管控中心
+
+	static size_t buffer_size() { return __deque_buf_size(sizeof(value_type)); }
+
+	// ctor
+	__deque_iterator() : cur(nullptr), first(nullptr), last(nullptr), node(nullptr) {}
+	__deque_iterator(pointer x, map_pointer y) : cur(x), first(*y), last(*y + buffer_size()), node(y) {}
+	__deque_iterator(const iterator& rhs) : cur(rhs.cur), first(rhs.first), last(rhs.last), node(rhs.node) {}
+
+	self& operator = (const iterator& deq_iter){
+		cur = deq_iter.cur;
+		first = deq_iter.first;
+		last = deq_iter.last;
+		node = deq_iter.node;
+		return *this;
+	}
 
 	//跳转缓冲区
 	void set_node(map_pointer new_node) {
@@ -50,6 +61,15 @@ struct __deque_iterator {
 
 	difference_type operator-(const self& rhs) {
 		return buffer_size()*(node - rhs.node - 1) + (cur - first) + (rhs.last - rhs.cur);
+	}
+
+	operator const_iterator() {
+		const_iterator res;
+		res.cur = cur;
+		res.first = first;
+		res.last = last;
+		res.node = node;
+		return res;
 	}
 
 	self& operator++() {
@@ -129,4 +149,44 @@ struct __deque_iterator {
 		return node == rhs.node ? cur < rhs.cur : node < rhs.node;
 	}
 };
+
+template<class T, class Ref, class Ptr>
+__deque_iterator<T, Ref, Ptr> operator+(typename __deque_iterator<T, Ref, Ptr>::distance_type n, const __deque_iterator<T, Ref, Ptr>& it){
+	return it + n;
+}
+
+template<class T, class Ref, class Ptr>
+__deque_iterator<T, Ref, Ptr> operator-(const __deque_iterator<T, Ref, Ptr>& it, typename __deque_iterator<T, Ref, Ptr>::distance_type n){
+	return it + (-n);
+}
+
+template<class T, class Ref, class Ptr>
+inline
+typename __deque_iterator<T, Ref, Ptr>::distance_type operator-(const __deque_iterator<T, Ref, Ptr>& it1, const __deque_iterator<T, Ref, Ptr>& it2){
+	using difference_type = typename __deque_iterator<T, Ref, Ptr>::difference_type;
+	using value_type = typename __deque_iterator<T, Ref, Ptr>::value_type;
+	return difference_type((it1.cur - it1.first) + (it1.node - it2.node - 1) * difference_type(deque_buf_size(sizeof(value_type))) + (it2.last - it2.cur));
+}
+
+template<class T, class Ref, class Ptr>
+inline bool operator==(const __deque_iterator<T, Ref, Ptr>& it1, const __deque_iterator<T, Ref, Ptr>& it2) {
+	return const_cast<__deque_iterator<T, Ref, Ptr>&>(it1).operator==(it2);
+}
+
+template<class T, class Ref, class Ptr>
+inline bool operator==(const __deque_iterator<T, Ref, Ptr>& it1,__deque_iterator<T, Ref, Ptr>& it2) {
+	return const_cast<__deque_iterator<T, Ref, Ptr>&>(it1).operator==(it2);
+}
+
+template<class T, class Ref, class Ptr>
+inline bool operator!=(const __deque_iterator<T, Ref, Ptr>& it1, const __deque_iterator<T, Ref, Ptr>& it2) {
+	return const_cast<__deque_iterator<T, Ref, Ptr>&>(it1).operator!=(it2);
+}
+
+template<class T, class Ref, class Ptr>
+inline bool operator!=(const __deque_iterator<T, Ref, Ptr>& it1, __deque_iterator<T, Ref, Ptr>& it2) {
+	return const_cast<__deque_iterator<T, Ref, Ptr>&>(it1).operator!=(it2);
+}
+
+
 }//  end namespace::MiniSTL
