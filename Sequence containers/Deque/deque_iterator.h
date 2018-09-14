@@ -174,19 +174,8 @@ inline bool operator==(const __deque_iterator<T, Ref, Ptr>& it1, const __deque_i
 }
 
 template<class T, class Ref, class Ptr>
-inline bool operator==(const __deque_iterator<T, Ref, Ptr>& it1,__deque_iterator<T, Ref, Ptr>& it2) {
-	return const_cast<__deque_iterator<T, Ref, Ptr>&>(it1).operator==(it2);
-}
-
-template<class T, class Ref, class Ptr>
 inline bool operator!=(const __deque_iterator<T, Ref, Ptr>& it1, const __deque_iterator<T, Ref, Ptr>& it2) {
 	return const_cast<__deque_iterator<T, Ref, Ptr>&>(it1).operator!=(it2);
 }
-
-template<class T, class Ref, class Ptr>
-inline bool operator!=(const __deque_iterator<T, Ref, Ptr>& it1, __deque_iterator<T, Ref, Ptr>& it2) {
-	return const_cast<__deque_iterator<T, Ref, Ptr>&>(it1).operator!=(it2);
-}
-
 
 }//  end namespace::MiniSTL

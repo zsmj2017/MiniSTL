@@ -247,7 +247,9 @@ deque<T, Alloc, BufSiz>::insert_aux(iterator pos, const value_type & value) {
 
 template<class T, class Alloc, size_t BufSiz>
 inline deque<T, Alloc, BufSiz>::~deque(){
-	clear();
+	destroy(start, finish);
+	for (auto temp = start.node; temp != finish.node; ++temp) deallocate_node(*temp);
+	deallocate_node(*finish.node);
 	map_allocator::deallocate(map,map_size);
 }
 
