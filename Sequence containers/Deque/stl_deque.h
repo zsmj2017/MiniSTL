@@ -19,6 +19,7 @@ public:// alias declarations
 	using iterator = typename __deque_iterator<T,T&,T*, BufSiz>::iterator;
 	using reverse_iterator = MiniSTL::reverse_iterator<iterator>;
 	using const_iterator = typename __deque_iterator<T, T&, T*, BufSiz>::const_iterator;
+	using const_reverse_iterator = MiniSTL::reverse_iterator<const_iterator>;
 
 private:// Internal alias declarations
 	using map_pointer = pointer* ;
@@ -51,6 +52,16 @@ public:// ctor && dtor
 	deque(int n, const value_type& value) :start(), finish(), map(nullptr), map_size(0) { fill_initialized(n, value); }
 	~deque();
 
+public:// getter
+	const_iterator cbegin() const noexcept { return start; }
+	const_iterator cend() const noexcept { return finish; }
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(finish); }
+	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(start); }
+	const_reference operator[](size_type n) const { return start[static_cast<difference_type>(n)]; }
+	size_type size() const noexcept { return finish - start; }
+	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
+	bool empty() const noexcept { return finish == start; }
+
 public:// setter
 	iterator begin() { return start; }
 	iterator end() { return finish; }
@@ -59,15 +70,6 @@ public:// setter
 	reference operator[](size_type n) {return start[static_cast<difference_type>(n)];}
 	reference front() { return *start; }
 	reference back() { return *(finish - 1); }
-
-public:// getter
-	// TO DO:Add const_iterator
-	// const_iterator cbegin() const noexcept { return start; }
-	// const_iterator cend() const noexcept { return finish}
-	const_reference operator[](size_type n) const { return start[static_cast<difference_type>(n)]; }
-	size_type size() const noexcept { return finish - start; }
-	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
-	bool empty() const noexcept { return finish == start; }
 
 public:// interface about insert and erase
 	void push_back(const value_type&);
