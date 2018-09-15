@@ -49,7 +49,7 @@ private:// Internal member function
 	iterator insert_aux(iterator, const value_type&);
 
 public:// ctor && dtor
-	deque(int n, const value_type& value) :start(), finish(), map(nullptr), map_size(0) { fill_initialized(n, value); }
+	deque(int n, const value_type& value=value_type()) :start(), finish(), map(nullptr), map_size(0) { fill_initialized(n, value); }
 	~deque();
 
 public:// getter
@@ -59,7 +59,6 @@ public:// getter
 	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(start); }
 	const_reference operator[](size_type n) const { return start[static_cast<difference_type>(n)]; }
 	size_type size() const noexcept { return finish - start; }
-	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
 	bool empty() const noexcept { return finish == start; }
 
 public:// setter
