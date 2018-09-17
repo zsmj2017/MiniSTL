@@ -49,7 +49,12 @@ private:// Internal member function
 	iterator insert_aux(iterator, const value_type&);
 
 public:// ctor && dtor
-	deque(int n, const value_type& value=value_type()) :start(), finish(), map(nullptr), map_size(0) { fill_initialized(n, value); }
+	deque():start(), finish(), map(nullptr), map_size(0) { fill_initialized(0, value_type()); }
+	explicit deque(size_type n, const value_type& value=value_type()) :start(), finish(), map(nullptr), map_size(0) { fill_initialized(n, value); }
+	// without this,InputIterator can be deduced as int
+	deque(int n,int value):start(), finish(), map(nullptr), map_size(0) { fill_initialized(n, value); }
+	template<class InputIterator>
+	deque(InputIterator first, InputIterator last);
 	~deque();
 
 public:// getter
@@ -377,4 +382,15 @@ deque<T, Alloc, BufSiz>::insert(iterator pos, const value_type& value) {
 	else
 		returninsert_aux(pos, value);
 }
+
+template<class T, class Alloc, size_t BufSiz>
+template<class InputIterator>
+inline deque<T, Alloc, BufSiz>::deque(InputIterator first, InputIterator last){
+	size_type size = MiniSTL::distance(first, last);
+	InputIterator mid = first;
+	advance(mid, size);
+	copy(first, mid, begin());
+	insert(end(), mid,last);
 }
+
+}// end namespace::std
