@@ -36,11 +36,11 @@ template <class RandomAccessIterator, class T>
 inline void pop_heap_aux(RandomAccessIterator first, RandomAccessIterator last, RandomAccessIterator result, T value) {
 	using Distance = difference_type_t<RandomAccessIterator>;
 	*result = *first;// 将尾端设置为取出值,而原本的尾端值变为了value
-	__adjust_heap(first, Distance(0), Distance(last - first), value);
+	adjust_heap(first, Distance(0), Distance(last - first), value);
 }
 
 template <class RandomAccessIterator, class Distance, class T>
-void __adjust_heap(RandomAccessIterator first, Distance holeIndex, Distance len, T value) {
+void adjust_heap(RandomAccessIterator first, Distance holeIndex, Distance len, T value) {
 	Distance topIndex = holeIndex;
 	Distance secondChild = 2 * holeIndex + 2;// 洞点右子
 	while (secondChild < len) {// 当前尚存在右子
@@ -70,14 +70,14 @@ template <class RandomAccessIterator>
 inline void make_heap(RandomAccessIterator first, RandomAccessIterator last) {
 	using Distance = difference_type_t<RandomAccessIterator>;
 	using T = value_type_t<RandomAccessIterator>;
-	//遍历所有有资格为root的点
+	// 遍历所有有资格为root的点
 	if (last - first < 2) return;
 	Distance len = last - first;
-	//找到需要重排的头部（即为最后一个有资格为root的点）
+	// 找到需要重排的头部（即为最后一个有资格为root的点）
 	Distance holeIndex = (len - 2) / 2;
 	while (true) {
-		//重排以holeIndex为首的子树,len以防越界
-		__adjust_heap(first, holeIndex, len, T(*(first + holeIndex)));
+		// 重排以holeIndex为首的子树,len以防越界
+		adjust_heap(first, holeIndex, len, T(*(first + holeIndex)));
 		if (holeIndex == 0) return;
 		holeIndex--;
 	}
