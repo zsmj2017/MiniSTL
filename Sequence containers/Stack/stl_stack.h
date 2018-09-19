@@ -1,36 +1,32 @@
 ﻿#pragma once
+#include "stl_deque.h"
 
-//默认以deque实现
-//stack并非container，而是adapter
+namespace MiniSTL {
 
-//Forward declarations of operators == and <, needed for friend declarations.
-
-template <clas T,class Sequence>
-class stack;
-
-template <class T, class Sequence>
-bool operator==(const stack<T, Sequence>&, const stack<T, Sequence>&);
-
-template<class T, class Sequence = deque<T> >
-inline bool operator<(const stack<T, Sequence>&, const stack<Sequence>&)
-
-template <class T,class Sequence = deque<T> >
+template <class T, class Sequence = deque<T> >
 class stack {
-	//friend template
+	// friend declarations
 	friend bool operator== <> (const stack&, const stack&);
-	friend bool operator< <> (const stack&, const stack&);
+	friend bool operator!= <> (const stack&, const stack&);
+
 public:
-	using value_type = Sequence::value_type;
-	using size_type = Sequence::size_type;
-	using reference = Sequence::reference;
-	using const_reference = Sequence::const_reference;
-protected:
-	Sequence c;//底层容器
-public:
-	bool empty() const { return c.empty(); }
-	size_type size() const { return c.size(); }
+	using value_type = typename Sequence::value_type;
+	using size_type = typename Sequence::size_type;
+	using reference = typename Sequence::reference;
+	using const_reference = typename Sequence::const_reference;
+
+private:// data
+	Sequence c;
+
+public:// getter
+	bool empty() const noexcept { return c.empty(); }
+	size_type size() const noexcept{ return c.size(); }
+	const_reference top() const noexcept { return c.back(); }
+
+public:// setter
 	reference top() { return c.back(); }
-	const_reference top() const { return c.back(); }
+
+public:// push && pop
 	void push(const value_type& value) { c.push_back(value); }
 	void pop() { c.pop_back(); }
 };
@@ -40,7 +36,9 @@ bool operator==(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs) {
 	return lhs.c == rhs.c;
 }
 
-template<class T, class Sequence = deque<T> >
-inline bool operator<(const stack<T, Sequence> &, const stack<Sequence> &) {
-	return lhs.c < rhs.c;
+template <class T, class Sequence>
+bool operator!=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs){
+	return !(lhs.c == rhs.c);
+}
+
 }
