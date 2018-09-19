@@ -95,6 +95,8 @@ public: // getter
 	const_iterator cend() const noexcept { return finish; }
 	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(finish); }
 	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(start); }
+	const_reference front() const noexcept { return *begin(); }
+	const_reference back() const noexcept { return *(end() - 1); }
 	const_reference operator[](const size_type n) const noexcept { return *(start + n); }
 	size_type size() const noexcept { return static_cast<size_type>(finish - start); }
 	size_type capacity() const noexcept { return static_cast<size_type>(end_of_storage - start); }
@@ -108,7 +110,6 @@ public: // setter
 	reference operator[](const size_type n) noexcept { return *(start + n); }
 	reference front() noexcept { return *begin(); }
 	reference back() noexcept { return *(end() - 1); }
-
 
 public: //  interface for size and capacity
 	void resize(size_type, const value_type&);
@@ -127,6 +128,7 @@ public: // interface for back operation
 public: // interface for insert and erase
 	iterator erase(iterator, iterator);
 	iterator erase(iterator) { return erase(position, position + 1); }
+	void clear() { erase(begin(), end()); }
 	void insert(iterator, size_type, const value_type&);
 	iterator insert(iterator, const value_type&);
 };
