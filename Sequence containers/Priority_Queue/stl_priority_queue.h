@@ -29,7 +29,22 @@ public:// ctor && dtor
 		: c(first, last), comp(compare) {
 		make_heap(c.begin(), c.end(), comp);
 	}
+	priority_queue(const priority_queue& rhs) :c(rhs.c), comp(rhs.comp) {}
+	priority_queue(priority_queue&& rhs) noexcept :c(std::move(rhs.c)), comp(std::move(rhs.comp)) {}
 	~priority_queue() = default;
+
+public:// operator=
+	priority_queue& operator=(const priority_queue& rhs) {
+		c = rhs.c;
+		comp = rhs.comp;
+		return *this;
+	}
+	
+	priority_queue& operator=(priority_queue&& rhs) noexcept{
+		c = std::move(rhs.c);
+		comp = std::move(rhs.comp);
+		return *this;
+	}
 
 public: // getter
 	bool empty() const noexcept{ return c.empty(); }
