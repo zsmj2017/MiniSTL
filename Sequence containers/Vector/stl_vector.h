@@ -203,7 +203,7 @@ inline vector<T, Alloc> & vector<T, Alloc>::operator=(vector &&rhs) noexcept {
 		destroy_and_deallocate();
 		start = rhs.start;
 		finish = rhs.finish;
-		end_of_storage_ = rhs.end_of_storage;
+		end_of_storage = rhs.end_of_storage;
 		rhs.start = rhs.finish = rhs.end_of_storage = nullptr;
 	}
 	return *this;
