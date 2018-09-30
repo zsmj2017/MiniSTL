@@ -1,44 +1,60 @@
 ﻿#pragma once
+#include "stl_deque.h"
 
-//Forward declarations of operators == and <, needed for friend declarations.
-
-template<class T,class Sequence>
-class queue;
-
-template <class T, class Sequence>
-bool operator==(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs);
-
-template <class T, class Sequence>
-bool operator<(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs);
+namespace MiniSTL {
 
 template <class T, class Sequence = deque<T> >
 class queue {
+	// friend declarations
 	friend bool operator== <>(const queue& lhs, const queue& rhs);
-	friend bool operator< <>(const queue& lhs, const queue& rhs);
-public:
-	using value_type = Sequence::value_type;
-	using size_type = Sequence::size_type;
-	using reference = Sequence::reference;
-	using const_reference = Sequence::const_reference;
-protected:
+	friend bool operator!= <>(const queue& lhs, const queue& rhs);
+
+public:// alias declarations
+	using value_type = typename Sequence::value_type;
+	using size_type = typename Sequence::size_type;
+	using reference = typename Sequence::reference;
+	using const_reference = typename Sequence::const_reference;
+
+private:// data member
 	Sequence c;
-public:
-	bool empty() const { return c.empty(); }
-	size_type size() const { return c.size(); }
-	reference front() { return c.front(); }
+
+public:// ctor
+	queue() :c() {}
+	explicit queue(const Sequence& rhs) :c(rhs) {}
+
+public:// copy operations
+	queue(const queue& rhs) :c(rhs.c) {}
+	queue& operator=(const queue& rhs) {
+		c.operator=(rhs.c);
+	}
+
+public:// move operations
+	queue(queue&& rhs) noexcept:c(std::move(rhs.c)){}
+	queue& operator=(queue&& rhs) noexcept{
+		c.operator=(std::move(rhs.c));
+	}
+
+public:// getter
+	bool empty() const noexcept{ return c.empty(); }
+	size_type size() const noexcept{ return c.size(); }
 	const_reference front() const { return c.front(); }
-	reference back() { return c.back(); }
-	const_reference back() const { return c.back(); }
+
+public:// setter
+	reference front() { return c.front(); }
+
+public:// push && pop
 	void push(const value_type& value) { c.push_back(value); }
 	void pop() { c.pop_front(); }
 };
 
 template <class T, class Sequence>
-bool operator==(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs){
+bool operator==(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs) {
 	return lhs.c == rhs.c;
 }
 
 template <class T, class Sequence>
-bool operator<(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs){
-	return lhs.c < rhs.c;
+bool operator!=(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs) {
+	return !(lhs.c == rhs.c);
 }
+
+}// end namespace::MiniSTL
