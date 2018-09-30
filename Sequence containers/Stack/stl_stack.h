@@ -28,8 +28,8 @@ public:// copy operations
 	}
 
 public:// move operations
-	stack(stack&& rhs) :c(std::move(rhs.c)) {}
-	stack& operator=(stack&& rhs) {
+	stack(stack&& rhs)  noexcept:c(std::move(rhs.c)){}
+	stack& operator=(stack&& rhs) noexcept{
 		c.operator=(std::move(rhs.c));
 	}
 
@@ -56,4 +56,4 @@ inline bool operator!=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& 
 	return !(lhs.c == rhs.c);
 }
 
-}
+}// end namespace::MiniSTL
