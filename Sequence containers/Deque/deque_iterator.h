@@ -55,14 +55,7 @@ struct __deque_iterator {
 		last = first + static_cast<difference_type>(buffer_size());
 	}
 
-	//解引用运算符
-	reference operator*() const { return *cur; }
-	pointer operator->() const { return &(operator*()); }
-
-	difference_type operator-(const self& rhs) {
-		return buffer_size()*(node - rhs.node - 1) + (cur - first) + (rhs.last - rhs.cur);
-	}
-
+	// implicit conversion
 	operator const_iterator() {
 		const_iterator res;
 		res.cur = cur;
@@ -70,6 +63,14 @@ struct __deque_iterator {
 		res.last = last;
 		res.node = node;
 		return res;
+	}
+
+	//解引用运算符
+	reference operator*() const { return *cur; }
+	pointer operator->() const { return &(operator*()); }
+
+	difference_type operator-(const self& rhs) const{
+		return buffer_size()*(node - rhs.node - 1) + (cur - first) + (rhs.last - rhs.cur);
 	}
 
 	self& operator++() {
@@ -162,10 +163,8 @@ __deque_iterator<T, Ref, Ptr> operator-(const __deque_iterator<T, Ref, Ptr>& it,
 
 template<class T, class Ref, class Ptr>
 inline
-typename __deque_iterator<T, Ref, Ptr>::distance_type operator-(const __deque_iterator<T, Ref, Ptr>& it1, const __deque_iterator<T, Ref, Ptr>& it2){
-	using difference_type = typename __deque_iterator<T, Ref, Ptr>::difference_type;
-	using value_type = typename __deque_iterator<T, Ref, Ptr>::value_type;
-	return difference_type((it1.cur - it1.first) + (it1.node - it2.node - 1) * difference_type(deque_buf_size(sizeof(value_type))) + (it2.last - it2.cur));
+typename __deque_iterator<T, Ref, Ptr>::difference_type operator-(const __deque_iterator<T, Ref, Ptr>& it1,const __deque_iterator<T, Ref, Ptr>& it2){
+	return it1.operator-(it2);
 }
 
 template<class T, class Ref, class Ptr>
