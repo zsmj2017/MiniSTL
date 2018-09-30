@@ -7,6 +7,7 @@ template <class T, class Sequence = deque<T> >
 class stack {
 	// friend declarations
 	friend bool operator== <> (const stack&, const stack&);
+	friend bool operator!= <> (const stack&, const stack&);
 
 public:
 	using value_type = typename Sequence::value_type;
