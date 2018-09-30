@@ -7,7 +7,6 @@ template <class T, class Sequence = deque<T> >
 class stack {
 	// friend declarations
 	friend bool operator== <> (const stack&, const stack&);
-	friend bool operator!= <> (const stack&, const stack&);
 
 public:
 	using value_type = typename Sequence::value_type;
@@ -17,6 +16,22 @@ public:
 
 private:// data
 	Sequence c;
+
+public:// ctor
+	stack():c() {}
+	explicit stack(const Sequence& rhs) :c(rhs) {}
+
+public:// copy operations
+	stack(const stack& rhs):c(rhs.c) {}
+	stack& operator=(const stack& rhs) {
+		c.operator=(rhs.c);
+	}
+
+public:// move operations
+	stack(stack&& rhs) :c(std::move(rhs.c)) {}
+	stack& operator=(stack&& rhs) {
+		c.operator=(std::move(rhs.c));
+	}
 
 public:// getter
 	bool empty() const noexcept { return c.empty(); }
@@ -32,12 +47,12 @@ public:// push && pop
 };
 
 template <class T, class Sequence>
-bool operator==(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs) {
+inline bool operator==(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs) {
 	return lhs.c == rhs.c;
 }
 
 template <class T, class Sequence>
-bool operator!=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs){
+inline bool operator!=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs){
 	return !(lhs.c == rhs.c);
 }
 
