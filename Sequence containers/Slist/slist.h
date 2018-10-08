@@ -8,7 +8,7 @@ namespace MiniSTL {
 
 template <class T, class Alloc = simpleAlloc<T>>
 class slist {
-public:
+public:// alias declarations
 	using value_type = T;
 	using pointer = T * ;
 	using const_pointer = const value_type*;
@@ -16,7 +16,6 @@ public:
 	using const_reference = const value_type&;
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
-
 	using iterator = slist_iterator<T, T&, T*>;
 	using const_iterator = slist_iterator<T, const T&, const T*>;
 
@@ -26,11 +25,11 @@ private:
 	using iterator_base = slist_iterator_base;
 	using list_node_allocator = simpleAlloc<list_node>;
 
-	//配置与释放node
+private:// allocate && deallocate node
 	static list_node* create_node(const value_type& value) {
 		list_node* node = list_node_allocator::allocate();
 		try {
-			construct(&node->data, x);
+			construct(&node->data, value);
 			node->next = 0;
 		}
 		catch(std::exception&){
@@ -50,29 +49,33 @@ private:
 		}
 	}
 
-private:
+private:// data member
 	list_node_base head;
 
-public:
+public:// ctor && dtor
 	slist() { head.next = nullptr; }
 	~slist() { clear(); }
 
-public:
+public:// setter
 	iterator begin() { return iterator(static_cast<list_node*>(head.next)); }
 	iterator end() { return iterator(nullptr); }
-	size_type size() const { return slist_size(head.next); }
-	bool empty() const { return head.next == nullptr; }
+	reference front() { return static_cast<list_node*>(head.next)->data; }
 
+public:// getter
+	const_iterator cbegin() const noexcept { return iterator(static_cast<list_node*>(head.next)); }
+	const_iterator cend() const noexcept { return iterator(nullptr); }
+	size_type size() const noexcept { return slist_size(head.next); }
+	bool empty() const noexcept { return head.next == nullptr; }
+	const_reference front() const noexcept { return static_cast<list_node*>(head.next)->data; }
+
+public:// swap
 	void swap(slist& rhs) {
-		//交换单链表只需要交换彼此的第一个节点即可
 		list_node_base* temp = head.next;
 		head.next = rhs.head.next;
 		rhs.head.next = temp;
 	}
 
-public:
-	reference front() { return static_cast<list_node*>(head.next)->data; }
-
+public:// push && pop
 	void push_front(const value_type& value) {
 		slist_make_link(&head, create_node(value));
 	}
