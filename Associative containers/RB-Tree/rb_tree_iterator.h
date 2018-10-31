@@ -2,9 +2,12 @@
 
 #include <cstddef>
 #include "rb_tree_node.h"
+#include "stl_iterator.h"
 
-struct __rb_tree_base_iterator {
-	using base_ptr = __rb_tree_node_base::base_ptr;
+namespace MiniSTL{
+
+struct rb_tree_base_iterator {
+	using base_ptr = rb_tree_node_base::base_ptr;
 	using iterator_category = bidirectional_iterator_tag;
 	using difference_type = ptrdiff_t;
 
@@ -30,7 +33,7 @@ struct __rb_tree_base_iterator {
 	}
 
 	void decrement() {
-		if (node->color == __rb_tree_red && node->parent->parent == node)
+		if (node->color == rb_tree_red && node->parent->parent == node)
 			//此为特例，当迭代器指向end()将触发此情况
 			//root存在一个父节点header，其颜色为红色，左右子均为root
 			node = node->left;
@@ -54,18 +57,18 @@ struct __rb_tree_base_iterator {
 
 
 template <class T,class Ref,class Ptr>
-struct __rb_tree_iterator :public __rb_tree_base_iterator {
+struct rb_tree_iterator :public rb_tree_base_iterator {
 	using value_type = T;
 	using reference = Ref;
 	using pointer = Ptr;
-	using iterator = __rb_tree_iterator<T, T&, T*>;
-	using const_iterator = __rb_tree_iterator<T, const T&, const T*>;
-	using self = __rb_tree_iterator<T, Ref, Ptr>;
-	using link_type = __rb_tree_node<T>*;
+	using iterator = rb_tree_iterator<T, T&, T*>;
+	using const_iterator = rb_tree_iterator<T, const T&, const T*>;
+	using self = rb_tree_iterator<T, Ref, Ptr>;
+	using link_type = rb_tree_node<T>*;
 
-	__rb_tree_iterator() {}
-	__rb_tree_iterator(link_type x) { node = x; }
-	__rb_tree_iterator(const iterator& it) { node = it.node; }
+	rb_tree_iterator() {}
+	rb_tree_iterator(link_type x) { node = x; }
+	rb_tree_iterator(const iterator& it) { node = it.node; }
 
 	reference operator*() { return static_cast<link_type>(node)->value_field; }
 	pointer operator->() { return &(operator*()); }
@@ -92,3 +95,4 @@ struct __rb_tree_iterator :public __rb_tree_base_iterator {
 		return temp;
 	}
 };
+}// end namespace::MiniSTL
