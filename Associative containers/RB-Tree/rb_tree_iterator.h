@@ -25,9 +25,8 @@ struct rb_tree_base_iterator {
 				p = p->parent;
 			}
 			//正常情况下该祖先之父即为结果
-			if (node->right != p) {
+			if (node->right != p)
 				node = p;
-			}
 			//若右子等于父节点，node即为自增结果（此为特殊情况，适用于迭代器指向root而后者无right）
 		}
 	}
@@ -39,9 +38,8 @@ struct rb_tree_base_iterator {
 			node = node->left;
 		else if (node->left) {//存在左子，前一节点必然是左子树的最右下角
 			base_ptr l = node->left;
-			while (l->right){
+			while (l->right)
 				l = l->right; 
-			}
 			node = l;
 		}
 		else {//既非root，亦无左子
@@ -95,4 +93,15 @@ struct rb_tree_iterator :public rb_tree_base_iterator {
 		return temp;
 	}
 };
+
+inline bool operator==(const rb_tree_base_iterator& lhs,
+				       const rb_tree_base_iterator& rhs){
+	return lhs.node == rhs.node;
+}
+
+inline bool operator!=(const rb_tree_base_iterator& lhs,
+				       const rb_tree_base_iterator& rhs){
+	return lhs.node != rhs.node;
+}
+
 }// end namespace::MiniSTL

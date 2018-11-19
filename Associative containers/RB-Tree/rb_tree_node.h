@@ -22,7 +22,8 @@ struct rb_tree_node_base {
 	}
 
 	static base_ptr maxium(base_ptr root) {
-		while (root->right) root = root->right;
+		while (root->right) 
+			root = root->right;
 		return root;
 	}
 };
