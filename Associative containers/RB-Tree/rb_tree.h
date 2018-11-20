@@ -321,32 +321,32 @@ template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(link_type x){
 	while (x) {
 		// 递归式删除
-    	erase(right(x));
-    	link_type y = left(x);
-    	destroy_node(x);
-    	x = y;
-  	}
+		erase(right(x));
+		link_type y = left(x);
+		destory_node(x);
+		x = y;
+	}
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::link_type
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 	link_type top = clone_node(x);
-    top->parent = y;
- 	try{
-    	if (x->right)
-      		top->right = copy(right(x), top);
-    	y = top;
-    	x = left(x);
-    	while (x) {
-      		link_type p = clone_node(x);
-      		y->left = p;
-      		p->_M_parent = y;
-      		if (x->right)
-        		p->right = copy(right(x),p);
-      		y = p;
-      		x = left(x);
-    	}
+	top->parent = y;
+	try {
+		if (x->right)
+			top->right = copy(right(x), top);
+		y = top;
+		x = left(x);
+		while (x) {
+			link_type p = clone_node(x);
+			y->left = p;
+			p->parent = y;
+			if (x->right)
+				p->right = copy(right(x),p);
+			y = p;
+			x = left(x);
+		}
 	}
 	catch(std::exception&){
 		erase(top());
