@@ -130,7 +130,7 @@ public:
 	using reference = void;
 
 public:
-	explicit back_insert_iterator(Container& value) :container(x) {}
+	explicit back_insert_iterator(Container& value) :container(value) {}
 	back_insert_iterator& operator=(const typename Container::value_type& value) {
 		container->push_back(value);//本质上是调用了push_back
 		return *this;
@@ -162,7 +162,7 @@ public:
 	using reference = void;
 
 public:
-	explicit front_insert_iterator(Container& value) :container(x) {}
+	explicit front_insert_iterator(Container& value) :container(value) {}
 	front_insert_iterator& operator=(const typename Container::value_type& value) {
 		container->push_front(value);
 		return *this;
@@ -193,7 +193,7 @@ public:
 	using reference = void;
 
 public:
-	insert_iterator(Container& value, typename Container::iterator i) :container(x), iter(i) {}
+	insert_iterator(Container& value, typename Container::iterator i) :container(value), iter(i) {}
 	insert_iterator& operator=(const typename Container::value_type& value) {
 		container->insert(iter, value);//调用insert
 		++iter;//保证insert_iterator永远与目标贴合
@@ -234,7 +234,7 @@ public:
 public:
 	reverse_iterator() {}
 	explicit reverse_iterator(iterator_type value) :current(value) {}
-	reverse_iterator(const self& value) :current(x.current) {}
+	reverse_iterator(const self& value) :current(value.current) {}
 
 	iterator_type base() const { return current; }
 	reference operator*() const {
@@ -323,7 +323,7 @@ public:
 	using pointer = const T*;//由于身为input_iterator，采用const较为保险
 	using reference = const T&;
 
-	istream_iterator() :stream(&cin), end_marker(false) {}
+	istream_iterator() :stream(&std::cin), end_marker(false) {}
 	istream_iterator(std::istream &s) :stream(&s) { read(); }
 
 	reference operator*() const { return value; }
@@ -354,7 +354,7 @@ public:
 	using pointer = void;
 	using reference = void;
 
-	ostream_iterator() :stream(&cin), interval(nullptr) {}
+	ostream_iterator() :stream(&std::cin), interval(nullptr) {}
 	ostream_iterator(std::ostream& s, const char* c) :stream(&s), interval(c) {}
 
 	ostream_iterator& operator=(const T& value) {
