@@ -94,13 +94,11 @@ struct rb_tree_iterator :public rb_tree_base_iterator {
 	}
 };
 
-inline bool operator==(const rb_tree_base_iterator& lhs,
-				       const rb_tree_base_iterator& rhs){
+inline bool operator==(const rb_tree_base_iterator& lhs,const rb_tree_base_iterator& rhs){
 	return lhs.node == rhs.node;
 }
 
-inline bool operator!=(const rb_tree_base_iterator& lhs,
-				       const rb_tree_base_iterator& rhs){
+inline bool operator!=(const rb_tree_base_iterator& lhs,const rb_tree_base_iterator& rhs){
 	return lhs.node != rhs.node;
 }
 
