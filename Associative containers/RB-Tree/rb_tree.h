@@ -8,7 +8,7 @@ namespace MiniSTL{
 
 template <class Key,class Value,class KeyOfValue,class Compare,class Alloc = simpleAlloc<Value> >
 class rb_tree {
-protected:// Internal alias declarations
+private:// Internal alias declarations
 	using void_pointer = void*;
 	using base_ptr = __rb_tree_node_base * ;
 	using rb_tree_node = __rb_tree_node<Value>;
@@ -26,7 +26,7 @@ public:// Basic types
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
-protected:// operations of node
+private:// operations of node
 	link_type get_node() { return rb_tree_node_allocator::allocate(); }
 	void put_node(link_type p) { rb_tree_node_allocator::deallocate(p); }
 
@@ -49,12 +49,12 @@ protected:// operations of node
 		return temp;
 	}
 
-	void destory_node(link_type p) {
-		destory(&p->value_field);
+	void destroy_node(link_type p) {
+		destroy(&p->value_field);
 		put_node(p);
 	}
 
-protected:
+private:
 	// RB-Tree仅以三组数据表现
 	size_type node_count;// 用节点数量表征树的大小
 	link_type header;// root的父亲，实现技巧
@@ -323,7 +323,7 @@ void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(link_type x){
 		// 递归式删除
 		erase(right(x));
 		link_type y = left(x);
-		destory_node(x);
+		destroy_node(x);
 		x = y;
 	}
 }
@@ -355,13 +355,13 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear(){
-	if (node_count != 0) {
-       erase(root());
-       leftmost() = header;
-       root() = nullptr;
-       rightmost() = header;
-       node_count = 0;
-    }
+	if(node_count){
+		erase(root());
+		leftmost() = header;
+		root() = nullptr;
+		rightmost() = header;
+		node_count = 0;
+	}
 }
 
 } // end namesapce::MiniSTL
