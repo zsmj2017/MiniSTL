@@ -213,10 +213,10 @@ inline insert_iterator<Container> inserter(Container &x, Iterator i) {
 
 template <class Iterator>
 class reverse_iterator {
-	template<class Iterator>
-	friend bool operator == (const reverse_iterator<Iterator>&, const reverse_iterator<Iterator>&);
-	template<class Iterator>
-	friend bool operator != (const reverse_iterator<Iterator>&, const reverse_iterator<Iterator>&);
+	template<class It>
+	friend bool operator == (const reverse_iterator<It>&, const reverse_iterator<It>&);
+	template<class It>
+	friend bool operator != (const reverse_iterator<It>&, const reverse_iterator<It>&);
 
 protected:
 	Iterator current;//与之对应的正向迭代器
