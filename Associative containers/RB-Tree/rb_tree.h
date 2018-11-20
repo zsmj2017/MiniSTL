@@ -6,12 +6,12 @@
 
 namespace MiniSTL{
 
-template <class Key,class Value,class KeyOfValue,class Compare,class Alloc>
+template <class Key,class Value,class KeyOfValue,class Compare,class Alloc = simpleAlloc<Value> >
 class rb_tree {
 protected://Internal alias declarations
 	using void_pointer = void*;
-	using base_ptr = rb_tree_node_base * ;
-	using rb_tree_node = rb_tree_node<Value>;
+	using base_ptr = __rb_tree_node_base * ;
+	using rb_tree_node = __rb_tree_node<Value>;
 	using rb_tree_node_allocator = simpleAlloc<rb_tree_node>;
 	using color_type = rb_tree_color_type;
 
@@ -32,10 +32,12 @@ protected://operations of node
 
 	link_type create_node(const value_type &value) {
 		link_type temp = get_node();
-		try 
+		try{
 			construct(&temp->value_field, value);
-		catch
+		}
+		catch(std::exception&){
 			put_node(temp);
+		}
 		return temp;
 	}
 
@@ -59,33 +61,33 @@ protected:
 	Compare key_compare;//比较器
 
 	//获取header成员
-	link_type& root() const { return static_cast<link_type&>(header->parent); }
-	link_type& leftmost() const { return static_cast<link_type&>(header->left); }
-	link_type& rightmost() const { return static_cast<link_type&>(header->right); }
+	link_type& root() const { return reinterpret_cast<link_type&>(header->parent); }
+	link_type& leftmost() const { return reinterpret_cast<link_type&>(header->left); }
+	link_type& rightmost() const { return reinterpret_cast<link_type&>(header->right); }
 
 	//普通node的快速访问与设定
-	static link_type& left(link_type p) { return static_cast<link_type&>(p->left); }
-	static link_type& right(link_type p) { return static_cast<link_type&>(p->right); }
-	static link_type& parent(link_type p) { return static_cast<link_type&>(p->parent); }
+	static link_type& left(link_type p) { return reinterpret_cast<link_type&>(p->left); }
+	static link_type& right(link_type p) { return reinterpret_cast<link_type&>(p->right); }
+	static link_type& parent(link_type p) { return reinterpret_cast<link_type&>(p->parent); }
 	static reference& value(link_type p) { return p->value_field; }
 	static const Key& key(link_type p) { return KeyOfValue()(value(p)); }//KeyofValue是一个函数对象
 	static color_type& color(link_type p) { return static_cast<color_type&>(p->color); }
 
 	//base_node的快速访问与设定
-	static link_type& left(base_ptr p) { return static_cast<link_type&>(p->left); }
-	static link_type& right(base_ptr p) { return static_cast<link_type&>(p->right); }
-	static link_type& parent(base_ptr p) { return static_cast<link_type&>(p->parent); }
+	static link_type& left(base_ptr p) { return reinterpret_cast<link_type&>(p->left); }
+	static link_type& right(base_ptr p) { return reinterpret_cast<link_type&>(p->right); }
+	static link_type& parent(base_ptr p) { return reinterpret_cast<link_type&>(p->parent); }
 	static reference& value(base_ptr p) { return static_cast<link_type>(p)->value_field; }
 	static const Key& key(base_ptr p) { return KeyOfValue()(value(static_cast<link_type>(p))); }//KeyofValue是一个函数对象
 	static color_type& color(base_ptr p) { return static_cast<color_type&>(static_cast<link_type>(p)->color); }
 
 	//求取极值（转交node_base)
 	static link_type minimum(link_type p) {
-		return static_cast<link_type>(rb_tree_node_base::minimum(p));
+		return static_cast<link_type>(__rb_tree_node_base::minimum(p));
 	}
 
 	static link_type maximum(link_type p) {
-		return static_cast<link_type>(rb_tree_node_base::maximum(p));
+		return static_cast<link_type>(__rb_tree_node_base::maximum(p));
 	}
 
 public:
@@ -113,7 +115,7 @@ public:
 		:node_count(0), key_compare(comp) { init(); }
 
 	~rb_tree() {
-		clear();
+		//clear();
 		put_node(header);
 	}
 
@@ -132,7 +134,6 @@ public:
 	std::pair<iterator, bool> insert_unique(const value_type& value);
 	//允许重复
 	iterator insert_equal(const value_type& value);
-
 	iterator find(const value_type& value);
 };
 
@@ -283,7 +284,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type 
 	while (x) {
 		y = x;
 		comp = key_compare(KeyOfValue()(value), key(x));//value是否小于x的键值
-		x = comp ? left(x), right(x);
+		x = comp ? left(x) : right(x);
 	}
 	//此时y必为待插入点的父节点（也必为叶节点）
 	iterator j(y);
@@ -305,7 +306,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &
 	link_type x = root();
 	while (x) {
 		y = x;
-		x = key_compare(KeyOfValue()(value), key(x)) ? left(x), right(x);//大则向左
+		x = key_compare(KeyOfValue()(value), key(x)) ? left(x) : right(x);//大则向左
 	}
 	return insert(x, y, value);//x为新值插入点，y为其父
 }

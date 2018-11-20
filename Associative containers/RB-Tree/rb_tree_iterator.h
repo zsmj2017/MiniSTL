@@ -7,7 +7,7 @@
 namespace MiniSTL{
 
 struct rb_tree_base_iterator {
-	using base_ptr = rb_tree_node_base::base_ptr;
+	using base_ptr = __rb_tree_node_base::base_ptr;
 	using iterator_category = bidirectional_iterator_tag;
 	using difference_type = ptrdiff_t;
 
@@ -62,7 +62,7 @@ struct rb_tree_iterator :public rb_tree_base_iterator {
 	using iterator = rb_tree_iterator<T, T&, T*>;
 	using const_iterator = rb_tree_iterator<T, const T&, const T*>;
 	using self = rb_tree_iterator<T, Ref, Ptr>;
-	using link_type = rb_tree_node<T>*;
+	using link_type = __rb_tree_node<T>*;
 
 	rb_tree_iterator() {}
 	rb_tree_iterator(link_type x) { node = x; }
