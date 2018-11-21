@@ -29,8 +29,9 @@ public:// Basic types
 public:// Iterators
 	using iterator = rb_tree_iterator<value_type, reference, pointer>;
 	using const_iterator = rb_tree_iterator<value_type,const_reference,const_pointer>;
-	using reverse_iterator = reverse_iterator<iterator>;
-	using const_reverse_iterator = reverse_iterator<const_iterator>;
+	// TODO:
+	//using reverse_iterator = reverse_iterator<iterator>;
+	//using const_reverse_iterator = reverse_iterator<const_iterator>;
 
 private:// operations of node
 	link_type get_node() { return rb_tree_node_allocator::allocate(); }
@@ -118,8 +119,23 @@ private:// rotate && rebalance
 	base_ptr rb_tree_rebalance_for_erase(base_ptr,base_ptr&,base_ptr&,base_ptr&);
 
 public:// ctor && dtor
-	rb_tree(const Compare& comp = Compare()) 
+	rb_tree():node_count(0),key_compare() { init(); }
+
+	rb_tree(const Compare& comp) 
 		:node_count(0), key_compare(comp) { init(); }
+
+	rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs)
+		:node_count(0), key_compare(lhs.key_compare){
+			if(lhs.root())
+				init();
+			else{
+				header->color = rb_tree_red;
+				root() = copy(lhs.root(),header);
+				leftmost() = reinterpret_cast<link_type>(__rb_tree_node_base::minimum(root()));
+				rightmost() = reinterpret_cast<link_type>(__rb_tree_node_base::maximum(root()));
+			}
+			node_count = lhs.node_count;
+	}
 
 	~rb_tree() {
 		clear();
@@ -130,10 +146,11 @@ public:// ctor && dtor
 
 public: // getter
 	Compare key_comp() const noexcept { return key_compare; }
-	const_iterator cbegin() const noexcept { return leftmost();}
-	const_iterator cend() const noexcept { return rightmost();}
-	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end());}
-	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin());}
+	const_iterator cbegin() const noexcept { return leftmost(); }
+	const_iterator cend() const noexcept { return rightmost(); }
+	// TODO:
+	//const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
+	//const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
 	bool empty() const noexcept { return node_count == 0; }
 	size_type size() const noexcept { return node_count; }
 	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
@@ -141,8 +158,9 @@ public: // getter
 public: // setter
 	iterator begin() { return leftmost(); }
 	iterator end() { return rightmost(); }
-	reverse_iterator rbegin() { return reverse_iterator(end());}
-	reverse_iterator rend() { return reverse_iterator(begin());}
+	// TODO:
+	//reverse_iterator rbegin() { return reverse_iterator(end()); }
+	//reverse_iterator rend() { return reverse_iterator(begin()); }
 
 public:
 	// 保持node值独一无二
@@ -500,7 +518,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 		}
 	}
 	catch(std::exception&){
-		erase(top());
+		erase(top);
 	}
 }
 
