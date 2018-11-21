@@ -67,7 +67,6 @@ private:// data member
 	Compare key_compare;// 比较器
 
 private:// data member getter && setter
-
 	// 获取header成员
 	link_type& root() const { return reinterpret_cast<link_type&>(header->parent); }
 	link_type& leftmost() const { return reinterpret_cast<link_type&>(header->left); }
@@ -99,10 +98,9 @@ private:// data member getter && setter
 	}
 
 private:// aux interface
-	iterator insert(base_ptr, base_ptr, const value_type&);
-	iterator rb_tree_find_key (const key_type&);
+	iterator insert_aux(base_ptr, base_ptr, const value_type&);
 	link_type copy(link_type, link_type);
-	void erase(link_type);
+	void erase_aux(link_type);
 	void init() {
 		header = get_node();
 		color(header) = rb_tree_red;
@@ -110,7 +108,6 @@ private:// aux interface
 		leftmost() = header;
 		rightmost() = header;
 	}
-	void clear();
 	
 private:// rotate && rebalance
 	void rb_tree_rotate_left(base_ptr, base_ptr&);
@@ -120,10 +117,11 @@ private:// rotate && rebalance
 
 public:// ctor && dtor
 	rb_tree():node_count(0),key_compare() { init(); }
-
 	rb_tree(const Compare& comp) 
 		:node_count(0), key_compare(comp) { init(); }
+	~rb_tree() {clear();}
 
+public:// copy operation
 	rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs)
 		:node_count(0), key_compare(lhs.key_compare){
 			if(lhs.root())
@@ -136,15 +134,9 @@ public:// ctor && dtor
 			}
 			node_count = lhs.node_count;
 	}
-
-	~rb_tree() {
-		clear();
-		put_node(header);
-	}
-
 	rb_tree& operator=(const rb_tree& rhs);
 
-public: // getter
+public:// getter
 	Compare key_comp() const noexcept { return key_compare; }
 	const_iterator cbegin() const noexcept { return leftmost(); }
 	const_iterator cend() const noexcept { return rightmost(); }
@@ -155,19 +147,29 @@ public: // getter
 	size_type size() const noexcept { return node_count; }
 	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
 
-public: // setter
+public:// setter
 	iterator begin() { return leftmost(); }
 	iterator end() { return rightmost(); }
 	// TODO:
 	//reverse_iterator rbegin() { return reverse_iterator(end()); }
 	//reverse_iterator rend() { return reverse_iterator(begin()); }
 
-public:
-	// 保持node值独一无二
-	std::pair<iterator, bool> insert_unique(const value_type& value);
-	// 允许重复
-	iterator insert_equal(const value_type& value);
-	iterator find(const value_type& value) const noexcept ;
+public:// insert
+	std::pair<iterator, bool> insert_unique(const value_type&);
+	iterator insert_equal(const value_type&);
+	iterator insert_unique(iterator,const value_type&);
+	iterator insert_equal(iterator,const value_type&);
+
+public:// erase
+	void erase(iterator);
+	size_type erase(const key_type&);
+	void erase(iterator,iterator);
+	void clear();
+
+public:// find
+	iterator find(const key_type&) const noexcept ;
+
+public:// swap
 	void swap(rb_tree<Key,Value,KeyOfValue,Compare,Alloc>& lhs){
 		// swap data members
 		std::swap(header,lhs.header);
@@ -177,8 +179,8 @@ public:
 };
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert(base_ptr x_, base_ptr y_, const value_type & value){
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_aux(base_ptr x_, base_ptr y_, const value_type & value){
 
 	link_type x = x_;
 	link_type y = y_;
@@ -212,7 +214,18 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert(base_ptr x_, base_ptr y_
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance(base_ptr x, base_ptr& root) {
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase_aux(link_type x){
+	while (x) {
+		// 递归式删除
+		erase_aux(right(x));
+		link_type y = left(x);
+		destroy_node(x);
+		x = y;
+	}
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance(base_ptr x, base_ptr& root) {
 	x->color = rb_tree_red;
 	while (x != root && x->parent->color == rb_tree_red) {// 当前父节点为红
 		if (x->parent == x->parent->parent->left) {// 父亲为爷爷的左子
@@ -385,7 +398,6 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance_for_erase(bas
 	return y;
 }
 
-
 // 将x的右子树绕x逆时针旋转，其右子的左子变为了x，而原本的左子变为了x的右子
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rotate_left(base_ptr x, base_ptr & root){
@@ -426,10 +438,9 @@ inline void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rotate_righ
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_find_key(const key_type & k){
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type & k) const noexcept{
 	link_type y = header;// 最后一个不小于k的node
 	link_type x = root();// 当前node
-
 	while (x) {
 		if (!key_compare(key(x), k))// x的键值不小于k
 			y = x, x = left(x);
@@ -443,9 +454,8 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_find_key(const key_type
 	return (j == end()) || key_compare(k, key(j.node)) ? end() : j;
 }
 
-
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,bool> 
+std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,bool> 
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type & value){
 	link_type y = header;
 	link_type x = root();
@@ -469,7 +479,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type 
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator 
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator 
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type & value){
 	link_type y = header;
 	link_type x = root();
@@ -478,23 +488,6 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &
 		x = key_compare(KeyOfValue()(value), key(x)) ? left(x) : right(x);// 大则向左
 	}
 	return insert(x, y, value);// x为新值插入点，y为其父
-}
-
-template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const value_type & value) const noexcept {
-	return rb_tree_find_key(KeyOfValue()(value));
-}
-
-template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(link_type x){
-	while (x) {
-		// 递归式删除
-		erase(right(x));
-		link_type y = left(x);
-		destroy_node(x);
-		x = y;
-	}
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -518,14 +511,14 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 		}
 	}
 	catch(std::exception&){
-		erase(top);
+		erase_aux(top);
 	}
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear(){
 	if(node_count){
-		erase(root());
+		erase_aux(root());
 		leftmost() = header;
 		root() = nullptr;
 		rightmost() = header;
