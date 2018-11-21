@@ -26,6 +26,12 @@ public:// Basic types
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
+public:// Iterators
+	using iterator = rb_tree_iterator<value_type, reference, pointer>;
+	using const_iterator = rb_tree_iterator<value_type,const_reference,const_pointer>;
+	using reverse_iterator = reverse_iterator<iterator>;
+	using const_reverse_iterator = reverse_iterator<const_iterator>;
+
 private:// operations of node
 	link_type get_node() { return rb_tree_node_allocator::allocate(); }
 	void put_node(link_type p) { rb_tree_node_allocator::deallocate(p); }
@@ -54,11 +60,12 @@ private:// operations of node
 		put_node(p);
 	}
 
-private:
-	// RB-Tree仅以三组数据表现
+private:// data member
 	size_type node_count;// 用节点数量表征树的大小
 	link_type header;// root的父亲，实现技巧
 	Compare key_compare;// 比较器
+
+private:// data member getter && setter
 
 	// 获取header成员
 	link_type& root() const { return reinterpret_cast<link_type&>(header->parent); }
@@ -90,15 +97,8 @@ private:
 		return static_cast<link_type>(__rb_tree_node_base::maximum(p));
 	}
 
-public:
-	using iterator = rb_tree_iterator<value_type, reference, pointer>;
-
-private:
+private:// aux interface
 	iterator insert(base_ptr, base_ptr, const value_type&);
-	void rb_tree_rebalance(base_ptr, base_ptr&);
-	base_ptr rb_tree_rebalance_for_erase(base_ptr,base_ptr&,base_ptr&,base_ptr&);
-	void rb_tree_rotate_left(base_ptr, base_ptr&);
-	void rb_tree_rotate_right(base_ptr, base_ptr&);
 	iterator rb_tree_find_key (const key_type&);
 	link_type copy(link_type, link_type);
 	void erase(link_type);
@@ -110,8 +110,14 @@ private:
 		rightmost() = header;
 	}
 	void clear();
+	
+private:// rotate && rebalance
+	void rb_tree_rotate_left(base_ptr, base_ptr&);
+	void rb_tree_rotate_right(base_ptr, base_ptr&);
+	void rb_tree_rebalance(base_ptr, base_ptr&);
+	base_ptr rb_tree_rebalance_for_erase(base_ptr,base_ptr&,base_ptr&,base_ptr&);
 
-public:
+public:// ctor && dtor
 	rb_tree(const Compare& comp = Compare()) 
 		:node_count(0), key_compare(comp) { init(); }
 
@@ -122,20 +128,34 @@ public:
 
 	rb_tree& operator=(const rb_tree& rhs);
 
-public:
-	Compare key_comp() const { return key_compare; }
+public: // getter
+	Compare key_comp() const noexcept { return key_compare; }
+	const_iterator cbegin() const noexcept { return leftmost();}
+	const_iterator cend() const noexcept { return rightmost();}
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end());}
+	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin());}
+	bool empty() const noexcept { return node_count == 0; }
+	size_type size() const noexcept { return node_count; }
+	size_type max_size() const noexcept { return static_cast<size_type>(-1); }
+
+public: // setter
 	iterator begin() { return leftmost(); }
 	iterator end() { return rightmost(); }
-	bool empty() { return node_count == 0; }
-	size_type size() { return node_count; }
-	size_type max_size() { return static_cast<size_type>(-1); }
+	reverse_iterator rbegin() { return reverse_iterator(end());}
+	reverse_iterator rend() { return reverse_iterator(begin());}
 
 public:
 	// 保持node值独一无二
 	std::pair<iterator, bool> insert_unique(const value_type& value);
 	// 允许重复
 	iterator insert_equal(const value_type& value);
-	iterator find(const value_type& value);
+	iterator find(const value_type& value) const noexcept ;
+	void swap(rb_tree<Key,Value,KeyOfValue,Compare,Alloc>& lhs){
+		// swap data members
+		std::swap(header,lhs.header);
+		std::swap(node_count,lhs.node_count);
+		std::swap(key_compare,lhs.key_compare);
+	}
 };
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -444,7 +464,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const value_type & value){
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const value_type & value) const noexcept {
 	return rb_tree_find_key(KeyOfValue()(value));
 }
 
