@@ -96,6 +96,7 @@ public:
 private:
 	iterator insert(base_ptr, base_ptr, const value_type&);
 	void rb_tree_rebalance(base_ptr, base_ptr&);
+	base_ptr rb_tree_rebalance_for_erase(base_ptr,base_ptr&,base_ptr&,base_ptr&);
 	void rb_tree_rotate_left(base_ptr, base_ptr&);
 	void rb_tree_rotate_right(base_ptr, base_ptr&);
 	iterator rb_tree_find_key (const key_type&);
@@ -214,6 +215,136 @@ inline void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance(b
 		}
 	}
 	root->color = rb_tree_black;// root永远为黑色
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::base_ptr
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance_for_erase(base_ptr z, base_ptr& root,base_ptr& leftmost,base_ptr& rightmost){
+	base_ptr y = z;
+	base_ptr x = nullptr;
+	base_ptr x_parent = nullptr;
+	if(!y->left) // z至多存在一个孩子
+		x = y->right;
+	else // z至少存在一个孩子
+		if(!y->right)
+			x = y->left;
+		else{
+			y = y->right;
+			while(y->left)
+				y = y->left;
+			x = y->right;
+		}
+	if(y != z){ // 若条件成立，此时y为z的后代
+		z->left->parent = y;
+		y->left = z->left;
+		if(y != z->right){
+			x_parent = y->parent;
+			if(x) 
+				x->parent = y->parent;
+			y->parent->left = x;
+			y->right = z->right;
+			z->right->parent = y;
+		}
+		else
+			x_parent = y;
+		if(root == z)
+			root = y;
+		else if(z->parent->left == z)
+			z->parent->left = y;
+		else
+			z->parent->right = y;
+		y->parent = z->parent;
+		std::swap(y->color,z->color);
+		y = z;
+	}
+	else{
+		x_parent = y->parent;
+		if(x)
+			x->parent = y->parent;
+		if(root == z)
+			root = x;
+		else
+			if(z->parent->left == z)
+				z->parent->left = x;
+			else
+				z->parent->right = x;
+		if(leftmost == z)
+			if(!z->right)
+				leftmost = z->parent;
+			else
+				leftmost  = __rb_tree_node_base::minimum(x);
+		if(rightmost == z)
+			if(!z->left)
+				rightmost = z->parent;
+			else
+				rightmost = __rb_tree_node_base::maximum(x);
+	}
+	if(y->color != rb_tree_red){
+		while(x != root && (!x || x->color == rb_tree_black))
+			if(x == x->parent->left){
+				base_ptr w = x_parent->right;
+				if(w->color == rb_tree_red){
+					w->color = rb_tree_black;
+					x_parent->color = rb_tree_red;
+					rb_tree_rotate_left(x_parent,root);
+					w = x_parent->right;
+				}
+				if((!w->left || w->left->color == rb_tree_black) &&
+					(!w->right || w->right->color == rb_tree_black)){
+						w->color = rb_tree_red;
+						x = x_parent;
+						x_parent = x_parent->parent;
+				}
+				else{
+					if(!w->right || w->right->color == rb_tree_black){
+						if(w->left)
+							w->left->color = rb_tree_black;
+						w->color = rb_tree_red;
+						rb_tree_rotate_right(w,root);
+						w = x_parent->right;
+					}
+					w->color = x_parent->color;
+					x_parent->color = rb_tree_black;
+					if(x->right)
+						w->right->color = rb_tree_black;
+					rb_tree_rotate_left(x_parent,root);
+					break;
+				}
+			}
+			else{
+				base_ptr w = x_parent->left;
+				if(w->color == rb_tree_red){
+					w->color = rb_tree_black;
+					x_parent->color = rb_tree_red;
+					rb_tree_rotate_right(x_parent,root);
+					w = x_parent->left;
+				}
+				if((!w->right || w->right->color == rb_tree_black) &&
+					(!w->left || w->left->color == rb_tree_black)){
+						w->color = rb_tree_red;
+						x = x_parent;
+						x_parent = x_parent->parent;
+				}
+				else{
+					if(!w->left || w->left->color == rb_tree_black){
+						if(w->right)
+							w->right->color = rb_tree_black;
+						w->color = rb_tree_red;
+						rb_tree_rotate_left(w,root);
+						w = x_parent->left;
+					}
+					w->color = x_parent->color;
+					x_parent->color = rb_tree_black;
+					if(w->left)
+						w->left->color = rb_tree_black;
+					rb_tree_rotate_right(x_parent,root);
+					break;
+				}
+			}
+		if(x)
+			x->color = rb_tree_black;
+	}
+	return y;
 }
 
 
