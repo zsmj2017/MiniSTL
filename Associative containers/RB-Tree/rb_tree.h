@@ -116,7 +116,7 @@ private:// rotate && rebalance
 
 public:// ctor && dtor
 	rb_tree():node_count(0),key_compare() { init(); }
-	rb_tree(const Compare& comp) 
+	explicit rb_tree(const Compare& comp) 
 		:node_count(0), key_compare(comp) { init(); }
 	~rb_tree() {clear();}
 
@@ -155,9 +155,13 @@ public:// setter
 
 public:// insert
 	std::pair<iterator, bool> insert_unique(const value_type&);
-	iterator insert_equal(const value_type&);
 	iterator insert_unique(iterator,const value_type&);
+	template<class _InputIterator>
+	void insert_unique(_InputIterator first,_InputIterator last);
 	iterator insert_equal(iterator,const value_type&);
+	iterator insert_equal(const value_type&);
+	template<class _InputIterator>
+	void insert_equal(_InputIterator first,_InputIterator last);
 
 public:// erase
 	void erase(iterator);
@@ -626,6 +630,13 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(iterator pos,cons
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+template<class _InputIterator>
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(_InputIterator first,_InputIterator last){
+	for(;first != last;++first)
+		insert_unique(*first);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator 
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type & value){
 	link_type y = header;
@@ -665,6 +676,13 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(iterator pos,const
 		else
 			return insert_equal(value);
 	}
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+template<class _InputIterator>
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(_InputIterator first,_InputIterator last){
+	for(;first != last;++first)
+		insert_equal(*first);
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
