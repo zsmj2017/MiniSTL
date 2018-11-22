@@ -84,17 +84,17 @@ private:// data member getter && setter
 	static link_type& left(base_ptr p) { return reinterpret_cast<link_type&>(p->left); }
 	static link_type& right(base_ptr p) { return reinterpret_cast<link_type&>(p->right); }
 	static link_type& parent(base_ptr p) { return reinterpret_cast<link_type&>(p->parent); }
-	static reference& value(base_ptr p) { return static_cast<link_type>(p)->value_field; }
-	static const Key& key(base_ptr p) { return KeyOfValue()(value(static_cast<link_type>(p))); }//KeyofValue是一个函数对象
-	static color_type& color(base_ptr p) { return static_cast<color_type&>(static_cast<link_type>(p)->color); }
+	static reference& value(base_ptr p) { return reinterpret_cast<link_type>(p)->value_field; }
+	static const Key& key(base_ptr p) { return KeyOfValue()(value(reinterpret_cast<link_type>(p))); }//KeyofValue是一个函数对象
+	static color_type& color(base_ptr p) { return static_cast<color_type&>(reinterpret_cast<link_type>(p)->color); }
 
 	// 求取极值（转交node_base)
 	static link_type minimum(link_type p) {
-		return static_cast<link_type>(__rb_tree_node_base::minimum(p));
+		return reinterpret_cast<link_type>(__rb_tree_node_base::minimum(p));
 	}
 
 	static link_type maximum(link_type p) {
-		return static_cast<link_type>(__rb_tree_node_base::maximum(p));
+		return reinterpret_cast<link_type>(__rb_tree_node_base::maximum(p));
 	}
 
 private:// aux interface
@@ -124,17 +124,17 @@ public:// ctor && dtor
 public:// copy operation
 	rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs)
 		:node_count(0), key_compare(lhs.key_compare){
-			if(lhs.root())
+			if(!lhs.root())
 				init();
 			else{
 				header->color = rb_tree_red;
 				root() = copy(lhs.root(),header);
-				leftmost() = reinterpret_cast<link_type>(__rb_tree_node_base::minimum(root()));
-				rightmost() = reinterpret_cast<link_type>(__rb_tree_node_base::maximum(root()));
+				leftmost() = reinterpret_cast<link_type>(minimum(root()));
+				rightmost() = reinterpret_cast<link_type>(maximum(root()));
 			}
 			node_count = lhs.node_count;
 	}
-	rb_tree& operator=(const rb_tree& rhs);
+	rb_tree& operator=(const rb_tree&);
 
 public:// getter
 	Compare key_comp() const noexcept { return key_compare; }
@@ -167,10 +167,16 @@ public:// erase
 	void clear();
 
 public:// find
-	iterator find(const key_type&) const noexcept ;
+	iterator find(const key_type&) noexcept;
+	const_iterator find(const key_type&) const noexcept;
+	size_type count(const key_type&) const noexcept;
+	iterator lower_bound(const key_type&) noexcept;
+	const_iterator lower_bound(const key_type&) const noexcept;
+	iterator upper_bound(const key_type&) noexcept;
+	const_iterator upper_bound(const key_type&) const noexcept;
 
 public:// swap
-	void swap(rb_tree<Key,Value,KeyOfValue,Compare,Alloc>& lhs){
+	void swap(rb_tree<Key,Value,KeyOfValue,Compare,Alloc>& lhs) noexcept{
 		// swap data members
 		std::swap(header,lhs.header);
 		std::swap(node_count,lhs.node_count);
@@ -438,7 +444,7 @@ inline void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rotate_righ
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type & k) const noexcept{
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type & k) noexcept{
 	link_type y = header;// 最后一个不小于k的node
 	link_type x = root();// 当前node
 	while (x) {
