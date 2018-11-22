@@ -188,18 +188,16 @@ public:// swap
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_aux(base_ptr x_, base_ptr y_, const value_type & value){
-
 	link_type x = x_;
 	link_type y = y_;
 	link_type z;
-
 	if (y == header || x || KeyOfValue()(value), key(y)) {
 		// 待插入节点之父为header||待插入节点自身并不为nullptr(何时触发？）||父节点明确大于待插入值
 		z = create_node(value);
 		left(y) = z;// 若y为header，此时leftmost==z
 		if (y == header) {
 			root() = z;
-			rightmost = z;
+			rightmost() = z;
 		}
 		else if (y == leftmost()) {
 			leftmost() = z;
@@ -540,14 +538,14 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type & k)
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,
-	typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator>
+		typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator>
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type & k) noexcept{
 	return std::pair<iterator,iterator>(lower_bound(k),upper_bound(k));
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator,
-	typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator>
+		typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator>
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type & k) const noexcept{
 	return std::pair<const_iterator,const_iterator>(lower_bound(k),upper_bound(k));
 }
@@ -588,13 +586,43 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type 
 	iterator j(y);
 	if (comp)// y键值大于value键值，插于左侧
 		if (j == begin())//待插入点之父为最左节点
-			return std::pair<iterator, bool>(insert(x, y, value), true);
+			return std::pair<iterator, bool>(insert_aux(x, y, value), true);
 		else
 			--j;// 调整j准备完成测试（可能与某键值重复）
 	if (key_compare(key(j.node), KeyOfValue(value)))
 		// 新键值不与旧有键值重复，放心插入
-		return std::pair<iterator, bool>(insert(x, y, value), true);
+		return std::pair<iterator, bool>(insert_aux(x, y, value), true);
 	return std::pair<iterator, bool>(j, false);// 当前value为重复值
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(iterator pos,const value_type& value){
+	if(pos.node == header->left){ // begin()
+		if(size() > 0 && key_compare(KeyOfValue()(value),key(pos.node)))
+			return insert_aux(pos.node,pos.node,value);
+		else
+			return insert_unique(value).first;
+	}
+	else if(pos.node == header){ // end()
+		if(key_compare(key(rightmost()),KeyOfValue()(value)))
+			return insert_aux(nullptr,rightmost(),value);
+		else
+			return insert_unique(value).first;
+	}
+	else{
+		iterator before = pos;
+		--before;
+		if(key_compare(key(before.node),KeyOfValue()(value)) &&
+		key_compare(KeyOfValue()(value),key(pos.node))){
+			if(!right(before.node))
+				return insert_aux(nullptr,before.node,value);
+			else
+				return insert_aux(pos.node,pos.node,value);
+		}
+		else
+			return insert_unique(value).first;
+	}
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -606,7 +634,37 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &
 		y = x;
 		x = key_compare(KeyOfValue()(value), key(x)) ? left(x) : right(x);// 大则向左
 	}
-	return insert(x, y, value);// x为新值插入点，y为其父
+	return insert_aux(x, y, value);// x为新值插入点，y为其父
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(iterator pos,const value_type& value){
+	if(pos.node == header->left){ // begin()
+		if(size() > 0 && !key_compare(key(pos.node), KeyOfValue()(value)))
+			return insert_aux(pos.node,pos.node,value);
+		else
+			return insert_equal(value);
+	}
+	else if(pos.node == header){ // end()
+		if(!key_compare(KeyOfValue()(value)),key(rightmost()))
+			return insert_aux(nullptr,rightmost(),value);
+		else
+			return insert_equal(value);
+	}
+	else{
+		iterator before = pos;
+		--before;
+		if(!key_compare(KeyOfValue()(value),key(before.node)) &&
+		!key_compare(key(pos.node),KeyOfValue()(value))){
+			if(!right(before.node))
+				return insert_aux(nullptr,before.node,value);
+			else
+				return insert_aux(pos.node,pos.node,value);
+		}
+		else
+			return insert_equal(value);
+	}
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
