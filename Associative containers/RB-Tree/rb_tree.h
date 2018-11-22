@@ -92,7 +92,6 @@ private:// data member getter && setter
 	static link_type minimum(link_type p) {
 		return reinterpret_cast<link_type>(__rb_tree_node_base::minimum(p));
 	}
-
 	static link_type maximum(link_type p) {
 		return reinterpret_cast<link_type>(__rb_tree_node_base::maximum(p));
 	}
@@ -129,8 +128,8 @@ public:// copy operation
 			else{
 				header->color = rb_tree_red;
 				root() = copy(lhs.root(),header);
-				leftmost() = reinterpret_cast<link_type>(minimum(root()));
-				rightmost() = reinterpret_cast<link_type>(maximum(root()));
+				leftmost() = minimum(root());
+				rightmost() = maximum(root());
 			}
 			node_count = lhs.node_count;
 	}
@@ -174,6 +173,8 @@ public:// find
 	const_iterator lower_bound(const key_type&) const noexcept;
 	iterator upper_bound(const key_type&) noexcept;
 	const_iterator upper_bound(const key_type&) const noexcept;
+	std::pair<iterator,iterator> equal_range(const key_type&) noexcept;
+	std::pair<const_iterator,const_iterator> equal_range(const key_type&) const noexcept;
 
 public:// swap
 	void swap(rb_tree<Key,Value,KeyOfValue,Compare,Alloc>& lhs) noexcept{
@@ -443,21 +444,133 @@ inline void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rotate_righ
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type & k) noexcept{
 	link_type y = header;// 最后一个不小于k的node
 	link_type x = root();// 当前node
-	while (x) {
+	while (x)
 		if (!key_compare(key(x), k))// x的键值不小于k
 			y = x, x = left(x);
 		else
 			x = right(x);
-	}
-	iterator j(y);
+	iterator j = iteator(y);
 	// 没找到存在两种可能
 	// 1.k比最大值还大，j已经指向了end
 	// 2.已经寻至叶子，但此时发现k仍然小于key(j.node) 若找到应有k==key(j.node)
 	return (j == end()) || key_compare(k, key(j.node)) ? end() : j;
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type & k) const noexcept{
+	link_type y = header;// 最后一个不小于k的node
+	link_type x = root();// 当前node
+	while (x)
+		if (!key_compare(key(x), k))// x的键值不小于k
+			y = x, x = left(x);
+		else
+			x = right(x);
+	const_iterator j = const_iterator(y);
+	// 没找到存在两种可能
+	// 1.k比最大值还大，j已经指向了end
+	// 2.已经寻至叶子，但此时发现k仍然小于key(j.node) 若找到应有k==key(j.node)
+	return (j == end()) || key_compare(k, key(j.node)) ? end() : j;
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::count(const key_type & k) const noexcept{
+	std::pair<const_iterator,const_iterator> p = equal_range(k);
+	size_type n = 0;
+	distance(p.first,p.second,n);
+	return n;
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type & k) noexcept{
+	link_type y = header;
+	link_type x = root();
+	while(x)
+		if(!key_compare(key(x),k))
+			y = x, x = left(x);
+		else
+			x = right(x);
+	return iterator(y);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type & k) const noexcept{
+	link_type y = header;
+	link_type x = root();
+	while(x)
+		if(!key_compare(key(x),k))
+			y = x, x = left(x);
+		else
+			x = right(x);
+	return const_iterator(y);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type & k) noexcept{
+	link_type y = header;
+	link_type x = root();
+	while(x)
+		if(key_compare(k,key(x)))
+			y = x, x = left(x);
+		else
+			x = right(x);
+	return iterator(y);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type & k) const noexcept{
+	link_type y = header;
+	link_type x = root();
+	while(x)
+		if(key_compare(k,key(x)))
+			y = x, x = left(x);
+		else
+			x = right(x);
+	return const_iterator(y);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator>
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type & k) noexcept{
+	return std::pair<iterator,iterator>(lower_bound(k),upper_bound(k));
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator,
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator>
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type & k) const noexcept{
+	return std::pair<const_iterator,const_iterator>(lower_bound(k),upper_bound(k));
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline rb_tree<Key, Value, KeyOfValue, Compare, Alloc>&
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::operator=(const rb_tree& lhs){
+	if(this != &lhs){
+		clear();
+		key_compare = lhs.key_compare;
+		if(!lhs.root()){
+			root() = nullptr;
+			leftmost() = header;
+			rightmost() = header;
+		}
+		else{
+			root() = copy(lhs.root(),header);
+			leftmost() = minimum(root());
+			rightmost() = maximum(root());
+			node_count = lhs.node_count;
+		}
+	}
+	return *this;
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -519,6 +632,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 	catch(std::exception&){
 		erase_aux(top);
 	}
+	return top;
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
