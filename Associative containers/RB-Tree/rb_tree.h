@@ -78,7 +78,7 @@ private:// data member getter && setter
 	static link_type& parent(link_type p) { return reinterpret_cast<link_type&>(p->parent); }
 	static reference& value(link_type p) { return p->value_field; }
 	static const Key& key(link_type p) { return KeyOfValue()(value(p)); }//KeyofValue是一个函数对象
-	static color_type& color(link_type p) { return static_cast<color_type&>(p->color); }
+	static color_type& color(link_type p) { return p->color; }
 
 	// base_node的快速访问与设定
 	static link_type& left(base_ptr p) { return reinterpret_cast<link_type&>(p->left); }
@@ -86,7 +86,7 @@ private:// data member getter && setter
 	static link_type& parent(base_ptr p) { return reinterpret_cast<link_type&>(p->parent); }
 	static reference& value(base_ptr p) { return reinterpret_cast<link_type>(p)->value_field; }
 	static const Key& key(base_ptr p) { return KeyOfValue()(value(reinterpret_cast<link_type>(p))); }//KeyofValue是一个函数对象
-	static color_type& color(base_ptr p) { return static_cast<color_type&>(reinterpret_cast<link_type>(p)->color); }
+	static color_type& color(base_ptr p) { return reinterpret_cast<link_type>(p)->color; }
 
 	// 求取极值（转交node_base)
 	static link_type minimum(link_type p) {
@@ -727,6 +727,21 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 		erase_aux(top);
 	}
 	return top;
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline bool operator==(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
+	return lhs.size() == rhs.size() && std::equal(lhs.begin(),lhs.end(),rhs.begin());
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline bool operator!=(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
+	return !(lhs == rhs);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline void swap(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) noexcept {
+	lhs.swap(rhs);
 }
 
 } // end namesapce::MiniSTL
