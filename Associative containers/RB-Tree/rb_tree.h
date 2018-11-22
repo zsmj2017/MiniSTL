@@ -668,6 +668,42 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(iterator pos,const
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator pos){
+	link_type y = reinterpret_cast<link_type>(rb_tree_rebalance_for_erase(pos.node,header->parent,header->left,header->right));
+	destroy_node(y);
+	--node_count;
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type& k){
+	std::pair<iterator,iterator> p = equal_range(k);
+	size_type n = 0;
+	distance(p.first,p.second,n);
+	erase(p.first,p.second);
+	return n;
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator first,iterator last){
+	if(first == begin() && last == end())
+		clear();
+	else
+		while(first != last) erase(first++);	
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear(){
+	if(node_count){
+		erase_aux(root());
+		leftmost() = header;
+		root() = nullptr;
+		rightmost() = header;
+		node_count = 0;
+	}
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::link_type
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 	link_type top = clone_node(x);
@@ -691,17 +727,6 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 		erase_aux(top);
 	}
 	return top;
-}
-
-template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear(){
-	if(node_count){
-		erase_aux(root());
-		leftmost() = header;
-		root() = nullptr;
-		rightmost() = header;
-		node_count = 0;
-	}
 }
 
 } // end namesapce::MiniSTL
