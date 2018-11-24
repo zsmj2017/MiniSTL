@@ -19,8 +19,10 @@ inline bool operator==(const map<Key, T, Compare, Alloc>& lhs, const map<Key, T,
 template <class Key, class T,class Compare = std::less<Key>,class Alloc = simpleAlloc<T> >
 class map{
 	// friend declarations
-	friend bool operator== <>(const map&, const map&);
-	friend bool operator< <>(const map&, const map&);
+	template <class _Key, class _T, class _Compare, class _Alloc>
+	friend bool operator==(const map<_Key, _T, _Compare, _Alloc>& lhs, const map<_Key, _T, _Compare, _Alloc>& rhs);
+	template <class _Key, class _T, class _Compare, class _Alloc>
+	friend bool operator< (const map<_Key, _T, _Compare, _Alloc>& lhs, const map<_Key, _T, _Compare, _Alloc>& rhs);
 public:// value comparator
 	using key_type = Key;
 	using data_type = T;
@@ -50,12 +52,11 @@ public:// Alias declarations
 	using const_reference = typename rep_type:: const_reference;
 	using iterator = typename rep_type::iterator;
 	using const_iterator = typename rep_type::const_iterator;
-	using reverse_iterator = typename rep_type::reverse_iterator;
-	using const_reverse_iterator = typename rep_type::const_reverse_iterator;
+	// TODO::reverse
+	//using reverse_iterator = typename rep_type::reverse_iterator;
+	//using const_reverse_iterator = typename rep_type::const_reverse_iterator;
 	using size_type = typename rep_type::size_type;
 	using difference_type = typename rep_type::difference_type;
-	using allocator_type = typename rep_type::allocator_type;
-
 
 public:// ctor
 	map():t(key_compare()) {}
@@ -63,12 +64,12 @@ public:// ctor
 	template <class InputIterator>
 	map(InputIterator first, InputIterator last) : t(key_compare()) { t.insert_unique(first, last); }
 	template <class InputIterator>
-	map(InputIterator first, InputIterator last,const key_compare()& comp) : t(comp) { t.insert_unique(first, last); }
-	map(const map<Key,T,Compare,Alloc>&rhs):t(x.t){}
+	map(InputIterator first, InputIterator last,const key_compare& comp) : t(comp) { t.insert_unique(first, last); }
+	map(const map<Key,T,Compare,Alloc>& rhs):t(rhs.t){}
 
 public:// copy operation
-	map& operator=(const map&rhs) {
-		t = x.t;
+	map& operator=(const map& rhs) {
+		t = rhs.t;
 		return *this;
 	}
 	
@@ -77,8 +78,9 @@ public:// getter
 	value_compare value_comp() const noexcept { return value_compare(t.key_comp()); }
 	const_iterator cbegin() const noexcept{ return t.begin(); }
 	const_iterator cend() const noexcept { return t.end(); }
-	const_reverse_iterator crbegin() const noexcept { return t.rbegin(); }
-	const_reverse_iterator crend() const noexcept { return t.rend(); }
+	// TODO::reverse
+	//const_reverse_iterator crbegin() const noexcept { return t.rbegin(); }
+	//const_reverse_iterator crend() const noexcept { return t.rend(); }
 	bool empty() const noexcept { return t.empty(); }
 	size_type size() const noexcept { return t.size(); }
 	size_type max_size() const noexcept { return t.max_size(); }
@@ -86,11 +88,12 @@ public:// getter
 public:// setter
 	iterator begin() noexcept { return t.begin(); }
 	iterator end() noexcept { return t.end(); }
-	reverse_iterator rbegin() noexcept { return t.rbegin(); }
-	reverse_iterator rend() noexcept { return t.rend(); }
+	// TODO::reverse
+	//reverse_iterator rbegin() noexcept { return t.rbegin(); }
+	//reverse_iterator rend() noexcept { return t.rend(); }
 	//map的operator[]具备插入功能
 	value_type& operator[](const key_type& k) {
-		return (*(insert(value_type(k,data_type())).first)).second
+		return (*(insert(value_type(k,data_type())).first)).second;
 	}
 
 public:// swap
