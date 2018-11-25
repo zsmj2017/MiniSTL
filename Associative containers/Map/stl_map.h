@@ -146,8 +146,18 @@ inline bool operator==(const map<Key, Tp, Compare, Alloc>& lhs, const map<Key, T
 }
 
 template <class Key, class Tp, class Compare, class Alloc>
+inline bool operator!=(const map<Key, Tp, Compare, Alloc>& lhs, const map<Key, Tp, Compare, Alloc>& rhs) {
+	return !(lhs.t == rhs.t);
+}
+
+template <class Key, class Tp, class Compare, class Alloc>
 inline bool operator<(const map<Key, Tp, Compare, Alloc>& lhs,const map<Key, Tp, Compare, Alloc>& rhs) {
 	return lhs.t < rhs.t;
+}
+
+template <class Key, class Tp, class Compare, class Alloc>
+inline bool operator>=(const map<Key, Tp, Compare, Alloc>& lhs,const map<Key, Tp, Compare, Alloc>& rhs) {
+	return !(lhs.t < rhs.t);
 }
 
 }// end namespace::MiniSTL
