@@ -749,12 +749,32 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,link_type y){
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator==(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
-	return lhs.size() == rhs.size() && std::equal(lhs.begin(),lhs.end(),rhs.begin());
+	return lhs.size() == rhs.size() && std::equal(lhs.cbegin(),lhs.cend(),rhs.cbegin());
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator!=(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
 	return !(lhs == rhs);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline bool operator<(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
+	return std::lexicographical_compare(lhs.cbegin(),lhs.cend(),rhs.cbegin(),rhs.cend());
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline bool operator>(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
+	return rhs < lhs;
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline bool operator<=(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
+	return !(rhs < lhs);
+}
+
+template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+inline bool operator>=(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs){
+	return !(lhs < rhs);
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
