@@ -68,9 +68,9 @@ private:// data member
 
 private:// data member getter && setter
 	// 获取header成员
-	link_type& root() const { return reinterpret_cast<link_type&>(header->parent); }
-	link_type& leftmost() const { return reinterpret_cast<link_type&>(header->left); }
-	link_type& rightmost() const { return reinterpret_cast<link_type&>(header->right); }
+	link_type& root() const noexcept { return reinterpret_cast<link_type&>(header->parent); }
+	link_type& leftmost() const noexcept{ return reinterpret_cast<link_type&>(header->left); }
+	link_type& rightmost() const noexcept{ return reinterpret_cast<link_type&>(header->right); }
 
 	// 普通node的快速访问与设定
 	static link_type& left(link_type p) { return reinterpret_cast<link_type&>(p->left); }
@@ -138,7 +138,7 @@ public:// copy operation
 public:// getter
 	Compare key_comp() const noexcept { return key_compare; }
 	const_iterator cbegin() const noexcept { return leftmost(); }
-	const_iterator cend() const noexcept { return rightmost(); }
+	const_iterator cend() const noexcept { return header; }
 	// TODO:
 	//const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
 	//const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
@@ -148,7 +148,7 @@ public:// getter
 
 public:// setter
 	iterator begin() { return leftmost(); }
-	iterator end() { return rightmost(); }
+	iterator end() { return header; }
 	// TODO:
 	//reverse_iterator rbegin() { return reverse_iterator(end()); }
 	//reverse_iterator rend() { return reverse_iterator(begin()); }
