@@ -26,7 +26,7 @@ class map{
 public:// value comparator
 	using key_type = Key;
 	using data_type = T;
-	using value_type = std::pair<const Key,T>;
+	using value_type = pair<const Key,T>;
 	using key_compare = Compare;
 
 	class value_compare : public binary_function<value_type, value_type, bool> {
@@ -101,7 +101,7 @@ public:// swap
 	void swap(map<Key, T, Compare, Alloc>& x) noexcept { t.swap(x.t); }
 
 public:// insert && erase
-	std::pair<iterator, bool> insert(const value_type& x){
+	pair<iterator, bool> insert(const value_type& x){
 		return t.insert_unique(x);
 	}
 	iterator insert(iterator pos, const value_type& x){
@@ -132,10 +132,10 @@ public:// find
 	const_iterator upper_bound(const key_type& x) const noexcept {
 		return t.upper_bound(x);
 	}
-	std::pair<iterator, iterator> equal_range(const key_type& x) noexcept {
+	pair<iterator, iterator> equal_range(const key_type& x) noexcept {
 		return t.equal_range(x);
 	}
-	std::pair<const_iterator, const_iterator> equal_range(const key_type& x) const noexcept {
+	pair<const_iterator, const_iterator> equal_range(const key_type& x) const noexcept {
 		return t.equal_range(x);
 	}
 };

@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "rb_tree_iterator.h"
-#include <functional>
+#include "stl_function.h"
 #include "allocator.h"
 
 namespace MiniSTL{
 
 template <class Key,class Value,class KeyOfValue,class Compare,class Alloc = simpleAlloc<Value> >
 class rb_tree {
-private:// Internal alias declarations
+private:// Internalstd::pair alias declarations
 	using void_pointer = void*;
 	using base_ptr = __rb_tree_node_base * ;
 	using rb_tree_node = __rb_tree_node<Value>;
@@ -154,7 +154,7 @@ public:// setter
 	//reverse_iterator rend() { return reverse_iterator(begin()); }
 
 public:// insert
-	std::pair<iterator, bool> insert_unique(const value_type&);
+	pair<iterator, bool> insert_unique(const value_type&);
 	iterator insert_unique(iterator,const value_type&);
 	template<class _InputIterator>
 	void insert_unique(_InputIterator first,_InputIterator last);
@@ -177,8 +177,8 @@ public:// find
 	const_iterator lower_bound(const key_type&) const noexcept;
 	iterator upper_bound(const key_type&) noexcept;
 	const_iterator upper_bound(const key_type&) const noexcept;
-	std::pair<iterator,iterator> equal_range(const key_type&) noexcept;
-	std::pair<const_iterator,const_iterator> equal_range(const key_type&) const noexcept;
+	pair<iterator,iterator> equal_range(const key_type&) noexcept;
+	pair<const_iterator,const_iterator> equal_range(const key_type&) const noexcept;
 
 public:// swap
 	void swap(rb_tree<Key,Value,KeyOfValue,Compare,Alloc>& lhs) noexcept{
@@ -192,8 +192,8 @@ public:// swap
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_aux(base_ptr x_, base_ptr y_, const value_type & value){
-	link_type x = x_;
-	link_type y = y_;
+	link_type x = reinterpret_cast<link_type>(x_);
+	link_type y = reinterpret_cast<link_type>(y_);
 	link_type z;
 	if (y == header || x || KeyOfValue()(value), key(y)) {
 		// 待插入节点之父为header||待插入节点自身并不为nullptr(何时触发？）||父节点明确大于待插入值
@@ -482,7 +482,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type & k) const 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::count(const key_type & k) const noexcept{
-	std::pair<const_iterator,const_iterator> p = equal_range(k);
+	pair<const_iterator,const_iterator> p = equal_range(k);
 	size_type n = 0;
 	distance(p.first,p.second,n);
 	return n;
@@ -541,17 +541,17 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type & k)
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,
+inline pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,
 		typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator>
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type & k) noexcept{
-	return std::pair<iterator,iterator>(lower_bound(k),upper_bound(k));
+	return pair<iterator,iterator>(lower_bound(k),upper_bound(k));
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-inline std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator,
+inline pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator,
 		typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator>
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type & k) const noexcept{
-	return std::pair<const_iterator,const_iterator>(lower_bound(k),upper_bound(k));
+	return pair<const_iterator,const_iterator>(lower_bound(k),upper_bound(k));
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -576,7 +576,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::operator=(const rb_tree& lhs){
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,bool> 
+pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,bool> 
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type & value){
 	link_type y = header;
 	link_type x = root();
@@ -590,13 +590,13 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type 
 	iterator j(y);
 	if (comp)// y键值大于value键值，插于左侧
 		if (j == begin())//待插入点之父为最左节点
-			return std::pair<iterator, bool>(insert_aux(x, y, value), true);
+			return pair<iterator, bool>(insert_aux(x, y, value), true);
 		else
 			--j;// 调整j准备完成测试（可能与某键值重复）
 	if (key_compare(key(j.node), KeyOfValue(value)))
 		// 新键值不与旧有键值重复，放心插入
-		return std::pair<iterator, bool>(insert_aux(x, y, value), true);
-	return std::pair<iterator, bool>(j, false);// 当前value为重复值
+		return pair<iterator, bool>(insert_aux(x, y, value), true);
+	return pair<iterator, bool>(j, false);// 当前value为重复值
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -695,7 +695,7 @@ void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator pos){
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type& k){
-	std::pair<iterator,iterator> p = equal_range(k);
+	pair<iterator,iterator> p = equal_range(k);
 	size_type n = 0;
 	distance(p.first,p.second,n);
 	erase(p.first,p.second);
