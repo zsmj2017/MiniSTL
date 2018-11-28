@@ -195,7 +195,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_aux(base_ptr x_, base_pt
 	link_type x = reinterpret_cast<link_type>(x_);
 	link_type y = reinterpret_cast<link_type>(y_);
 	link_type z;
-	if (y == header || x || KeyOfValue()(value), key(y)) {
+	if (y == header || x || key_compare(KeyOfValue()(value), key(y))) {
 		// 待插入节点之父为header||待插入节点自身并不为nullptr(何时触发？）||父节点明确大于待插入值
 		z = create_node(value);
 		left(y) = z;// 若y为header，此时leftmost==z
@@ -593,7 +593,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type 
 			return pair<iterator, bool>(insert_aux(x, y, value), true);
 		else
 			--j;// 调整j准备完成测试（可能与某键值重复）
-	if (key_compare(key(j.node), KeyOfValue(value)))
+	if (key_compare(key(j.node), KeyOfValue()(value)))
 		// 新键值不与旧有键值重复，放心插入
 		return pair<iterator, bool>(insert_aux(x, y, value), true);
 	return pair<iterator, bool>(j, false);// 当前value为重复值

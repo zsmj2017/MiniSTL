@@ -91,9 +91,13 @@ public:// setter
 	// TODO::reverse
 	//reverse_iterator rbegin() noexcept { return t.rbegin(); }
 	//reverse_iterator rend() noexcept { return t.rend(); }
+
 	//map的operator[]具备插入功能
-	value_type& operator[](const key_type& k) {
-		return (*(insert(value_type(k,data_type())).first)).second;
+	data_type& operator[](const key_type& k) {
+		iterator i = lower_bound(k);
+		if(i==end() || key_comp()(k,(*i).first))
+			i = insert(i,value_type(k,data_type()));
+		return (*i).second;
 	}
 
 public:// swap
