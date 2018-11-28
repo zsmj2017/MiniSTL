@@ -16,7 +16,7 @@ inline bool operator==(const map<Key, T, Compare, Alloc>& lhs, const map<Key, T,
 template <class Key, class T, class Compare, class Alloc>
 inline bool operator==(const map<Key, T, Compare, Alloc>& lhs, const map<Key, T, Compare, Alloc>& rhs);
 
-template <class Key, class T,class Compare = std::less<Key>,class Alloc = simpleAlloc<T> >
+template <class Key, class T,class Compare = less<Key>,class Alloc = simpleAlloc<T> >
 class map{
 	// friend declarations
 	template <class _Key, class _T, class _Compare, class _Alloc>
