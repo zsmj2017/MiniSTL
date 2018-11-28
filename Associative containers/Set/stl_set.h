@@ -32,7 +32,7 @@ private:
 	struct identity :public unary_function<T,T>{
 		const T& operator()(const T& x) const { return x; }
 	};
-	using rep_type = rb_tree <key_type, value_type, identity<value_type>, Alloc>;
+	using rep_type = rb_tree <key_type, value_type, identity<value_type>, Compare, Alloc>;
 	rep_type t;//底层红黑树
 
 public:
@@ -50,15 +50,14 @@ public:
 
 	using size_type = typename rep_type::size_type;
 	using difference_type = typename rep_type::difference_type;
-	using allocator_type = typename rep_type::allocator_type;
 
 public:// ctor
 	// set只能使用insert-unique()
-	set():t(key_compare()) {}
-	explicit set (const key_compare& comp):t(comp) {}
+	set():t(Compare()) {}
+	explicit set(const Compare& comp):t(comp) {}
 	template <class InputIterator>
 	set (InputIterator first, InputIterator last)
-		: t(key_compare()) {
+		: t(Compare()) {
 		t.insert_unique(first, last);
 	}
 	template <class InputIterator>
@@ -77,7 +76,6 @@ public:// copy operations
 public:// getter
 	key_compare key_comp() const noexcept { return t.key_comp(); }
 	value_compare value_comp() const noexcept { return t.key_comp(); }//set的value_comp即为rb-tree的key_comp
-	allocator_type get_allocator() const noexcept { return t.get_allocator(); }
 	bool empty() const noexcept { return t.empty(); }
 	size_type size() const noexcept { return t.size(); }
 	size_type max_size() const noexcept { return t.max_size(); }
@@ -100,8 +98,8 @@ public:// inset && erase
 	}
 
 	iterator insert(iterator pos, const value_type& x) {
-		using rep_iterator = rep_type::iterator;
-		return t.insert_unique(static_cast<rep_iterator&>(pos),x);
+		using rep_iterator = typename rep_type::iterator;
+		return t.insert_unique(reinterpret_cast<rep_iterator&>(pos),x);
 	}
 
 	template <class InputIterator>
@@ -110,8 +108,8 @@ public:// inset && erase
 	}
 
 	void erase(iterator pos) {
-		using rep_iterator = rep_type::iterator;
-		t.erase(static_cast<rep_iterator&>(pos))
+		using rep_iterator = typename rep_type::iterator;
+		t.erase(reinterpret_cast<rep_iterator&>(pos));
 	}
 
 	size_type erase(const key_type& x) {
@@ -119,8 +117,8 @@ public:// inset && erase
 	}
 
 	void erase(iterator first, iterator last) {
-		using rep_iterator = rep_type::iterator;
-		t.erase(static_cast<rep_iterator&>(first), static_cast<rep_iterator&>(last));
+		using rep_iterator = typename rep_type::iterator;
+		t.erase(reinterpret_cast<rep_iterator&>(first), reinterpret_cast<rep_iterator&>(last));
 	}
 
 	void clear() { t.clear(); }
