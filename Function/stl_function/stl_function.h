@@ -499,4 +499,59 @@ inline const_mem_fun1_ref_t<S, T, Arg>
 	mem_fun1_ref(S(T::*f)(Arg) const) {
 	return const_mem_fun1_ref_t<S, T, Arg>(f);
 }
+
+// struct pair
+template<class T1,class T2>
+struct pair{
+	using first_type = T1;
+	using second_type = T2;
+
+	first_type first;
+	second_type second;
+
+	pair():first(first_type()),second(second_type()) {}
+	pair(const first_type& a,const second_type& b):first(a),second(b) {}
+
+	template<class U1,class U2>
+	pair(const pair<U1,U2>& rhs):first(rhs.first),second(rhs.second) {}
+};
+
+// Compartor for pair
+template<class T1,class T2>
+inline bool operator==(const pair<T1,T2>& lhs,const pair<T1,T2>& rhs){
+	return lhs.first == rhs.first && lhs.second == rhs.second;
 }
+
+template<class T1,class T2>
+inline bool operator<(const pair<T1,T2>& lhs,const pair<T1,T2>& rhs){
+	return lhs.first < rhs.first ||
+		(!(rhs.first<lhs.first) && lhs.second < rhs.second);
+}
+
+template<class T1,class T2>
+inline bool operator!=(const pair<T1,T2>& lhs,const pair<T1,T2>& rhs){
+	return !(lhs==rhs);
+}
+
+template<class T1,class T2>
+inline bool operator>(const pair<T1,T2>& lhs,const pair<T1,T2>& rhs){
+	return rhs < lhs;
+}
+
+template<class T1,class T2>
+inline bool operator<=(const pair<T1,T2>& lhs,const pair<T1,T2>& rhs){
+	return !(rhs < lhs);
+}
+
+template<class T1,class T2>
+inline bool operator>=(const pair<T1,T2>& lhs,const pair<T1,T2>& rhs){
+	return !(lhs < rhs);
+}
+
+// make pair
+template<class T1,class T2>
+inline pair<T1,T2> make_pair(const T1& first,const T2& second){
+	return pair<T1,T2>(first,second);
+}
+
+}// end namespace::MiniSTL
