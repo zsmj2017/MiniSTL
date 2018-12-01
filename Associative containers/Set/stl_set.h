@@ -27,13 +27,9 @@ public:// Set的key与value是同一个
 	using key_compare = Compare;
 	using value_compare = Compare;
 
-private:
-	template <class T>
-	struct identity :public unary_function<T,T>{
-		const T& operator()(const T& x) const { return x; }
-	};
+private:// data member
 	using rep_type = rb_tree <key_type, value_type, identity<value_type>, Compare, Alloc>;
-	rep_type t;//底层红黑树
+	rep_type t;
 
 public:
 	// set禁止修改键值，因此其迭代器与指针均为const iterator或const_ptr，引用亦为const
@@ -47,17 +43,16 @@ public:
 	// TODO:
 	//using reverse_iterator = typename rep_type::const_reverse_iterator;
 	//using const_reverse_iterator = typename rep_type::const_reverse_iterator;
-
 	using size_type = typename rep_type::size_type;
 	using difference_type = typename rep_type::difference_type;
 
 public:// ctor
-	// set只能使用insert-unique()
-	set():t(Compare()) {}
-	explicit set(const Compare& comp):t(comp) {}
+	// only use insert_unique
+	set():t(key_compare()) {}
+	explicit set(const key_compare& comp):t(comp) {}
 	template <class InputIterator>
 	set (InputIterator first, InputIterator last)
-		: t(Compare()) {
+		: t(key_compare()) {
 		t.insert_unique(first, last);
 	}
 	template <class InputIterator>
@@ -75,21 +70,21 @@ public:// copy operations
 
 public:// getter
 	key_compare key_comp() const noexcept { return t.key_comp(); }
-	value_compare value_comp() const noexcept { return t.key_comp(); }//set的value_comp即为rb-tree的key_comp
+	value_compare value_comp() const noexcept { return t.key_comp(); }
 	bool empty() const noexcept { return t.empty(); }
 	size_type size() const noexcept { return t.size(); }
 	size_type max_size() const noexcept { return t.max_size(); }
-	// set的迭代器具有只读属性
+	// read only
 	iterator begin() const noexcept{ return t.cbegin(); }
 	iterator end() const noexcept { return t.cend(); }
-	iterator cbegin() const noexcept{ return t.cbegin(); }
-	iterator cend() const noexcept { return t.cend(); }
+	const_iterator cbegin() const noexcept{ return t.cbegin(); }
+	const_iterator cend() const noexcept { return t.cend(); }
 	// TODO:
 	//reverse_iterator rbegin() const noexcept { return t.rbegin(); }
 	//reverse_iterator rend() const noexcept { return t.rend(); }
 
 public:// swap
-	void swap(set<Key, Compare, Alloc>& x) { t.swap(x.t); }//此处调用的是rb-tree成员函数，而非stl swap
+	void swap(set<Key, Compare, Alloc>& x) noexcept { t.swap(x.t); }
 
 public:// inset && erase
 	pair<iterator, bool> insert(const value_type& x) {
