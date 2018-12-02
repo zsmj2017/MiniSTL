@@ -33,9 +33,15 @@ public:// value comparator
 		Compare comp;
 		value_compare(Compare c) : comp(c) {}
 	public:
-		bool operator()(const value_type& x, const value_type& y) const 
+		bool operator()(const value_type& x, const value_type& y) const{
 			return comp(x.first, y.first);	
+		}
 	};
+
+private:// data member
+	using rep_type = rb_tree<key_type, value_type, select1st<value_type>, key_compare, Alloc>;
+	rep_type t;
+
 public:// alias declarations
 	using pointer = typename rep_type::pointer;
 	using const_pointer = typename rep_type::const_pointer;
@@ -48,11 +54,6 @@ public:// alias declarations
 	//using const_reverse_iterator = typename rep_type::const_reverse_iterator;
 	using size_type = typename rep_type::size_type;
 	using difference_type = typename rep_type::difference_type;
-	using allocator_type = typename rep_type::allocator_type;
-
-private:// data member
-	using rep_type = rb_tree<key_type, value_type, select1st<value_type>, key_compare, Alloc>;
-	rep_type t;
 
 public:// ctor
 	multimap() :t(key_compare()) {}
@@ -60,18 +61,18 @@ public:// ctor
 	template <class InputIterator>
 	multimap(InputIterator first, InputIterator last) : t(key_compare()) { t.insert_equal(first, last); }
 	template <class InputIterator>
-	multimap(InputIterator first, InputIterator last, const key_compare()& comp) : t(comp) { t.insert_equal(first, last); }
-	multimap(const multimap<Key, T, Compare, Alloc>&rhs) :t(x.t) {}
+	multimap(InputIterator first, InputIterator last, const key_compare& comp) : t(comp) { t.insert_equal(first, last); }
+	multimap(const multimap<Key, T, Compare, Alloc>&rhs) :t(rhs.t) {}
 
 public:// copy operations
 	multimap<Key, T, Compare, Alloc>& operator= (const multimap<Key, T, Compare, Alloc>& rhs) {
-		t = x.t;
+		t = rhs.t;
 		return *this;
 	}
 
 public:// getter
 	key_compare key_comp() const noexcept { return t.key_comp(); }
-	value_compare value_comp() const noexcept {r eturn value_compare(t.key_comp()); }
+	value_compare value_comp() const noexcept { return value_compare(t.key_comp()); }
 	const_iterator cbegin() const { return t.cbegin(); }
 	const_iterator cend() const { return t.cend(); }
 	// TODO:
