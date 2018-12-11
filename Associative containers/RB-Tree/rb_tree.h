@@ -455,7 +455,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type & k) noexce
 			y = x, x = left(x);
 		else
 			x = right(x);
-	iterator j = iteator(y);
+	iterator j = iterator(y);
 	// 没找到存在两种可能
 	// 1.k比最大值还大，j已经指向了end
 	// 2.已经寻至叶子，但此时发现k仍然小于key(j.node) 若找到应有k==key(j.node)
@@ -483,9 +483,7 @@ template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::count(const key_type & k) const noexcept{
 	pair<const_iterator,const_iterator> p = equal_range(k);
-	size_type n = 0;
-	distance(p.first,p.second,n);
-	return n;
+	return MiniSTL::distance(p.first,p.second);
 }
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -696,8 +694,7 @@ template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type& k){
 	pair<iterator,iterator> p = equal_range(k);
-	size_type n = 0;
-	distance(p.first,p.second,n);
+	size_type n = MiniSTL::distance(p.first,p.second);
 	erase(p.first,p.second);
 	return n;
 }
