@@ -7,21 +7,21 @@ namespace MiniSTL{
 
 //Forward declarations of operators == and <, needed for friend declarations.
 template <class Key, class Compare, class Alloc>
-class mutiset;
+class multiset;
 
 template <class Key, class Compare, class Alloc>
-inline bool operator==(const mutiset<Key, Compare, Alloc>& lhs, const mutiset<Key, Compare, Alloc>& rhs);
+inline bool operator==(const multiset<Key, Compare, Alloc>& lhs, const multiset<Key, Compare, Alloc>& rhs);
 
 template <class Key, class Compare, class Alloc>
-inline bool operator<(const mutiset<Key, Compare, Alloc>& lhs, const mutiset<Key, Compare, Alloc>& rhs);
+inline bool operator<(const multiset<Key, Compare, Alloc>& lhs, const multiset<Key, Compare, Alloc>& rhs);
 
 template <class Key, class Compare = less<Key>, class Alloc = simpleAlloc<Key>>
-class mutiset {
+class multiset {
 	// friend declarations
 	template <class _Key, class _Compare, class _Alloc>
-	friend bool operator==(const mutiset<_Key, _Compare, _Alloc>& lhs, const mutiset<_Key, _Compare, _Alloc>& rhs);
+	friend bool operator==(const multiset<_Key, _Compare, _Alloc>& lhs, const multiset<_Key, _Compare, _Alloc>& rhs);
 	template <class _Key, class _Compare, class _Alloc>
-	friend bool operator<(const mutiset<_Key, _Compare, _Alloc>& lhs, const mutiset<_Key, _Compare, _Alloc>& rhs);
+	friend bool operator<(const multiset<_Key, _Compare, _Alloc>& lhs, const multiset<_Key, _Compare, _Alloc>& rhs);
 
 public:
 	using key_type = Key;
@@ -37,7 +37,7 @@ public:
 	using pointer = typename rep_type::const_pointer;
 	using const_pointer = typename rep_type::const_pointer;
 	using reference = typename rep_type::const_reference;
-	using const_reference = typename rep_type const_reference;
+	using const_reference = typename rep_type::const_reference;
 	using iterator = typename rep_type::const_iterator;
 	using const_iterator = typename rep_type::const_iterator;
 	// TODO:
@@ -47,23 +47,23 @@ public:
 	using difference_type = typename rep_type::difference_type;
 
 public:// ctor
-	mutiset():t(key_compare()) {}
-	explicit mutiset(const key_compare& comp) :t(comp) {}
+	multiset() : t(key_compare()) {}
+	explicit multiset(const key_compare& comp) :t(comp) {}
 	template <class InputIterator>
-	mutiset(InputIterator first, InputIterator last)
+	multiset(InputIterator first, InputIterator last)
 		: t(key_compare()) {
 		t.insert_equal(first, last);
 	}
 	template <class InputIterator>
-	mutiset(InputIterator first, InputIterator last, const key_compare& comp)
+	multiset(InputIterator first, InputIterator last, const key_compare& comp)
 		: t(comp) {
 		t.insert_equal(first, last);
 	}
 
 public:// copy operations
-	mutiset(const mutiset<Key, Compare, Alloc>& rhs) : t(rhs.t) {}
-	mutiset<Key, Compare, Alloc>& operator=(const mutiset<Key, Compare, Alloc>& rhs) {
-		t = x.t;
+	multiset(const multiset<Key, Compare, Alloc>& rhs) : t(rhs.t) {}
+	multiset<Key, Compare, Alloc>& operator=(const multiset<Key, Compare, Alloc>& rhs) {
+		t = rhs.t;
 		return *this;
 	}
 
@@ -82,7 +82,7 @@ public:// getter
 	size_type max_size() const noexcept { return t.max_size(); }
 
 public:// swap
-	void swap(mutiset<Key, Compare, Alloc>& x) noexcept { t.swap(x.t); }
+	void swap(multiset<Key, Compare, Alloc>& x) noexcept { t.swap(x.t); }
 
 public:// insert && erase
 	pair<iterator, bool> insert(const value_type& x) {
@@ -91,8 +91,8 @@ public:// insert && erase
 	}
 
 	iterator insert(iterator pos, const value_type& x) {
-		using rep_iterator = rep_type::iterator;
-		return t.insert_equal(static_cast<rep_iterator&>(pos), x);
+		using rep_iterator = typename rep_type::iterator;
+		return t.insert_equal(reinterpret_cast<rep_iterator&>(pos), x);
 	}
 
 	template <class InputIterator>
@@ -101,8 +101,8 @@ public:// insert && erase
 	}
 
 	void erase(iterator pos) {
-		using rep_iterator = rep_type::iterator;
-		t.erase(static_cast<rep_iterator&>(pos))
+		using rep_iterator = typename rep_type::iterator;
+		t.erase(reinterpret_cast<rep_iterator&>(pos));
 	}
 
 	size_type erase(const key_type& x) {
@@ -110,8 +110,8 @@ public:// insert && erase
 	}
 
 	void erase(iterator first, iterator last) {
-		using rep_iterator = rep_type::iterator;
-		t.erase(static_cast<rep_iterator&>(first), static_cast<rep_iterator&>(last));
+		using rep_iterator = typename rep_type::iterator;
+		t.erase(reinterpret_cast<rep_iterator&>(first), reinterpret_cast<rep_iterator&>(last));
 	}
 
 	void clear() { t.clear(); }
@@ -125,12 +125,12 @@ public:// find && search
 };
 
 template <class Key, class Compare, class Alloc>
-inline bool operator==(const mutiset<Key, Compare, Alloc>& lhs, const mutiset<Key, Compare, Alloc>& rhs) {
+inline bool operator==(const multiset<Key, Compare, Alloc>& lhs, const multiset<Key, Compare, Alloc>& rhs) {
 	return lhs.t == rhs.t;
 }
 
 template <class Key, class Compare, class Alloc>
-inline bool operator<(const mutiset<Key, Compare, Alloc>& lhs, const mutiset<Key, Compare, Alloc>& rhs) {
+inline bool operator<(const multiset<Key, Compare, Alloc>& lhs, const multiset<Key, Compare, Alloc>& rhs) {
 	return lhs.t < rhs.t;
 }
 
