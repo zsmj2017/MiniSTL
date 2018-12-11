@@ -119,9 +119,34 @@ inline bool operator==(const multimap<Key, T, Compare, Alloc>& lhs, const multim
 	return lhs.t == rhs.t;
 }
 
+template <class Key, class Tp, class Compare, class Alloc>
+inline bool operator!=(const multimap<Key, Tp, Compare, Alloc>& lhs, const multimap<Key, Tp, Compare, Alloc>& rhs) {
+	return !(lhs.t == rhs.t);
+}
+
 template <class Key, class T, class Compare, class Alloc>
 inline bool operator<(const multimap<Key, T, Compare, Alloc>& lhs, const multimap<Key, T, Compare, Alloc>& rhs) {
 	return lhs.t < rhs.t;
+}
+
+template <class Key, class Tp, class Compare, class Alloc>
+inline bool operator>(const multimap<Key, Tp, Compare, Alloc>& lhs,const multimap<Key, Tp, Compare, Alloc>& rhs) {
+	return rhs < lhs;
+}
+
+template <class Key, class Tp, class Compare, class Alloc>
+inline bool operator<=(const multimap<Key, Tp, Compare, Alloc>& lhs,const multimap<Key, Tp, Compare, Alloc>& rhs) {
+	return !(rhs < lhs);
+}
+
+template <class Key, class Tp, class Compare, class Alloc>
+inline bool operator>=(const multimap<Key, Tp, Compare, Alloc>& lhs,const multimap<Key, Tp, Compare, Alloc>& rhs) {
+	return !(lhs < rhs);
+}
+
+template <class Key, class Tp, class Compare, class Alloc>
+inline void swap(multimap<Key, Tp, Compare, Alloc>& lhs,multimap<Key, Tp, Compare, Alloc>& rhs){
+	lhs.swap(rhs);
 }
 
 }// end namespace::MiniSTL

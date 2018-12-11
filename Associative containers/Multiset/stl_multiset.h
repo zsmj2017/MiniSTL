@@ -127,8 +127,33 @@ inline bool operator==(const multiset<Key, Compare, Alloc>& lhs, const multiset<
 }
 
 template <class Key, class Compare, class Alloc>
+inline bool operator!=(const multiset<Key, Compare, Alloc>& lhs, const multiset<Key, Compare, Alloc>& rhs) {
+	return !(lhs.t == rhs.t);
+}
+
+template <class Key, class Compare, class Alloc>
 inline bool operator<(const multiset<Key, Compare, Alloc>& lhs, const multiset<Key, Compare, Alloc>& rhs) {
 	return lhs.t < rhs.t;
+}
+
+template <class Key, class Compare, class Alloc>
+inline bool operator>(const multiset<Key, Compare, Alloc>& lhs,const multiset<Key, Compare, Alloc>& rhs) {
+	return rhs < lhs;
+}
+
+template <class Key, class Compare, class Alloc>
+inline bool operator<=(const multiset<Key, Compare, Alloc>& lhs,const multiset<Key, Compare, Alloc>& rhs) {
+	return !(rhs < lhs);
+}
+
+template <class Key, class Compare, class Alloc>
+inline bool operator>=(const multiset<Key, Compare, Alloc>& lhs,const multiset<Key, Compare, Alloc>& rhs) {
+	return !(lhs < rhs);
+}
+
+template <class Key, class Compare, class Alloc>
+inline void swap(multiset<Key, Compare, Alloc>& lhs,multiset<Key, Compare, Alloc>& rhs){
+	lhs.swap(rhs);
 }
 
 }// end namespace::MiniSTL
