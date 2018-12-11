@@ -1,5 +1,7 @@
 ﻿#pragma once
+
 #include "stl_iterator.h"
+#include "stl_function.h"
 
 namespace MiniSTL{
 
@@ -912,7 +914,7 @@ inline Size __lg(Size n) {
 template <class RandomAccessIterator, class T, class Size>
 void __introsort_loop(RandomAccessIterator first, RandomAccessIterator last, T*, Size depth_limit) {
 	//__STL_threshold是一个定义为16的全局常数
-	while (last - first > __stl_threshold) {
+	while (last - first > /*__stl_threshold*/ 16) {
 		if (depth_limit == 0) {//已经产生了分割恶化
 			partial_sort(first, last, last);//改用heap-sort
 			return;
@@ -928,7 +930,7 @@ void __introsort_loop(RandomAccessIterator first, RandomAccessIterator last, T*,
 //首先判断元素个数是否大于16，若答案为是，则将其分为两部分
 template <class RandomAccessIterator>
 void __final_insertion_sort(RandomAccessIterator first, RandomAccessIterator last) {
-	if (last - first > __stl_threshold) {
+	if (last - first > /*__stl_threshold*/ 16) {
 		__insertion_sort(first, first + __stl_threshold);
 		__unguarded_insertion_sort(first + __stl_threshold, last);
 	}
@@ -980,13 +982,13 @@ inline void __quick_sort_loop_aux(RandomAccessIterator first, RandomAccessIterat
 
 //equal_range:本质上返回了lower_bound与upper_bound组成的pair
 template <class ForwardIterator,class T>
-inline std::pair<ForwardIterator, ForwardIterator>
+inline pair<ForwardIterator, ForwardIterator>
 equal_range(ForwardIterator first, ForwardIterator last, const T& value) {
 	return __equal_range(first, last, value, distance_type(first), iterator_category(first));
 }
 
 template <class RandomAccessIterator, class T, class Distance>
-inline std::pair<RandomAccessIterator, RandomAccessIterator>
+inline pair<RandomAccessIterator, RandomAccessIterator>
 __equal_range(RandomAccessIterator first, RandomAccessIterator last, const T& value, Distance*, random_access_iterator_tag) {
 	Distance len = last - first;
 	Distance half;
@@ -1012,7 +1014,7 @@ __equal_range(RandomAccessIterator first, RandomAccessIterator last, const T& va
 }
 
 template <class ForwardIterator, class T, class Distance>
-inline std::pair<ForwardIterator, ForwardIterator>
+inline pair<ForwardIterator, ForwardIterator>
 __equal_range(ForwardIterator first, ForwardIterator last, const T& value, Distance*, forward_iterator_tag) {
 	Distance len = 0;
 	distance(first, last, len);
@@ -1034,11 +1036,11 @@ __equal_range(ForwardIterator first, ForwardIterator last, const T& value, Dista
 			left = lower_bound(first, middle, value);
 			advance(first, len);
 			right = upper_bound(++middle, first, value);
-			return pair<RandomAccessIterator, RandomAccessIterator>(left, right);
+			return pair<ForwardIterator, ForwardIterator>(left, right);
 		}
 	}
 	//并未找到该元素,指向第一个大于value的元素
-	return  pair<RandomAccessIterator, RandomAccessIterator>(first, first);
+	return  pair<ForwardIterator, ForwardIterator>(first, first);
 }
 
 //inplace_merge:stable，在存在缓冲区的情况下性能较优
@@ -1158,7 +1160,7 @@ void mergesort(BidirectionalIter first, BidirectionalIter last) {
 		BidirectionalIter mid = first + n / 2;
 		mergesort(first, mid);
 		mergesort(mid, last);
-		inplace_merge(first, middle, last);
+		inplace_merge(first, mid, last);
 	}
 }
 
