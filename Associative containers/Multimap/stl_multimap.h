@@ -105,7 +105,7 @@ public:// insert && erase
 public: // find
 	iterator find(const key_type& x) noexcept { return t.find(x); }
 	const_iterator find(const key_type& x) const noexcept { return t.find(x); }
-	size_type count(const key_type& x) const noexcept { return t.find(x) == t.end() ? 0 : 1; }
+	size_type count(const key_type& x) const noexcept { return t.count(x); }
 	iterator lower_bound(const key_type& x) noexcept { return t.lower_bound(x); }
 	const_iterator lower_bound(const key_type& x) const noexcept { return t.lower_bound(x); }
 	iterator upper_bound(const key_type& x) noexcept { return t.upper_bound(x); }
