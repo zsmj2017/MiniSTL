@@ -63,7 +63,7 @@ public:// ctor
 
 public:// copy operations
 	set(const set<Key, Compare, Alloc>& rhs) : t(rhs.t) {}
-	set<Key, Compare, Alloc>& operator=(const set<Key, Compare, Alloc> rhs){
+	set<Key, Compare, Alloc>& operator=(const set<Key, Compare, Alloc>& rhs){
 		t = rhs.t;
 		return *this;
 	}
