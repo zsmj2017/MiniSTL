@@ -93,7 +93,7 @@ public:// swap
 	void swap(multimap<Key, T, Compare, Alloc>& x) noexcept { t.swap(x.t); }
 
 public:// insert && erase
-	pair<iterator, bool> insert(const value_type& x) { return t.insert_equal(x); }
+	iterator insert(const value_type& x) { return t.insert_equal(x); }
 	iterator insert(iterator position, const value_type& x) { return t.insert_equal(position, x); }
 	template <class InputIterator>
 	void insert(InputIterator first, InputIterator last) { t.insert_equal(first, last); }

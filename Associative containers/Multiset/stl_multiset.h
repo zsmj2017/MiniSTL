@@ -30,7 +30,7 @@ public:
 	using value_compare = Compare;
 
 private:// data member
-	using rep_type = rb_tree < key_type, value_type, identity<value_type>, Alloc>;
+	using rep_type = rb_tree < key_type, value_type, identity<value_type>,key_compare, Alloc>;
 	rep_type t;//底层红黑树
 
 public:
@@ -47,7 +47,7 @@ public:
 	using difference_type = typename rep_type::difference_type;
 
 public:// ctor
-	multiset() : t(key_compare()) {}
+	multiset():t(key_compare()) {}
 	explicit multiset(const key_compare& comp) :t(comp) {}
 	template <class InputIterator>
 	multiset(InputIterator first, InputIterator last)
@@ -85,10 +85,7 @@ public:// swap
 	void swap(multiset<Key, Compare, Alloc>& x) noexcept { t.swap(x.t); }
 
 public:// insert && erase
-	pair<iterator, bool> insert(const value_type& x) {
-		pair<typename rep_type::iterator, bool> p = t.insert_equal(x);
-		return pair<iterator, bool>(p.first, p.second);
-	}
+	iterator insert(const value_type& x) { return t.insert_equal(x); }
 
 	iterator insert(iterator pos, const value_type& x) {
 		using rep_iterator = typename rep_type::iterator;
