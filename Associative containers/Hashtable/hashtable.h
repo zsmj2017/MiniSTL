@@ -82,6 +82,10 @@ struct hashtable_const_iterator {
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc=simpleAlloc<Value> >
 class hashtable {
+	// friend declarations
+	friend struct hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
+	friend struct hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
+
 public:// alias declarations
 	using hasher = HashFcn;
 	using key_equal = EqualKey;
@@ -101,7 +105,7 @@ private:// data member
 	using node = hashtable_node<Value>;
 	using node_allocator = simpleAlloc<node>;
 
-	vector<node*, Alloc> buckets;//以vector表征
+	vector<node*> buckets;//以vector表征
 	size_type num_elements;
 
 private:// allocate && deallocate
@@ -146,14 +150,16 @@ private:// data && interface for bucket
 		return __stl_prime_list[__stl_num_primes - 1];
 	}
 
-	size_type bkt_num(const value_type& obj, size_type n) const { return bkt_num_key(get_key(obj), n); }
-	size_type bkt_num(const value_type& obj) const { return bkt_num_key(get_key(obj)); }
-	size_type bkt_num(const key_type& key) const { return bkt_num_key(key); }
-	size_type bkt_num(const key_type& key, size_type n) const { return bkt_num_key(key, n); }
+	size_type bkt_num(const value_type& obj, size_type n) const noexcept { return bkt_num_key(get_key(obj), n); }
+	size_type bkt_num(const value_type& obj) const noexcept { return bkt_num_key(get_key(obj)); }
+	size_type bkt_num(const key_type& key) const noexcept { return bkt_num_key(key); }
+	size_type bkt_num(const key_type& key, size_type n) const noexcept { return bkt_num_key(key, n); }
+
+private: // aux interface
 	void resize(size_type);
 	pair<iterator, bool> insert_unique_noreseize(const value_type&);
 	pair<iterator, bool> insert_equal_noresize(const value_type&);
-private:// initialize
+
 	void initialize_buckets(size_type n) {
 		const size_type n_buckets = __stl_next_prime(n);
 		//保留空间，由于此时vector's size==0，因此等价于全部置0
@@ -162,18 +168,55 @@ private:// initialize
 		num_elements = 0;
 	}
 
-public:// ctor
+public:// ctor && dtor
 	hashtable(size_type n, const hasher& hf, const key_equal& eql)
 		:hash(hf), equals(eql), get_key(ExtractKey()) {
 		initialize_buckets(n);
 	}
 
-public:
-	size_type bucket_count() const { return buckets.size(); }
+	~hashtable() { clear(); }
+
+public:// getter
+	hasher hash_funct() const noexcept { return hash; }
+	key_equal key_eq() const noexcept { return equals; }
+	size_type bucket_count() const noexcept { return buckets.size(); }
+	size_type size() const noexcept { return num_elements; }
+	size_type max_size() const noexcept { return size_type(-1); }
+	bool empty() const noexcept {return size()==0; }
+
+	const_iterator cbegin() const {
+		for(size_type n = 0;n < buckets.size(); ++n)
+			if(buckets[n]) return const_iterator(buckets[n],this);
+		return cend();
+	}
+
+	const_iterator cend() const { return const_iterator(nullptr,this); }
+
+public:// setter
+	iterator begin(){
+		for(size_type n = 0;n < buckets.size(); ++n)
+			if(buckets[n]) return iterator(buckets[n],this);
+		return end();
+	}
+
+	iterator end() { return iterator(nullptr,this); }
+
+public:// insert && erase
 	pair<iterator, bool> insert_unique(const value_type&);
 	pair<iterator, bool> insert_equal(const value_type&);
 	void clear();
+
+public:// copy operations
 	void copy_from(const hashtable&);
+
+public:// swap
+	void swap(hashtable& rhs) noexcept {
+		std::swap(hash, rhs.hash);
+		std::swap(equals,rhs.equals);
+		std::swap(get_key,rhs.get_key);
+		buckets.swap(rhs.buckets);
+		std::swap(num_elements,rhs.num_elements);
+	}
 };
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
