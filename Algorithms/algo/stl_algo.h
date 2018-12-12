@@ -2,6 +2,7 @@
 
 #include "stl_iterator.h"
 #include "stl_function.h"
+#include "stl_tempbuf.h"
 
 namespace MiniSTL{
 
@@ -931,8 +932,8 @@ void __introsort_loop(RandomAccessIterator first, RandomAccessIterator last, T*,
 template <class RandomAccessIterator>
 void __final_insertion_sort(RandomAccessIterator first, RandomAccessIterator last) {
 	if (last - first > /*__stl_threshold*/ 16) {
-		__insertion_sort(first, first + __stl_threshold);
-		__unguarded_insertion_sort(first + __stl_threshold, last);
+		__insertion_sort(first, first + /*__stl_threshold*/ 16);
+		__unguarded_insertion_sort(first + /*__stl_threshold, last*/ 16);
 	}
 	else
 		__insertion_sort(first, last);
