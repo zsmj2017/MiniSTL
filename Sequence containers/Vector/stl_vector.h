@@ -3,17 +3,16 @@
 #include <cstddef> // ptrdiff_t
 #include "allocator.h"
 #include "uninitialized.h"
-#include "stl_iterator.h"
 
 namespace MiniSTL {
 // use sub_allocator as default allocator
 template<class T, class Alloc = simpleAlloc<T> >
 class vector {
 public:
-	template<class T, class Alloc>
-	friend bool operator == (const vector<T, Alloc>&, const vector<T, Alloc>&);
-	template<class T, class Alloc>
-	friend bool operator != (const vector<T, Alloc>&, const vector<T, Alloc>&);
+	template<class _T, class _Alloc>
+	friend bool operator == (const vector<_T, _Alloc>&, const vector<_T, _Alloc>&);
+	template<class _T, class _Alloc>
+	friend bool operator != (const vector<_T, _Alloc>&, const vector<_T, _Alloc>&);
 
 public:// alias declarartions
 	using value_type = T;
@@ -127,7 +126,7 @@ public: // interface for back operation
 
 public: // interface for insert and erase
 	iterator erase(iterator, iterator);
-	iterator erase(iterator) { return erase(position, position + 1); }
+	iterator erase(iterator position) { return erase(position, position + 1); }
 	void clear() { erase(begin(), end()); }
 	void insert(iterator, size_type, const value_type&);
 	iterator insert(iterator, const value_type&);
