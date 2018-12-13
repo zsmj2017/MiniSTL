@@ -85,6 +85,8 @@ class hashtable {
 	// friend declarations
 	friend struct hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
 	friend struct hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
+	template<class _Value, class _Key, class _HashFcn, class _ExtractKey, class _EqualKey, class _Alloc>
+	friend bool operator==(const hashtable<_Value,_Key,_HashFcn,_ExtractKey,_EqualKey,_Alloc>&,const hashtable<_Value,_Key,_HashFcn,_ExtractKey,_EqualKey,_Alloc>&);
 
 public:// alias declarations
 	using hasher = HashFcn;
@@ -146,19 +148,9 @@ private:// data && interface for bucket
 		return pos == last ? *(last - 1) : *pos;
 	}
 
-	size_type max_bucket_count() const noexcept {
-		return __stl_prime_list[__stl_num_primes - 1];
-	}
+	size_type max_bucket_count() const noexcept { return __stl_prime_list[__stl_num_primes - 1]; }
 
-	size_type bkt_num(const value_type& obj, size_type n) const noexcept { return bkt_num_key(get_key(obj), n); }
-	size_type bkt_num(const value_type& obj) const noexcept { return bkt_num_key(get_key(obj)); }
-	size_type bkt_num(const key_type& key) const noexcept { return bkt_num_key(key); }
-	size_type bkt_num(const key_type& key, size_type n) const noexcept { return bkt_num_key(key, n); }
-
-private: // aux interface
-	void resize(size_type);
-	pair<iterator, bool> insert_unique_noreseize(const value_type&);
-	pair<iterator, bool> insert_equal_noresize(const value_type&);
+	size_type next_size(size_type n) const noexcept { return __stl_next_prime(n); }
 
 	void initialize_buckets(size_type n) {
 		const size_type n_buckets = __stl_next_prime(n);
@@ -167,6 +159,20 @@ private: // aux interface
 		buckets.insert(buckets.end(), n_buckets, static_cast<node*>(nullptr));
 		num_elements = 0;
 	}
+
+	size_type bkt_num_key(const key_type& key) const noexcept { return bkt_num_key(key,buckets.size()); }
+	size_type bkt_num(const value_type& obj) const noexcept { return bkt_num_key(get_key(obj)); }
+	size_type bkt_num_key(const key_type& key,size_t n) const noexcept { return hash(key) % n; }
+	size_type bkt_num(const value_type& obj, size_type n) const noexcept { return bkt_num_key(get_key(obj), n); }
+
+	void erase_bucket(const size_type n, node* first, node* last);
+	void erase_bucket(const size_type n. node* last);
+
+private: // aux interface
+	void resize(size_type);
+	pair<iterator, bool> insert_unique_noreseize(const value_type&);
+	iterator insert_equal_noresize(const value_type&);
+	void copy_from(const hashtable&);
 
 public:// ctor && dtor
 	hashtable(size_type n, const hasher& hf, const key_equal& eql)
@@ -203,11 +209,22 @@ public:// setter
 
 public:// insert && erase
 	pair<iterator, bool> insert_unique(const value_type&);
-	pair<iterator, bool> insert_equal(const value_type&);
+	iterator insert_equal(const value_type&);
+	template <class InputIterator>
+	void insert
 	void clear();
 
 public:// copy operations
-	void copy_from(const hashtable&);
+	hashtable& operator=(const hashtable& rhs){
+		if(&rhs != this){
+			clear();
+			hash = rhs.hash;
+			equals = rhs.equals;
+			get_key = rhs.get_key;
+			copy_from(rhs);
+		}
+		return *this;
+	}
 
 public:// swap
 	void swap(hashtable& rhs) noexcept {
@@ -221,29 +238,29 @@ public:// swap
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(size_type num_elements_hint){
-	//是否重建表格的原则为：若元素个数大于bucket's size,则试图重建表格（我想是为了保证负载率低于0.5）
+	// 是否重建表格的原则为：若元素个数大于bucket's size,则试图重建表格（我想是为了保证负载率低于0.5）
 	const size_type old_n = buckets.size();
 	if (num_elements_hint > old_n) {//确定需要扩容
 		const size_type n = __stl_next_prime(num_elements_hint);
 		if (n > old_n) {
 			vector<node*, Alloc> temp(n, static_cast<node*>(nullptr));
 			try {
-				//处理每一个旧bucket
+				// 处理每一个旧bucket
 				for (size_type bucket = 0; bucket < old_n; ++bucket) {
 					node* first = buckets[bucket];
 					while (first) {
-						//找出节点应置于new_bucket的何处
+						// 找出节点应置于new_bucket的何处
 						size_type new_bucket = bkt(first->val, n);
-						buckets[bucket] = first->next;//将first与原vector分离
-						first->next = temp[new_bucket];//first连接至new buckets
-						temp[new_bucket] = first;//将first彻底放入new bucket内部
-						first = buckets[bucket];//回归old bucket的下一个节点
+						buckets[bucket] = first->next;// 将first与原vector分离
+						first->next = temp[new_bucket];// first连接至new buckets
+						temp[new_bucket] = first;// 将first彻底放入new bucket内部
+						first = buckets[bucket];// 回归old bucket的下一个节点
 					}
 				}
 				buckets.swap(temp);// copy && swap
 			}
 			catch(std::exception&){
-				//TODO:
+				clear();
 			}
 		}
 	}
@@ -252,13 +269,13 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(size_ty
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 inline pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator, bool>
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique_noreseize(const value_type& obj){
-	const size_type n = bkt_num(obj);//决定位于哪个bucket
+	const size_type n = bkt_num(obj);// 决定位于哪个bucket
 	node* first = buckets[n];
 	for (node* cur = first; cur; cur=cur->next) {
-		if (equals(get_key(cur->val)), get_key(obj))//存在相同键值，拒绝插入
+		if (equals(get_key(cur->val)), get_key(obj))// 存在相同键值，拒绝插入
 			return pair<iterator, bool>(iterator(cur,this), false);
 	}
-	//当前已离开循环或根本未进入循环,创造新节点并将其作为bucket的头部
+	// 当前已离开循环或根本未进入循环,创造新节点并将其作为bucket的头部
 	node* temp = new_node(obj);
 	temp->next = first;
 	buckets[n] = temp;
@@ -267,7 +284,7 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique_nores
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
-inline pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator, bool>
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal_noresize(const value_type& obj){
 	const size_type n = bkt_num(obj);
 	node* first = buckets[n];
@@ -290,12 +307,12 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal_noresi
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 inline pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator, bool>
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique(const value_type & obj){
-	resize(num_elements + 1);//判断是否需要扩充
+	resize(num_elements + 1);// 判断是否需要扩充
 	return insert_unique_noreseize(obj);
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
-inline pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator,bool>
+inline typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal(const value_type& obj){
 	resize(num_elements + 1);
 	return insert_equal_noresize(obj);
@@ -313,7 +330,7 @@ inline void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::clear()
 		buckets[i] = nullptr;
 	}
 	num_elements = 0;
-	//注意clear并没有释放vector
+	// clear并没有释放vector
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
@@ -323,7 +340,7 @@ inline void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::copy_fr
 	buckets.insert(buckets.end(), rhs.buckets.size(), static_cast<node*>(nullptr));
 	try {
 		for (size_type i = 0; i != rhs.buckets.size(); ++i) {
-			//复制每一个vector元素
+			// 复制每一个vector元素
 			if (const node* cur = rhs.buckets[i]) {
 				node* copy = new_node(cur->val);
 				buckets[i] = copy;
@@ -346,9 +363,9 @@ hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++
 	const node* old = cur;
 	cur = cur->next;
 	if (!cur) {
-		//根据元素值定位下一个bucket
+		// 根据元素值定位下一个bucket
 		size_type bucket = ht->bkt_num(old->val);
-		while (!cur && ++bucket < ht->buckets.size())//直到找到一个内含list的bucket
+		while (!cur && ++bucket < ht->buckets.size())// 直到找到一个内含list的bucket
 			cur = ht->buckets[bucket];
 	}
 	return *this;
