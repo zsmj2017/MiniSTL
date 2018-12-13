@@ -94,6 +94,8 @@ public:// alias declarations
 	using size_type = size_t;
 	using value_type = Value;
 	using key_type = Key;
+	using reference = Value&;
+	using pointer = Value*;
 
 	using iterator = hashtable_iterator<Value,Key,HashFcn,ExtractKey,EqualKey,Alloc>;
 	using const_iterator = hashtable_const_iterator<Value,Key,HashFcn,ExtractKey,EqualKey,Alloc>;
@@ -148,13 +150,11 @@ private:// data && interface for bucket
 		return pos == last ? *(last - 1) : *pos;
 	}
 
-	size_type max_bucket_count() const noexcept { return __stl_prime_list[__stl_num_primes - 1]; }
-
 	size_type next_size(size_type n) const noexcept { return __stl_next_prime(n); }
 
 	void initialize_buckets(size_type n) {
 		const size_type n_buckets = __stl_next_prime(n);
-		//保留空间，由于此时vector's size==0，因此等价于全部置0
+		// 保留空间，由于此时vector's size==0，因此等价于全部置0
 		buckets.reserve(n_buckets);
 		buckets.insert(buckets.end(), n_buckets, static_cast<node*>(nullptr));
 		num_elements = 0;
@@ -166,7 +166,7 @@ private:// data && interface for bucket
 	size_type bkt_num(const value_type& obj, size_type n) const noexcept { return bkt_num_key(get_key(obj), n); }
 
 	void erase_bucket(const size_type n, node* first, node* last);
-	void erase_bucket(const size_type n. node* last);
+	void erase_bucket(const size_type n, node* last);
 
 private: // aux interface
 	void resize(size_type);
@@ -186,6 +186,7 @@ public:// getter
 	hasher hash_funct() const noexcept { return hash; }
 	key_equal key_eq() const noexcept { return equals; }
 	size_type bucket_count() const noexcept { return buckets.size(); }
+	size_type max_bucket_count() const noexcept { return __stl_prime_list[__stl_num_primes - 1]; }
 	size_type size() const noexcept { return num_elements; }
 	size_type max_size() const noexcept { return size_type(-1); }
 	bool empty() const noexcept {return size()==0; }
@@ -207,11 +208,35 @@ public:// setter
 
 	iterator end() { return iterator(nullptr,this); }
 
+public:// aux_interface for insert && erase
+template <class InputIterator>
+void insert_unique(InputIterator, InputIterator, input_iterator_tag);
+template <class InputIterator>
+void insert_equal(InputIterator, InputIterator, input_iterator_tag);
+template <class ForwardIterator>
+void insert_unique(ForwardIterator, ForwardIterator, forward_iterator_tag);
+template <class ForwardIterator>
+void insert_equal(ForwardIterator, ForwardIterator, forward_iterator_tag);
+
+public: // find
+	reference find_or_insert(const value_type&);
+	iterator find(const key_type&);
+	const_iterator find(const key_type&) const;
+	size_type count(const key_type&) const;
+	pair<iterator,iterator> equal_range(const key_type&);
+	pair<const_iterator,const_iterator> equal_range(const key_type&) const;
+
 public:// insert && erase
 	pair<iterator, bool> insert_unique(const value_type&);
 	iterator insert_equal(const value_type&);
 	template <class InputIterator>
-	void insert
+	void insert_unique(InputIterator first,InputIterator last) { insert_unique(first,last,iterator_category_t<InputIterator>()); }
+	template <class InputIterator>
+	void insert_equal(InputIterator first,InputIterator last) { insert_equal(first,last,iterator_category_t<InputIterator>()); }
+	void erase(const iterator&);
+	void erase(iterator,iterator);
+	void erase(const const_iterator&);
+	void erase(const_iterator,const_iterator);
 	void clear();
 
 public:// copy operations
@@ -399,5 +424,21 @@ hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::oper
 	++*this;
 	return temp;
 }
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+bool operator==(const hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& lhs,
+	hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& rhs){
+		using node = typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::node;
+		if(lhs.buckets.size() != rhs.buckets.size())
+			return false;
+		for(int n = 0; n < lhs.buckets.size(); ++n){
+			node* cur1 = lhs.buckets[n];
+			node* cur2 = rhs.buckets[n];
+			for(;cur1 && cur2 && cur1->val == cur2->val;cur1 = cur1->next, cur2 = cur2->next) {}
+			if(cur1 || cur2) 
+				return false;
+		}
+		return true;
+	}
 
 }// end namespace::MiniSTL
