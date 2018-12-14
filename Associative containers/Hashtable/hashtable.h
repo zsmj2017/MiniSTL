@@ -209,16 +209,16 @@ public:// setter
 	iterator end() { return iterator(nullptr,this); }
 
 public:// aux_interface for insert && erase
-template <class InputIterator>
-void insert_unique(InputIterator, InputIterator, input_iterator_tag);
-template <class InputIterator>
-void insert_equal(InputIterator, InputIterator, input_iterator_tag);
-template <class ForwardIterator>
-void insert_unique(ForwardIterator, ForwardIterator, forward_iterator_tag);
-template <class ForwardIterator>
-void insert_equal(ForwardIterator, ForwardIterator, forward_iterator_tag);
+	template <class InputIterator>
+	void insert_unique(InputIterator, InputIterator, input_iterator_tag);
+	template <class InputIterator>
+	void insert_equal(InputIterator, InputIterator, input_iterator_tag);
+	template <class ForwardIterator>
+	void insert_unique(ForwardIterator, ForwardIterator, forward_iterator_tag);
+	template <class ForwardIterator>
+	void insert_equal(ForwardIterator, ForwardIterator, forward_iterator_tag);
 
-public: // find
+public:// find
 	reference find_or_insert(const value_type&);
 	iterator find(const key_type&);
 	const_iterator find(const key_type&) const;
@@ -330,6 +330,72 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal_noresi
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::reference
+hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::find_or_insert(const value_type & obj){
+	resize(num_elements + 1);
+
+	size_type n = bkt_num(obj);
+	node* first = buckets[n];
+
+	for(node* cur = first;cur;cur=cur->next)
+		if(equals(get_key(cur->val),get_key(obj)))
+			return cur->val;
+	
+	node* temp = new_node(obj);
+	temp->next = first;
+	buckets[n] = temp;
+	++num_elements;
+	return temp->val;
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator
+hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::find(const key_type& key){
+	size_type n = bkt_num_key(key);
+	node* first;
+	for(first = buckets[n];
+		first && !equals(get_key(first->val),key);
+		first = first->next){}
+	return iterator(first,this);
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator
+hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::find(const key_type& key) const {
+	size_type n = bkt_num_key(key);
+	node* first;
+	for(first = buckets[n];
+		first && !equals(get_key(first->val),key);
+		first = first->next){}
+	return const_iterator(first,this);
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::size_type
+hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::count(const key_type& key) const {
+	const size_type n = bkt_num_key(key);
+	size_type result = 0;
+	for(const node* cur = buckets[n];cur;cur = cur->next)
+		if(equals(get_key(cur->val),key))
+			++result;
+	return result;
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator,
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator>
+hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::equal_range(const key_type& key){
+	// TODO:
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator,
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator>
+hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::equal_range(const key_type& key) const {
+	// TODO:
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 inline pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator, bool>
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique(const value_type & obj){
 	resize(num_elements + 1);// 判断是否需要扩充
@@ -341,6 +407,38 @@ inline typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::ite
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal(const value_type& obj){
 	resize(num_elements + 1);
 	return insert_equal_noresize(obj);
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+template<class InputIterator>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique(InputIterator first, InputIterator last, input_iterator_tag){
+	for(;first!=last;++first)
+		insert_unique(*first);
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+template<class InputIterator>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal(InputIterator first, InputIterator last, input_iterator_tag){
+	for(;first != last;++first)
+		insert_equal(*first);
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+template<class ForwardIterator>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique(ForwardIterator first, ForwardIterator last, forward_iterator_tag){
+	size_type n = distance(first,last);
+	resize(num_elements+n);
+	for(;n > 0;--n, ++first)
+		insert_unique_noreseize(*first);
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+template<class ForwardIterator>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal(ForwardIterator first, ForwardIterator last, forward_iterator_tag){
+	size_type n = distance(first,last);
+	resize(num_elements+n);
+	for(;n > 0;--n, ++first)
+		insert_equal_noreseize(*first);
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
@@ -427,18 +525,17 @@ hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::oper
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 bool operator==(const hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& lhs,
-	hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& rhs){
-		using node = typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::node;
-		if(lhs.buckets.size() != rhs.buckets.size())
-			return false;
-		for(int n = 0; n < lhs.buckets.size(); ++n){
-			node* cur1 = lhs.buckets[n];
-			node* cur2 = rhs.buckets[n];
-			for(;cur1 && cur2 && cur1->val == cur2->val;cur1 = cur1->next, cur2 = cur2->next) {}
-			if(cur1 || cur2) 
-				return false;
-		}
-		return true;
+		hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& rhs){
+	using node = typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::node;
+	if(lhs.buckets.size() != rhs.buckets.size())
+		return false;
+	for(int n = 0; n < lhs.buckets.size(); ++n){
+		node* cur1 = lhs.buckets[n];
+		node* cur2 = rhs.buckets[n];
+		for(;cur1 && cur2 && cur1->val == cur2->val;cur1 = cur1->next, cur2 = cur2->next) {}
+		if(cur1 || cur2) return false;
 	}
+	return true;
+}
 
 }// end namespace::MiniSTL
