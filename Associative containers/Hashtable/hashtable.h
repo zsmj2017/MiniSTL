@@ -385,14 +385,40 @@ template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey
 pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator,
 typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator>
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::equal_range(const key_type& key){
-	// TODO:
+	using pii = pair<iterator,iterator>;
+	const size_type n = bkt_num_key(key);
+
+	for(node* first = buckets[n]; first; first = first->next)
+		if(equals(get_key(first->val),key)){
+			for(node *cur = first->next; cur; cur = cur->next)
+				if(!equals(get_key(cur->val),key))
+					return pii(iterator(first,this), iterator(cur,this));
+			for(size_type m = n + 1; m < buckets.size(); ++m)
+				if(buckets[m])
+					return pii(iterator(first,this),iterator(buckets[m],this));
+			return pii(iterator(first,this),end());
+		}
+		return pii(end(),end());
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 pair<typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator,
 typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator>
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::equal_range(const key_type& key) const {
-	// TODO:
+	using pii = pair<const_iterator,const_iterator>;
+	const size_type n = bkt_num_key(key);
+
+	for(const node* first = buckets[n]; first; first = first->next)
+		if(equals(get_key(first->val),key)){
+			for(const node *cur = first->next; cur; cur = cur->next)
+				if(!equals(get_key(cur->val),key))
+					return pii(const_iterator(first,this), const_iterator(cur,this));
+			for(size_type m = n + 1; m < buckets.size(); ++m)
+				if(buckets[m])
+					return pii(const_iterator(first,this),const_iterator(buckets[m],this));
+			return pii(const_iterator(first,this),cend());
+		}
+		return pii(cend(),cend());
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
@@ -525,7 +551,7 @@ hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::oper
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 bool operator==(const hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& lhs,
-		hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& rhs){
+	hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& rhs){
 	using node = typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::node;
 	if(lhs.buckets.size() != rhs.buckets.size())
 		return false;
