@@ -226,13 +226,16 @@ public:// find
 	pair<iterator,iterator> equal_range(const key_type&);
 	pair<const_iterator,const_iterator> equal_range(const key_type&) const;
 
-public:// insert && erase
+public:// insert
 	pair<iterator, bool> insert_unique(const value_type&);
 	iterator insert_equal(const value_type&);
 	template <class InputIterator>
 	void insert_unique(InputIterator first,InputIterator last) { insert_unique(first,last,iterator_category_t<InputIterator>()); }
 	template <class InputIterator>
 	void insert_equal(InputIterator first,InputIterator last) { insert_equal(first,last,iterator_category_t<InputIterator>()); }
+
+public:// erase
+	size_type erase(const key_type&);
 	void erase(const iterator&);
 	void erase(iterator,iterator);
 	void erase(const const_iterator&);
@@ -260,6 +263,50 @@ public:// swap
 		std::swap(num_elements,rhs.num_elements);
 	}
 };
+
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator&
+hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++() noexcept {
+	const node* old = cur;
+	cur = cur->next;
+	if (!cur) {
+		// 根据元素值定位下一个bucket
+		size_type bucket = ht->bkt_num(old->val);
+		while (!cur && ++bucket < ht->buckets.size())// 直到找到一个内含list的bucket
+			cur = ht->buckets[bucket];
+	}
+	return *this;
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+inline typename hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator
+hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++(int) noexcept {
+	iterator temp = *this;
+	++*this;
+	return temp;
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator&
+hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++() noexcept {
+	const node* old = cur;
+	cur = cur->next;
+	if (!cur) {
+		size_type bucket = ht->bkt_num(old->val);
+		while (!cur && ++bucket < ht->buckets.size())
+			cur = ht->buckets[bucket];
+	}
+	return *this;
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+inline typename hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator
+hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++(int) noexcept {
+	const_iterator temp = *this;
+	++*this;
+	return temp;
+}
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(size_type num_elements_hint){
@@ -468,6 +515,31 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal(F
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::size_type
+hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const key_type& key){
+	// TODO:
+}
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const iterator& pos){
+	// TODO:
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(iterator first, iterator last){
+	// TODO:
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const const_iterator& pos){
+	// TODO:
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const_iterator first, const_iterator last){
+	// TODO:
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 inline void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::clear(){
 	for (size_type i = 0; i != buckets.size(); ++i) {
 		node* cur = buckets[i];
@@ -504,49 +576,6 @@ inline void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::copy_fr
 	catch(std::exception&){
 		clear(); 
 	}
-}
-
-template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
-typename hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator&
-hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++() noexcept {
-	const node* old = cur;
-	cur = cur->next;
-	if (!cur) {
-		// 根据元素值定位下一个bucket
-		size_type bucket = ht->bkt_num(old->val);
-		while (!cur && ++bucket < ht->buckets.size())// 直到找到一个内含list的bucket
-			cur = ht->buckets[bucket];
-	}
-	return *this;
-}
-
-template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
-inline typename hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator
-hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++(int) noexcept {
-	iterator temp = *this;
-	++*this;
-	return temp;
-}
-
-template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
-typename hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator&
-hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++() noexcept {
-	const node* old = cur;
-	cur = cur->next;
-	if (!cur) {
-		size_type bucket = ht->bkt_num(old->val);
-		while (!cur && ++bucket < ht->buckets.size())
-			cur = ht->buckets[bucket];
-	}
-	return *this;
-}
-
-template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
-inline typename hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::const_iterator
-hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::operator++(int) noexcept {
-	const_iterator temp = *this;
-	++*this;
-	return temp;
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
