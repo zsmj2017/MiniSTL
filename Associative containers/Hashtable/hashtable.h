@@ -309,6 +309,35 @@ hashtable_const_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::oper
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase_bucket(const size_type n,node* first, node* last){
+	node* cur = buckets[n];
+	if(cur == first)
+		erase_bucket(n,last);
+	else{
+		node* next;
+		for(next = cur->next; next != first; cur = next, next = next->next);
+		while(next != last){
+			cur->next = next->next;
+			delete_node(next);
+			next = cur->next;
+			--num_elements;
+		}
+	}
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase_bucket(const size_type n, node* last){
+	node* cur = buckets[n];
+	while(cur !=last){
+		node* next = cur->next;
+		delete_node(cur);
+		cur = next;
+		buckets[n] = cur;
+		--num_elements;
+	}
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(size_type num_elements_hint){
 	// 是否重建表格的原则为：若元素个数大于bucket's size,则试图重建表格（我想是为了保证负载率低于0.5）
 	const size_type old_n = buckets.size();
@@ -517,26 +546,92 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal(F
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 typename hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::size_type
 hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const key_type& key){
-	// TODO:
+	const size_type n = bkt_num_key(key);
+	node* first = buckets[n];
+	size_type erased = 0;
+
+	if(first){
+		node* cur = first;
+		node* next = cur->next;
+		while(next){
+			if(equals(get_key(next->val),key)){
+				cur->next = next->next;
+				delete_node(next);
+				next = cur->next;
+				++erased;
+				--num_elements;
+			}
+			else{
+				cur = next;
+				next = cur->next;
+			}
+		}
+		if(equals(get_key(first->val),key)){
+			buckets[n] = first->next;
+			delete_node(first);
+			++erased;
+			--num_elements;
+		}
+	}
+	return erased;
 }
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const iterator& pos){
-	// TODO:
+	node* p = pos.cur;
+	if(p){
+		const size_type n = bkt_num(p->val);
+		node* cur = buckets[n];
+
+		if(cur == p){
+			buckets[n] = cur->next;
+			delete_node(cur);
+			--num_elements;
+		}
+		else{
+			node* next = cur->next;
+			while(next){
+				if(next == p){
+					cur->next = next->next;
+					delete_node(next);
+					--num_elements;
+					break;
+				}
+				else{
+					cur = next;
+					next = cur->next;
+				}
+			}
+		}
+	}
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(iterator first, iterator last){
-	// TODO:
+	size_type f_bucket = first.cur ? bkt_num(first.cur->val) : buckets.size();
+	size_type l_bucket = last.cur ? bkt_num(last.cur->val) : buckets.size();
+
+	if(first.cur == last.cur)
+		return;
+	else if(f_bucket == l_bucket)
+		erase_bucket(f_bucket,first.cur,last.cur);
+	else{
+		erase_bucket(f_bucket,first.cur,nullptr);
+		for(size_type n = f_bucket+1; n < l_bucket; ++n)
+			erase_bucket(n,nullptr);
+		if(l_bucket != buckets.size())
+			erase_bucket(l_bucket,last.cur);
+	}
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const const_iterator& pos){
-	// TODO:
+	erase(iterator(const_cast<node*>(pos.cur),const_cast<hashtable*>(pos.ht)));
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::erase(const_iterator first, const_iterator last){
-	// TODO:
+	erase(iterator(const_cast<node*>(first.cur),const_cast<hashtable*>(first.ht)),
+		const_cast<node*>(last.cur),const_cast<hashtable*>(last.ht));
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
