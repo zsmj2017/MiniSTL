@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "stl_iterator.h"
-#include "stl_function.h"
 #include "stl_tempbuf.h"
 
 namespace MiniSTL{
@@ -375,12 +373,12 @@ template <class ForwardIterator>
 inline void rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator last) {
 	if (first == middle || middle == last)
 		return;
-	__rotate(first, middle, last, difference_type(first), iterator_category(first));
+	__rotate(first, middle, last, difference_type_t<ForwardIterator>(), iterator_category_t<ForwardIterator>());
 }
 
 //rotate-forward
 template <class ForwardIterator,class Distance>
-void __rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator last,Distance*,forward_iterator_tag) {
+void __rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator last,Distance,forward_iterator_tag) {
 	for (ForwardIterator i = middle;;) {
 		iter_swap(first, i);//一一交换前端与后端元素
 		++first;
@@ -398,7 +396,7 @@ void __rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator las
 
 //rotate-bidrectional
 template <class BidrectionalIterator, class Distance>
-void __rotate(BidrectionalIterator first, BidrectionalIterator middle, BidrectionalIterator last, Distance*, bidirectional_iterator_tag) {
+void __rotate(BidrectionalIterator first, BidrectionalIterator middle, BidrectionalIterator last, Distance, bidirectional_iterator_tag) {
 	reverse(first, middle);
 	reverse(middle, last);
 	reverse(first, last);
@@ -406,11 +404,11 @@ void __rotate(BidrectionalIterator first, BidrectionalIterator middle, Bidrectio
 
 //rotate-randomaccess
 template <class RandomAccesslIterator, class Distance>
-void __rotate(RandomAccesslIterator first, RandomAccesslIterator middle, RandomAccesslIterator last, Distance*, random_access_iterator_tag) {
+void __rotate(RandomAccesslIterator first, RandomAccesslIterator middle, RandomAccesslIterator last, Distance, random_access_iterator_tag) {
 	//取全长于前端的最大公因子
 	Distance n = __gcd(last - first, middle - first);
 	while (n--)
-		__rotate_cycle(first, last, first + n, middle - first, value_type(first));
+		__rotate_cycle(first, last, first + n, middle - first, value_type_t<RandomAccesslIterator>());
 }
 
 //gcd:求取最大公约数（效率不如减损术）
@@ -606,11 +604,11 @@ OutputIterator unique_copy(InputIterator first, InputIterator last, OutputIterat
 //存在接受二元比较符的版本二，出于时间原因，略去不表
 template <class ForwardIterator,class T>
 inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value) {
-	return __lower_bound(first, last, value, distance_type(first), iterator_category(first));
+	return __lower_bound(first, last, value, difference_type_t<ForwardIterator>(), iterator_category_t<ForwardIterator>());
 }
 
 template <class ForwardIterator, class T,class Distance>
-ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*, forward_iterator_tag) {
+ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance, forward_iterator_tag) {
 	Distance len = 0;
 	distance(first, last, len);//求取长度
 	Distance half;
@@ -632,7 +630,7 @@ ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const
 }
 
 template <class RandomAccessIterator, class T, class Distance>
-RandomAccessIterator __lower_bound(RandomAccessIterator first, RandomAccessIterator last, const T& value, Distance*, random_access_iterator_tag) {
+RandomAccessIterator __lower_bound(RandomAccessIterator first, RandomAccessIterator last, const T& value, Distance, random_access_iterator_tag) {
 	Distance len = last - first;
 	Distance half;
 	RandomAccessIterator middle;

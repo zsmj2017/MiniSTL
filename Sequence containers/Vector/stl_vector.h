@@ -138,6 +138,7 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
 		construct(finish, *(finish - 1));
 		++finish;
 		value_type value_copy = value;// STL copy in copy out
+		// TODO:
 		// copy_backward needs _SCL_SECURE_NO_WARNINGS
 		std::copy_backward(position, finish - 2, finish - 1);
 		*position = value_copy;
@@ -273,14 +274,14 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 				finish += n;
 				// copy_backward needs _SCL_SECURE_NO_WARNINGS
 				std::copy_backward(position, old_finish - n, old_finish);
-				fill(position, position + n, value_copy);
+				std::fill(position, position + n, value_copy);
 			}
 			else {
 				uninitialized_fill_n(finish, n - elems_after, value_copy);
 				finish += n - elems_after;
 				uninitialized_copy(position, old_finish, finish);
 				finish += elems_after;
-				fill(position, old_finish, value_copy);//补足m
+				std::fill(position, old_finish, value_copy);//补足m
 			}
 		}
 		else { // expand
