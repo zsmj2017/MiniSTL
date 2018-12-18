@@ -154,7 +154,7 @@ private:// interface for bucket
 		const size_type n_buckets = __stl_next_prime(n);
 		// 保留空间，由于此时vector's size == 0，因此等价于全部置0
 		buckets.reserve(n_buckets);
-		buckets.insert(buckets.end(), n_buckets, reinterpret_cast<node*>(nullptr));
+		buckets.insert(buckets.end(), n_buckets, static_cast<node*>(nullptr));
 		num_elements = 0;
 	}
 
@@ -348,7 +348,7 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(size_ty
 	if (num_elements_hint > old_n) {//确定需要扩容
 		const size_type n = __stl_next_prime(num_elements_hint);
 		if (n > old_n) {
-			vector<node*, Alloc> temp(n, static_cast<node*>(nullptr));
+			vector<node*, node_allocator> temp(n, static_cast<node*>(nullptr));
 			try {
 				// 处理每一个旧bucket
 				for (size_type bucket = 0; bucket < old_n; ++bucket) {
@@ -399,7 +399,7 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal_noresi
 			temp->next = cur->next;
 			cur->next = temp;
 			++num_elements;
-			return iterator(temp);
+			return iterator(temp,this);
 		}
 	}
 	node* temp = new_node(obj);
