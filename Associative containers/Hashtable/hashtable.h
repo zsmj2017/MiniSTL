@@ -38,8 +38,8 @@ struct hashtable_iterator {
 	using reference = Value & ;
 	using pointer = Value * ;
 
-	node* cur;//当前指向的节点
-	__hashtable* ht;//保持与hashtable的连接
+	node* cur;// 当前指向的节点
+	__hashtable* ht;// 保持与hashtable的连接
 
 	hashtable_iterator(node* n, __hashtable* tab) :cur(n), ht(tab) {}
 	hashtable_iterator() = default;
@@ -80,6 +80,25 @@ struct hashtable_const_iterator {
 	bool operator!=(const iterator&rhs) const noexcept { return cur != rhs.cur; }
 };
 
+// data for hashtable
+enum { __stl_num_primes = 28 }; // use enum not #define
+static const unsigned long __stl_prime_list[__stl_num_primes] = {
+	53ul,         97ul,         193ul,       389ul,       769ul,
+	1543ul,       3079ul,       6151ul,      12289ul,     24593ul,
+	49157ul,      98317ul,      196613ul,    393241ul,    786433ul,
+	1572869ul,    3145739ul,    6291469ul,   12582917ul,  25165843ul,
+	50331653ul,   100663319ul,  201326611ul, 402653189ul, 805306457ul,
+	1610612741ul, 3221225473ul, 4294967291ul
+};
+
+// 找出大于n的最小质数
+inline unsigned long __stl_next_prime(unsigned long n) noexcept {
+	const unsigned long* first = __stl_prime_list;
+	const unsigned long* last = __stl_prime_list + __stl_num_primes;
+	const unsigned long* pos = lower_bound(first, last, n);
+	return pos == last ? *(last - 1) : *pos;
+}
+
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc=simpleAlloc<Value> >
 class hashtable {
 	// friend declarations
@@ -109,7 +128,7 @@ private:// data member
 	using node = hashtable_node<Value>;
 	using node_allocator = simpleAlloc<node>;
 
-	vector<node*> buckets;//以vector表征
+	vector<node*> buckets;// 以vector表征
 	size_type num_elements;
 
 private:// allocate && deallocate
@@ -125,33 +144,11 @@ private:// allocate && deallocate
 	}
 
 	void delete_node(node* n) {
-		destory(&n->val);
+		destroy(&n->val);
 		node_allocator::deallocate(n);
 	}
 
-private:// data && interface for bucket
-	// 当size为质数且负载低于0.5时两次查找必然可获取正确位置
-	// 预先存储28个质数
-	static const int __stl_num_primes = 28;
-	constexpr static const unsigned long __stl_prime_list[__stl_num_primes] = {
-		53ul,         97ul,         193ul,       389ul,       769ul,
-		1543ul,       3079ul,       6151ul,      12289ul,     24593ul,
-		49157ul,      98317ul,      196613ul,    393241ul,    786433ul,
-		1572869ul,    3145739ul,    6291469ul,   12582917ul,  25165843ul,
-		50331653ul,   100663319ul,  201326611ul, 402653189ul, 805306457ul,
-		1610612741ul, 3221225473ul, 4294967291ul
-	};
-
-	//找出大于n的最小质数
-	unsigned long __stl_next_prime(unsigned long n) const noexcept{
-		const unsigned long* first = __stl_prime_list;
-		const unsigned long* last = __stl_prime_list + __stl_num_primes;
-		const unsigned long* pos = lower_bound(first, last, n);
-		return pos == last ? *(last - 1) : *pos;
-	}
-
-	size_type next_size(size_type n) const noexcept { return __stl_next_prime(n); }
-
+private:// interface for bucket
 	void initialize_buckets(size_type n) {
 		const size_type n_buckets = __stl_next_prime(n);
 		// 保留空间，由于此时vector's size==0，因此等价于全部置0
@@ -243,6 +240,8 @@ public:// erase
 	void clear();
 
 public:// copy operations
+	hashtable(const hashtable& rhs)
+		:hash(rhs.hash),equals(rhs.equals),get_key(rhs.get_key),num_elements(0) { copy_from(rhs); }
 	hashtable& operator=(const hashtable& rhs){
 		if(&rhs != this){
 			clear();
@@ -263,7 +262,6 @@ public:// swap
 		std::swap(num_elements,rhs.num_elements);
 	}
 };
-
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
 typename hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::iterator&
@@ -351,7 +349,7 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(size_ty
 					node* first = buckets[bucket];
 					while (first) {
 						// 找出节点应置于new_bucket的何处
-						size_type new_bucket = bkt(first->val, n);
+						size_type new_bucket = bkt_num(first->val, n);
 						buckets[bucket] = first->next;// 将first与原vector分离
 						first->next = temp[new_bucket];// first连接至new buckets
 						temp[new_bucket] = first;// 将first彻底放入new bucket内部
@@ -686,6 +684,18 @@ bool operator==(const hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc
 		if(cur1 || cur2) return false;
 	}
 	return true;
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+bool operator!=(const hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& lhs,
+	hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& rhs){
+	return !(lhs==rhs);
+}
+
+template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
+void swap(const hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& lhs,
+	hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>& rhs){
+	lhs.swap(rhs);
 }
 
 }// end namespace::MiniSTL
