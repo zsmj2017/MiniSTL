@@ -115,6 +115,7 @@ public:// alias declarations
 	using key_type = Key;
 	using reference = Value&;
 	using pointer = Value*;
+	using allocator_type = Alloc;
 
 	using iterator = hashtable_iterator<Value,Key,HashFcn,ExtractKey,EqualKey,Alloc>;
 	using const_iterator = hashtable_const_iterator<Value,Key,HashFcn,ExtractKey,EqualKey,Alloc>;
@@ -151,9 +152,9 @@ private:// allocate && deallocate
 private:// interface for bucket
 	void initialize_buckets(size_type n) {
 		const size_type n_buckets = __stl_next_prime(n);
-		// 保留空间，由于此时vector's size==0，因此等价于全部置0
+		// 保留空间，由于此时vector's size == 0，因此等价于全部置0
 		buckets.reserve(n_buckets);
-		buckets.insert(buckets.end(), n_buckets, static_cast<node*>(nullptr));
+		buckets.insert(buckets.end(), n_buckets, reinterpret_cast<node*>(nullptr));
 		num_elements = 0;
 	}
 
@@ -166,14 +167,18 @@ private:// interface for bucket
 	void erase_bucket(const size_type n, node* last);
 
 private: // aux interface
-	void resize(size_type);
 	pair<iterator, bool> insert_unique_noreseize(const value_type&);
 	iterator insert_equal_noresize(const value_type&);
 	void copy_from(const hashtable&);
 
 public:// ctor && dtor
+	hashtable(size_type n, const hasher& hf, const key_equal& eql, const ExtractKey& ext)
+		:hash(hf), equals(eql), get_key(ext), num_elements(0){
+		initialize_buckets(n);
+	}
+
 	hashtable(size_type n, const hasher& hf, const key_equal& eql)
-		:hash(hf), equals(eql), get_key(ExtractKey()) {
+		:hash(hf), equals(eql), get_key(ExtractKey()), num_elements(0){
 		initialize_buckets(n);
 	}
 
@@ -204,6 +209,7 @@ public:// setter
 	}
 
 	iterator end() { return iterator(nullptr,this); }
+	void resize(size_type);
 
 public:// aux_interface for insert && erase
 	template <class InputIterator>
@@ -379,7 +385,7 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique_nores
 	temp->next = first;
 	buckets[n] = temp;
 	++num_elements;
-	return pair<iterator, bool>(iterator(temp), true);
+	return pair<iterator, bool>(iterator(temp,this), true);
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
@@ -393,14 +399,14 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal_noresi
 			temp->next = cur->next;
 			cur->next = temp;
 			++num_elements;
-			return pair<iterator, bool>(iterator(temp), true);
+			return iterator(temp);
 		}
 	}
 	node* temp = new_node(obj);
 	temp->next = first;
 	buckets[n] = temp;
 	++num_elements;
-	return pair<iterator, bool>(iterator(temp), true);
+	return iterator(temp,this);
 }
 
 template<class Value, class Key, class HashFcn, class ExtractKey, class EqualKey, class Alloc>
