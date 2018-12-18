@@ -67,17 +67,18 @@ struct hashtable_const_iterator {
 	using reference = const Value & ;
 	using pointer = const Value * ;
 
-	node* cur;
-	__hashtable* ht;
+	const node* cur;
+	const __hashtable* ht;
 
-	hashtable_const_iterator(node* n, __hashtable* tab) :cur(n), ht(tab) {}
+	hashtable_const_iterator(const node* n, const __hashtable* tab) :cur(n), ht(tab) {}
 	hashtable_const_iterator() = default;
+	hashtable_const_iterator(const iterator& it) :cur(it.cur),ht(it.ht) {} // add implicit convert
 	reference operator*() const noexcept { return cur->val; }
 	pointer operator->() const noexcept { return &(operator*()); }
 	const_iterator& operator++() noexcept;
 	const_iterator operator++(int) noexcept;
-	bool operator==(const iterator&rhs) const noexcept { return cur == rhs.cur; }
-	bool operator!=(const iterator&rhs) const noexcept { return cur != rhs.cur; }
+	bool operator==(const const_iterator& rhs) const noexcept { return cur == rhs.cur; }
+	bool operator!=(const const_iterator& rhs) const noexcept { return cur != rhs.cur; }
 };
 
 // data for hashtable
@@ -348,7 +349,7 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(size_ty
 	if (num_elements_hint > old_n) {//确定需要扩容
 		const size_type n = __stl_next_prime(num_elements_hint);
 		if (n > old_n) {
-			vector<node*, node_allocator> temp(n, static_cast<node*>(nullptr));
+			vector<node*> temp(n, static_cast<node*>(nullptr));
 			try {
 				// 处理每一个旧bucket
 				for (size_type bucket = 0; bucket < old_n; ++bucket) {
@@ -377,7 +378,7 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_unique_nores
 	const size_type n = bkt_num(obj);// 决定位于哪个bucket
 	node* first = buckets[n];
 	for (node* cur = first; cur; cur=cur->next) {
-		if (equals(get_key(cur->val)), get_key(obj))// 存在相同键值，拒绝插入
+		if (equals(get_key(cur->val), get_key(obj)))// 存在相同键值，拒绝插入
 			return pair<iterator, bool>(iterator(cur,this), false);
 	}
 	// 当前已离开循环或根本未进入循环,创造新节点并将其作为bucket的头部
