@@ -46,25 +46,12 @@ public:// getter
 	const_iterator cend() const noexcept { return rep.cend(); }
 
 public:// setter
-	void resize(size_type hint) {rep.resize(hint); }
+	void resize(size_type n) { rep.resize(n); }
 
 public:// ctor
 	hash_set():rep(100, hasher(), key_equal()) {}
 	explicit hash_set(size_type n):rep(n, hasher(), key_equal()) {}
 	hash_set(size_type n, const hasher& hf):rep(n, hf, key_equal()) {}
-		hash_set(const_iterator first, const_iterator last)
-		:rep(100, hasher(), key_equal()){
-		rep.insert_unique(first, last);
-	}
-	hash_set(const_iterator first, const_iterator last, size_type n)
-		:rep(n, hasher(), key_equal()){
-		rep.insert_unique(first, last);
-	}
-	hash_set(const_iterator first, const_iterator last, size_type n,
-		const hasher& hf)
-		:rep(n, hf, key_equal()){
-		rep.insert_unique(first, last);
-	}
 	template <class InputIterator>
 	hash_set(InputIterator first, InputIterator last)
 		:rep(100, hasher(), key_equal()){
@@ -82,7 +69,7 @@ public:// ctor
 	}
 
 public:// swap
-	void swap(hash_set& rhs) {rep.swap(rhs.rep); }
+	void swap(hash_set& rhs) noexcept {rep.swap(rhs.rep); }
 
 public:// insert
 	pair<iterator, bool> insert(const value_type& obj){
@@ -91,12 +78,6 @@ public:// insert
 	}
 	template <class InputIterator>
 	void insert(InputIterator first, InputIterator last){ rep.insert_unique(first, last); }
-	void insert(const value_type* first, const value_type* last) { rep.insert_unique(first, last); }
-	void insert(const_iterator first, const_iterator last){ rep.insert_unique(first, last); }
-	pair<iterator, bool> insert_noresize(const value_type& obj){
-		pair<typename ht::iterator, bool> p = rep.insert_unique_noresize(obj);
-		return pair<iterator, bool>(p.first, p.second);
-	}
 
 public:// erase
 	size_type erase(const key_type& key) { return rep.erase(key); }
@@ -113,6 +94,16 @@ public:// find
 template <class Value, class HashFcn, class EqualKey, class Alloc>
 inline bool operator==(const hash_set<Value, HashFcn, EqualKey, Alloc>& lhs,const hash_set<Value, HashFcn, EqualKey, Alloc>& rhs){
 	return lhs.rep == rhs.rep;
+}
+
+template <class Value, class HashFcn, class EqualKey, class Alloc>
+inline bool operator!=(const hash_set<Value, HashFcn, EqualKey, Alloc>& lhs,const hash_set<Value, HashFcn, EqualKey, Alloc>& rhs){
+	return !(lhs == rhs);
+}
+
+template <class Value, class HashFcn, class EqualKey, class Alloc>
+inline void swap(const hash_set<Value, HashFcn, EqualKey, Alloc>& lhs,const hash_set<Value, HashFcn, EqualKey, Alloc>& rhs){
+	lhs.swap(rhs);
 }
 
 }

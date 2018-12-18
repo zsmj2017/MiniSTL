@@ -55,17 +55,20 @@ private: // allocate and construct aux functions
 	}
 
 	void deallocate() noexcept {
-		if (start) data_allocator::deallocate(start, end_of_storage - start);
+		if (start) 
+			data_allocator::deallocate(start, end_of_storage - start);
 	}
 
-	void destroy_and_deallocate()noexcept {
+	void destroy_and_deallocate() noexcept {
 		destroy(start, finish); // destroy in "construct.h"
 		deallocate();
 	}
 
 private: // aux_interface
-	void swap(vector&) noexcept;
 	void insert_aux(iterator position, const value_type& value);
+
+public: // swap
+	void swap(vector&) noexcept;
 
 public:// ctor && dtor
 	vector() :start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
