@@ -7,7 +7,7 @@
 针对SGI STL Source，有学习计划如下：
 
  - [x] 第一阶段：通读全文，了解数据结构的底层实现与算法流程，针对书本完成代码撰写与整理。
- - [ ] 第二阶段：补全各容器的实现（进行中）。
+ - [x] 第二阶段：补全各容器的实现。
  - [ ] 第三阶段：针对容器类加入C++11新特性，如move语义，initialized_list构造等,撰写完备的单元测试。
  - [ ] 第四阶段：测试MiniSTL性能，并与std作对比，总结原因。
 
@@ -50,19 +50,19 @@
 
  &emsp;[set(stl_set.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Set/stl_set.h):100%  
 
- &emsp;[map(stl_map.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Map/stl_map.h):50%  
+ &emsp;[map(stl_map.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Map/stl_map.h):100%  
 
- &emsp;[multiset(stl_multiset.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Mutiset/stl_mutiset.h):50%  
+ &emsp;[multiset(stl_multiset.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Mutiset/stl_mutiset.h):100%  
 
- &emsp;[multimap(stl_multimap.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Mutimap/stl_mutimap.h):50%  
+ &emsp;[multimap(stl_multimap.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Mutimap/stl_mutimap.h):100%  
 
- &emsp;[hashtable(hashtable.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Hashmap/hash_map.h):50%  
+ &emsp;[hashtable(hashtable.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Hashmap/hash_map.h):100%  
 
- &emsp;[hashset(hashset.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Hashset/hash_set.h):50%  
+ &emsp;[hashset(hashset.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/Hashset/hash_set.h):100%  
 
- &emsp;[hashmultiset(hash_multiset.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/HashMultiset/hash_multiset.h):50%  
+ &emsp;[hashmultiset(hash_multiset.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/HashMultiset/hash_multiset.h):100%  
 
- &emsp;[hashmultimap(hash_multimap.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/HashMultiset/hash_multimap.h):50%  
+ &emsp;[hashmultimap(hash_multimap.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Associative%20containers/HashMultiset/hash_multimap.h):100%  
 
  5. **算法（algorithm)**
 
@@ -90,7 +90,7 @@
 
 ## 编译环境
 
-本仓库代码编译环境为windows10，VS2017。
+本仓库代码编译环境为Ubuntu18.04，GCC。
 
 ## LICENSE
 
