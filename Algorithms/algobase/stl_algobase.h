@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-#include <cstddef> // ptrdiff_t
-#include <string>
-#include <functional>
+#include <cstddef>
+#include <string.h> // memcmp
+#include "stl_function.h"
 #include "stl_iterator.h"
+#include "typeTraits.h"
 
 namespace MiniSTL {
 
@@ -41,12 +42,12 @@ OutputIterator fill_n(OutputIterator first, OutputIterator last, Size n, const T
 
 template <class ForwardIterator1, class ForwardIterator2>
 inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b) {
-	return __iter_swap(a, b, value_type(*a));
+	return __iter_swap(a, b, value_type_t<ForwardIterator1>());
 }
 
-//必须要知道迭代器指向的对象类型，才能够构造对象，因此本处使用了value_type
+// 必须要知道迭代器指向的对象类型，才能够构造对象，因此本处使用了value_type
 template <class ForwardIterator1, class ForwardIterator2, class T>
-inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b, T*) {
+inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b, T) {
 	T temp = *a;
 	*a = *b;
 	*b = temp;
@@ -61,7 +62,7 @@ bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
 		else if (*first1 > *first2)
 			return false;
 	}
-	return first1 == last1 && first2 != last2;//若第二序列有余，返回true，否则false
+	return first1 == last1 && first2 != last2;// 若第二序列有余，返回true，否则false
 }
 
 template <class T>
@@ -93,22 +94,22 @@ bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
 		else if (comp(*first2, *first1))
 			return false;
 	}
-	return first1 == last1 && first2 != last2;//若第二序列有余，返回true，否则false
+	return first1 == last1 && first2 != last2;// 若第二序列有余，返回true，否则false
 }
 
-//针对原始指针const unsigned char*的全特化版本
+// 针对原始指针const unsigned char*的全特化版本
 inline bool lexicographical_compare(const unsigned char* first1, const unsigned char* last1,
 		const unsigned char* first2, const unsigned char* last2) {
 	const size_t len1 = last1 - first1;
 	const size_t len2 = last2 - first2;
-	//先比较长度相同的段落
+	// 先比较长度相同的段落
 	const int result = memcmp(first1, first2, min(len1, len2));
 	return result != 0 ? result < 0 : len1 < len2;
 }
 
-//显然要求序列1长于序列2
+// 显然要求序列1长于序列2
 template <class InputIterator1, class InputIterator2>
-std::pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
+pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
 	InputIterator2 first2, InputIterator2 last2) {
 	while (first1 != last1 && *first1 == *first2) {
 		++first1, ++first2;
@@ -117,7 +118,7 @@ std::pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputI
 }
 
 template <class InputIterator1, class InputIterator2, class BinaryPredicate>
-std::pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
+pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
 	InputIterator2 first2, InputIterator2 last2, BinaryPredicate binary_pred) {
 	while (first1 != last1 && binary_pred(*first1, *first2)) {
 		++first1, ++first2;
@@ -176,7 +177,7 @@ inline wchar_t* copy(const wchar_t* first, const wchar_t* last, wchar_t* result)
 //InputIterator
 template <class InputIterator, class OutputIterator>
 inline OutputIterator __copy(InputIterator first, InputIterator last, OutputIterator result, input_iterator_tag) {
-	for (; first != last; ++first, ++result)//迭代器判同，速度较慢
+	for (; first != last; ++first, ++result)// 迭代器判同，速度较慢
 		*result = *first;
 	return result;
 }
@@ -184,12 +185,12 @@ inline OutputIterator __copy(InputIterator first, InputIterator last, OutputIter
 //RandomIterator
 template <class InputIterator, class OutputIterator>
 inline OutputIterator __copy(InputIterator first, InputIterator last, OutputIterator result, random_access_iterator_tag) {
-	return __copy_d(first, last, result, distance_type(first));//再细分函数以便复用
+	return __copy_d(first, last, result, distance_type(first));// 再细分函数以便复用
 }
 
 template <class InputIterator, class OutputIterator, class Distance>
 inline OutputIterator __copy_d(InputIterator first, InputIterator last, OutputIterator result, Distance*) {
-	for (Distance n = last - first; n > 0; --n, ++first, ++result)//以n决定循环次数，速度较快
+	for (Distance n = last - first; n > 0; --n, ++first, ++result)// 以n决定循环次数，速度较快
 		*result = *first;
 	return result;
 }
@@ -209,4 +210,4 @@ inline T* __copy_t(const T* first, const T* last, T* result, _false_type) {
 }
 
 //copy_backward的实现与copy类似，本篇出于时间原因，并不列出
-}
+}// end namespace::MiniSTL

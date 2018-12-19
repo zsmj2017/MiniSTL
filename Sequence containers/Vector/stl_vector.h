@@ -3,6 +3,7 @@
 #include <cstddef> // ptrdiff_t
 #include "allocator.h"
 #include "uninitialized.h"
+#include "stl_algobase.h"
 
 namespace MiniSTL {
 // use sub_allocator as default allocator
@@ -277,7 +278,6 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 			if (elems_after > n) {
 				MiniSTL::uninitialized_copy(finish - n, finish, finish);
 				finish += n;
-				// copy_backward needs _SCL_SECURE_NO_WARNINGS
 				std::copy_backward(position, old_finish - n, old_finish);
 				std::fill(position, position + n, value_copy);
 			}
