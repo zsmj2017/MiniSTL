@@ -8,7 +8,7 @@ namespace MiniSTL {
 // use sub_allocator as default allocator
 template<class T, class Alloc = simpleAlloc<T> >
 class vector {
-public:
+	// friend declarations
 	template<class _T, class _Alloc>
 	friend bool operator == (const vector<_T, _Alloc>&, const vector<_T, _Alloc>&);
 	template<class _T, class _Alloc>
@@ -331,6 +331,11 @@ inline bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
 template<class T, class Alloc>
 inline bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 	return !(lhs == rhs);
+}
+
+template<class T,class Alloc>
+inline void swap(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+	lhs.swap(rhs);
 }
 
 }// endnamespace::MiniSTL
