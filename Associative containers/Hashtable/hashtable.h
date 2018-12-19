@@ -223,7 +223,7 @@ public:// aux_interface for insert && erase
 	void insert_equal(ForwardIterator, ForwardIterator, forward_iterator_tag);
 
 public:// find
-	reference find_or_insert(const value_type&);
+	reference find_or_insert(const value_type&); // interface for map
 	iterator find(const key_type&);
 	const_iterator find(const key_type&) const;
 	size_type count(const key_type&) const;
@@ -395,7 +395,7 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::insert_equal_noresi
 	const size_type n = bkt_num(obj);
 	node* first = buckets[n];
 	for (node* cur = first; cur; cur = cur->next) {
-		if (equals(get_key(cur->val)), get_key(obj)) {
+		if (equals(get_key(cur->val), get_key(obj))) {
 			node* temp = new_node(obj);
 			temp->next = cur->next;
 			cur->next = temp;
