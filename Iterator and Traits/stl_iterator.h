@@ -212,11 +212,11 @@ inline insert_iterator<Container> inserter(Container &x, Iterator i) {
 }
 
 template <class Iterator>
-class reverse_iterator {
+class __reverse_iterator {
 	template<class It>
-	friend bool operator == (const reverse_iterator<It>&, const reverse_iterator<It>&);
+	friend bool operator == (const __reverse_iterator<It>&, const __reverse_iterator<It>&);
 	template<class It>
-	friend bool operator != (const reverse_iterator<It>&, const reverse_iterator<It>&);
+	friend bool operator != (const __reverse_iterator<It>&, const __reverse_iterator<It>&);
 
 protected:
 	Iterator current;//与之对应的正向迭代器
@@ -229,12 +229,12 @@ public:
 	using reference = reference_t<Iterator>;
 
 	using iterator_type = Iterator;//正向迭代器
-	using self = reverse_iterator;//反向迭代器
+	using self = __reverse_iterator;//反向迭代器
 
 public:
-	reverse_iterator() {}
-	explicit reverse_iterator(iterator_type value) :current(value) {}
-	reverse_iterator(const self& value) :current(value.current) {}
+	__reverse_iterator() {}
+	explicit __reverse_iterator(iterator_type value) :current(value) {}
+	__reverse_iterator(const self& value) :current(value.current) {}
 
 	iterator_type base() const { return current; }
 	reference operator*() const {
@@ -292,12 +292,12 @@ public:
 
 
 template<class Iterator>
-inline bool operator==(const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs){
+inline bool operator==(const __reverse_iterator<Iterator>& lhs, const __reverse_iterator<Iterator>& rhs){
 	return lhs.operator==(rhs);
 }
 
 template<class Iterator>
-inline bool operator!=(const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+inline bool operator!=(const __reverse_iterator<Iterator>& lhs, const __reverse_iterator<Iterator>& rhs) {
 	return !(lhs == rhs);
 }
 

@@ -18,9 +18,9 @@ public:// alias declarartions
 	using value_type = T;
 	using pointer = value_type * ;
 	using iterator = value_type * ;// iterator is raw pointer
-	using const_iterator = value_type * ;
-	using reverse_iterator = MiniSTL::reverse_iterator<iterator>;
-	using const_reverse_iterator = MiniSTL::reverse_iterator<const_iterator>;
+	using const_iterator = const value_type * ;
+	using reverse_iterator = __reverse_iterator<iterator>;
+	using const_reverse_iterator = __reverse_iterator<const_iterator>;
 	using reference = value_type & ;
 	using const_reference = const value_type&;
 	using size_type = size_t;
@@ -74,6 +74,8 @@ public:// ctor && dtor
 	vector() :start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
 	explicit vector(size_type n) { fill_initialize(n, value_type()); }
 	vector(size_type n, const value_type &value) { fill_initialize(n, value); }
+	// Without this,int would be deduced as InputIterator
+	vector(int n, const value_type &value) { fill_initialize(n, value); }
 	template<class InputIterator>
 	vector(InputIterator first, InputIterator last) { allocate_and_copy(first, last); }
 	vector(std::initializer_list<T>);
