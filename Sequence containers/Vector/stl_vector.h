@@ -42,14 +42,14 @@ private: // allocate and construct aux functions
 
 	iterator allocate_and_fill(size_type n, const value_type& value) {
 		iterator result = data_allocator::allocate(n);
-		uninitialized_fill_n(result, n, value);
+		MiniSTL::uninitialized_fill_n(result, n, value);
 		return result;
 	}
 
 	template<class InputIterator>
 	iterator allocate_and_copy(InputIterator first, InputIterator last) {
 		start = data_allocator::allocate(last - first);
-		finish = uninitialized_copy(first, last, start);
+		finish = MiniSTL::uninitialized_copy(first, last, start);
 		end_of_storage = finish;
 		return start;
 	}
@@ -152,10 +152,10 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
 		iterator new_start = data_allocator::allocate(new_size);
 		iterator new_finish = new_start;
 		try {
-			new_finish = uninitialized_copy(start, position, new_start);//复制前半段
+			new_finish = MiniSTL::uninitialized_copy(start, position, new_start);//复制前半段
 			construct(new_finish, value);
 			++new_finish;
-			new_finish = uninitialized_copy(position, finish, new_finish);//复制后半段
+			new_finish = MiniSTL::uninitialized_copy(position, finish, new_finish);//复制后半段
 		}
 		catch (std::exception&) {
 			//commit or rollback
@@ -225,7 +225,7 @@ inline void vector<T, Alloc>::reserve(size_type new_capacity){
 	if (new_capacity <= capacity())
 		return;
 	T* new_start = data_allocator::allocate(new_capacity);
-	T* new_finish = uninitialized_copy(start, finish, new_start);
+	T* new_finish = MiniSTL::uninitialized_copy(start, finish, new_start);
 	destroy_and_deallocate();
 	start = new_start;
 	finish = new_finish;
@@ -273,16 +273,16 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 			const size_type elems_after = finish - position;
 			iterator old_finish = finish;
 			if (elems_after > n) {
-				uninitialized_copy(finish - n, finish, finish);
+				MiniSTL::uninitialized_copy(finish - n, finish, finish);
 				finish += n;
 				// copy_backward needs _SCL_SECURE_NO_WARNINGS
 				std::copy_backward(position, old_finish - n, old_finish);
 				std::fill(position, position + n, value_copy);
 			}
 			else {
-				uninitialized_fill_n(finish, n - elems_after, value_copy);
+				MiniSTL::uninitialized_fill_n(finish, n - elems_after, value_copy);
 				finish += n - elems_after;
-				uninitialized_copy(position, old_finish, finish);
+				MiniSTL::uninitialized_copy(position, old_finish, finish);
 				finish += elems_after;
 				std::fill(position, old_finish, value_copy);//补足m
 			}
@@ -293,9 +293,9 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 			iterator new_start = data_allocator::allocate(new_size);
 			iterator new_finish = new_start;
 			try {
-				new_finish = uninitialized_copy(start, position, new_start);
-				new_finish = uninitialized_fill_n(new_finish, n, value);
-				new_finish = uninitialized_copy(position, finish, new_finish);
+				new_finish = MiniSTL::uninitialized_copy(start, position, new_start);
+				new_finish = MiniSTL::uninitialized_fill_n(new_finish, n, value);
+				new_finish = MiniSTL::uninitialized_copy(position, finish, new_finish);
 			}
 			catch (std::exception&) {
 				destroy(new_start, new_finish);
