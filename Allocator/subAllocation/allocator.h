@@ -29,24 +29,24 @@ public:
 
 template<class T, class Alloc>
 T *simpleAlloc<T, Alloc>::allocate() {
-	return static_cast<T *>(Alloc::allocate(sizeof(T)));
+	return reinterpret_cast<T *>(Alloc::allocate(sizeof(T)));
 }
 
 template<class T, class Alloc>
 T *simpleAlloc<T, Alloc>::allocate(size_t n) {
 	if (n == 0) return 0;
-	return static_cast<T *>(Alloc::allocate(sizeof(T) * n));
+	return reinterpret_cast<T *>(Alloc::allocate(sizeof(T) * n));
 }
 
 template<class T, class Alloc>
 void simpleAlloc<T, Alloc>::deallocate(T *ptr) {
-	Alloc::deallocate(static_cast<void *>(ptr), sizeof(T));
+	Alloc::deallocate(reinterpret_cast<void *>(ptr), sizeof(T));
 }
 
 template<class T, class Alloc>
 void simpleAlloc<T, Alloc>::deallocate(T *ptr, size_t n) {
 	if (n == 0) return;
-	Alloc::deallocate(static_cast<void *>(ptr), sizeof(T)* n);
+	Alloc::deallocate(reinterpret_cast<void *>(ptr), sizeof(T)* n);
 }
 
 template<class T, class Alloc>
