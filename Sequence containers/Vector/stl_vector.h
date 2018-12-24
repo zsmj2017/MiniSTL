@@ -9,12 +9,6 @@ namespace MiniSTL {
 // use sub_allocator as default allocator
 template<class T, class Alloc = simpleAlloc<T> >
 class vector {
-	// friend declarations
-	template<class _T, class _Alloc>
-	friend bool operator == (const vector<_T, _Alloc>&, const vector<_T, _Alloc>&);
-	template<class _T, class _Alloc>
-	friend bool operator != (const vector<_T, _Alloc>&, const vector<_T, _Alloc>&);
-
 public:// alias declarartions
 	using value_type = T;
 	using pointer = value_type * ;
@@ -27,12 +21,12 @@ public:// alias declarartions
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
-private: // iterator to indicate the vector's memory location
+private:// iterator to indicate the vector's memory location
 	iterator start;
 	iterator finish;
 	iterator end_of_storage;
 
-private: // allocate and construct aux functions 
+private:// allocate and construct aux functions 
 	using data_allocator = Alloc;
 
 	void fill_initialize(size_type n, const value_type& value) {
@@ -65,10 +59,10 @@ private: // allocate and construct aux functions
 		deallocate();
 	}
 
-private: // aux_interface
+private:// aux_interface
 	void insert_aux(iterator position, const value_type& value);
 
-public: // swap
+public:// swap
 	void swap(vector&) noexcept;
 
 public:// ctor && dtor
@@ -91,9 +85,11 @@ public:// ctor && dtor
 public:// copy assignment operator
 	vector & operator=(const vector&);
 	vector& operator=(std::initializer_list<value_type>);
+
+public:// move assignment
 	vector& operator=(vector&&) noexcept;
 
-public: // getter
+public:// getter
 	const_iterator begin() const noexcept { return start; }
 	const_iterator end() const noexcept { return finish; }
 	const_iterator cbegin() const noexcept { return start; }
@@ -107,7 +103,7 @@ public: // getter
 	size_type capacity() const noexcept { return static_cast<size_type>(end_of_storage - start); }
 	bool empty() const noexcept { return start == finish; }
 
-public: // setter
+public:// setter
 	iterator begin() noexcept { return start; }
 	iterator end() noexcept { return finish; }
 	reverse_iterator rbegin() noexcept { return reverse_iterator(finish); }
@@ -116,21 +112,21 @@ public: // setter
 	reference front() noexcept { return *begin(); }
 	reference back() noexcept { return *(end() - 1); }
 
-public: //  interface for size and capacity
+public:// interface for size and capacity
 	void resize(size_type, const value_type&);
 	void resize(size_type new_size) { resize(new_size, value_type()); }
 	void reserve(size_type);
 	void shrink_to_fit() noexcept { vector temp(*this); swap(temp); }
 
-public: // compare operator(member function)
+public:// compare operator(member function)
 	bool operator== (const vector&) const noexcept;
 	bool operator!= (const vector& rhs) const noexcept { return !(*this == rhs); }
 
-public: // interface for back operation
+public:// interface for back operation
 	void push_back(const value_type&);
 	void pop_back() {--finish;destroy(finish);}
 
-public: // interface for insert and erase
+public:// interface for insert and erase
 	iterator erase(iterator, iterator);
 	iterator erase(iterator position) { return erase(position, position + 1); }
 	void clear() { erase(begin(), end()); }
@@ -144,24 +140,22 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
 		construct(finish, *(finish - 1));
 		++finish;
 		value_type value_copy = value;// STL copy in copy out
-		// TODO:
-		// copy_backward needs _SCL_SECURE_NO_WARNINGS
 		std::copy_backward(position, finish - 2, finish - 1);
 		*position = value_copy;
 	}
 	else {// expand
 		const size_type old_size = size();
-		const size_type new_size = old_size ? 2 * old_size : 1; // new_cap=2*old_cap
+		const size_type new_size = old_size ? 2 * old_size : 1; // new_cap = 2 * old_cap
 		iterator new_start = data_allocator::allocate(new_size);
 		iterator new_finish = new_start;
 		try {
-			new_finish = MiniSTL::uninitialized_copy(start, position, new_start);//复制前半段
+			new_finish = MiniSTL::uninitialized_copy(start, position, new_start);// Copy the first segment
 			construct(new_finish, value);
 			++new_finish;
-			new_finish = MiniSTL::uninitialized_copy(position, finish, new_finish);//复制后半段
+			new_finish = MiniSTL::uninitialized_copy(position, finish, new_finish);// Copy the second segment
 		}
 		catch (std::exception&) {
-			//commit or rollback
+			// commit or rollback
 			destroy(new_start, new_finish);
 			data_allocator::deallocate(new_start, new_size);
 			throw;
@@ -175,10 +169,9 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
 
 template<class T, class Alloc>
 inline void vector<T, Alloc>::swap(vector &rhs) noexcept {
-	using std::swap;
-	swap(start, rhs.start);
-	swap(finish, rhs.finish);
-	swap(end_of_storage, rhs.end_of_storage);
+	MiniSTL::swap(start, rhs.start);
+	MiniSTL::swap(finish, rhs.finish);
+	MiniSTL::swap(end_of_storage, rhs.end_of_storage);
 }
 
 template<class T, class Alloc>
@@ -286,7 +279,7 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 				finish += n - elems_after;
 				MiniSTL::uninitialized_copy(position, old_finish, finish);
 				finish += elems_after;
-				std::fill(position, old_finish, value_copy);//补足m
+				std::fill(position, old_finish, value_copy);// complement 
 			}
 		}
 		else { // expand
