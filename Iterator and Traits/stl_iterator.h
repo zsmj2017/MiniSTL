@@ -301,6 +301,38 @@ inline bool operator!=(const __reverse_iterator<Iterator>& lhs, const __reverse_
 	return !(lhs == rhs);
 }
 
+template<class Iterator>
+inline bool operator<(const __reverse_iterator<Iterator>& lhs, const __reverse_iterator<Iterator>& rhs) {
+	return rhs.base() < lhs.base();
+}
+
+template<class Iterator>
+inline bool operator>(const __reverse_iterator<Iterator>& lhs, const __reverse_iterator<Iterator>& rhs) {
+	return rhs < lhs;
+}
+
+template<class Iterator>
+inline bool operator<=(const __reverse_iterator<Iterator>& lhs, const __reverse_iterator<Iterator>& rhs) {
+	return !(rhs < lhs);
+}
+
+template<class Iterator>
+inline bool operator>=(const __reverse_iterator<Iterator>& lhs, const __reverse_iterator<Iterator>& rhs) {
+	return !(lhs < rhs);
+}
+
+template<class Iterator>
+inline typename __reverse_iterator<Iterator>::difference_type
+operator-(const __reverse_iterator<Iterator>& lhs, const __reverse_iterator<Iterator>& rhs) {
+	return rhs.base() - lhs.base();
+}
+
+template<class Iterator>
+inline __reverse_iterator<Iterator>
+operator+(typename __reverse_iterator<Iterator>::difference_type n, const __reverse_iterator<Iterator>& x) {
+	return __reverse_iterator<Iterator>(x.base() - n);
+}
+
 //stream:input_stream,output_stream
 
 template <class T, class Distance = ptrdiff_t>
