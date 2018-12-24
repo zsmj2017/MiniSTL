@@ -386,7 +386,7 @@ public:
 	using pointer = void;
 	using reference = void;
 
-	ostream_iterator() :stream(&std::cin), interval(nullptr) {}
+	ostream_iterator() :stream(&std::cout), interval(nullptr) {}
 	ostream_iterator(std::ostream& s, const char* c) :stream(&s), interval(c) {}
 
 	ostream_iterator& operator=(const T& value) {

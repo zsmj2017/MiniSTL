@@ -13,8 +13,8 @@ protected:
         vf = {1.0f,2.0f,3.0f,4.0f,5.0f};
         vd = {1.0f,2.0f,3.0f,4.0f,5.0f};
         vb.resize(5);
-        vs = {"hello","world"};
-        vvi = {{1,2,3},{4,5,6}};
+        vs = {"hello","hello"};
+        vvi = {{1,2,3},{1,2,3}};
     }
     // pre structure
     struct BAR{ int a; double b; };
@@ -134,9 +134,62 @@ TEST_F(VectorTest,COPYASSIGN_WITH_SELF){
 }
 
 TEST_F(VectorTest,COPYASSIGN_WITH_INITIAL_LIST){
-    vector<string> temp_vs = {"hello","hello","hello"};
-    vs = temp_vs;
+    vi = {2,2,2,2,2};
+    for(auto i:vi) EXPECT_EQ(i,2);
+    vf = {2.0f,2.0f,2.0f,2.0f,2.0f};
+    for(auto f:vf) EXPECT_EQ(f,2.0f);
+    vd = {2.235f};
+    for(auto d:vd) EXPECT_EQ(d,2.235f);
+    vs = {"hello","hello","hello"};
     for(auto s:vs) EXPECT_EQ(s,"hello");
+    vvi = {vector<int>({1,2,3}),vector<int>({1,2,3})};
+    for(auto vi:vvi) EXPECT_EQ(vi,vector<int>({1,2,3}));
+}
+
+TEST_F(VectorTest,MOVEASSIGN_WITH_SELF){
+    vector<int> temp_vi(5,2);
+    vi = std::move(temp_vi);
+    for(auto i:vi) EXPECT_EQ(i,2);
+    for(auto i:temp_vi) EXPECT_NE(i,2);
+    vector<float> temp_vf(5,2.0f);
+    vf = std::move(temp_vf);
+    for(auto f:vf) EXPECT_EQ(f,2.0f);
+    for(auto f:temp_vf) EXPECT_NE(f,2.0f);
+    vector<double> temp_vd(5,2.235f);
+    vd = std::move(temp_vd);
+    for(auto d:vd) EXPECT_EQ(d,2.235f);
+    for(auto d:temp_vd) EXPECT_NE(d,2.235f);
+    vector<string> temp_vs(5,"hello");
+    vs = std::move(temp_vs);
+    for(auto s:vs) EXPECT_EQ(s,"hello");
+    for(auto s:temp_vs) EXPECT_NE(s,"hello");
+    vector<vector<int> > temp_vvi(5,{1,2,3});
+    vvi = std::move(temp_vvi);
+    for(auto vi:vvi) EXPECT_EQ(vi,vector<int>({1,2,3}));
+    for(auto vi:temp_vvi) EXPECT_NE(vi,vector<int>({1,2,3}));
+}
+
+TEST_F(VectorTest,BEGIN_AND_END){
+    for(auto it = vi.begin();it != vi.end();++it){ EXPECT_EQ(*it, it - vi.begin()+1); *it = 5; }
+    for(auto it = vi.cbegin();it != vi.cend();++it) EXPECT_EQ(*it,5);
+    for(auto it = vi.rbegin();it != vi.rend();++it){ EXPECT_EQ(*it,5); *it = 3; }
+    for(auto it = vi.crbegin();it != vi.crend();++it){ EXPECT_EQ(*it,3); }
+    for(auto it = vf.begin();it != vf.end();++it){ EXPECT_EQ(*it, it - vf.begin()+1.0f); *it = 5.0f; }
+    for(auto it = vf.cbegin();it != vf.cend();++it) EXPECT_EQ(*it,5.0f);
+    for(auto it = vf.rbegin();it != vf.rend();++it){ EXPECT_EQ(*it,5.0f); *it = 3.0f; }
+    for(auto it = vf.crbegin();it != vf.crend();++it){ EXPECT_EQ(*it,3.0f); }
+    for(auto it = vd.begin();it != vd.end();++it){ EXPECT_EQ(*it, it - vd.begin()+1.0f); *it = 5.0f; }
+    for(auto it = vd.cbegin();it != vd.cend();++it) EXPECT_EQ(*it,5.0f);
+    for(auto it = vd.rbegin();it != vd.rend();++it){ EXPECT_EQ(*it,5.0f); *it = 3.0f; }
+    for(auto it = vd.crbegin();it != vd.crend();++it){ EXPECT_EQ(*it,3.0f); }
+    for(auto it = vs.begin();it != vs.end();++it){ EXPECT_EQ(*it, "hello"); *it = "world"; }
+    for(auto it = vs.cbegin();it != vs.cend();++it) EXPECT_EQ(*it,"world");
+    for(auto it = vs.rbegin();it != vs.rend();++it){ EXPECT_EQ(*it,"world"); *it = "hello"; }
+    for(auto it = vs.crbegin();it != vs.crend();++it){ EXPECT_EQ(*it,"hello"); }
+    for(auto it = vvi.begin();it != vvi.end();++it){ EXPECT_EQ(*it, vector<int>({1,2,3})); *it = {4,5,6}; }
+    for(auto it = vvi.cbegin();it != vvi.cend();++it) EXPECT_EQ(*it,vector<int>({4,5,6}));
+    for(auto it = vvi.rbegin();it != vvi.rend();++it){ EXPECT_EQ(*it,vector<int>({4,5,6})); *it = {7,8,9}; }
+    for(auto it = vvi.crbegin();it != vvi.crend();++it){ EXPECT_EQ(*it,vector<int>({7,8,9})); }
 }
 
 TEST_F(VectorTest,COMPARATOR){
@@ -148,7 +201,7 @@ TEST_F(VectorTest,COMPARATOR){
     EXPECT_TRUE(temp_vd == vd);
     vector<string> temp_vs(std::move(vs));
     EXPECT_FALSE(temp_vs == vs);
-    vector<vector<int> > temp_vvi({{1,2,3},{4,5,6}});
+    vector<vector<int> > temp_vvi({{1,2,3},{1,2,3}});
     EXPECT_TRUE(temp_vvi == vvi);
 }
 
