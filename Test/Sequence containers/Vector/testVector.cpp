@@ -192,17 +192,161 @@ TEST_F(VectorTest,BEGIN_AND_END){
     for(auto it = vvi.crbegin();it != vvi.crend();++it){ EXPECT_EQ(*it,vector<int>({7,8,9})); }
 }
 
+TEST_F(VectorTest,FRONT_AND_BACK){
+    EXPECT_EQ(vi.front(),1);
+    vi.front() = 2;
+    EXPECT_EQ(vi.front(),2);
+    EXPECT_EQ(vi.back(),5);
+    vi.back() = 2;
+    EXPECT_EQ(vi.back(),2);
+    EXPECT_EQ(vf.front(),1.0f);
+    vf.front() = 2.0f;
+    EXPECT_EQ(vf.front(),2.0f);
+    EXPECT_EQ(vf.back(),5.0f);
+    vf.back() = 2.0f;
+    EXPECT_EQ(vf.back(),2.0f);
+    EXPECT_EQ(vd.front(),1.0f);
+    vd.front() = 2.0f;
+    EXPECT_EQ(vd.front(),2.0f);
+    EXPECT_EQ(vd.back(),5.0f);
+    vd.back() = 2.0f;
+    EXPECT_EQ(vd.back(),2.0f);
+    EXPECT_EQ(vs.front(),"hello");
+    vs.front() = "world";
+    EXPECT_EQ(vs.front(),"world");
+    EXPECT_EQ(vs.back(),"hello");
+    vs.back() = "world";
+    EXPECT_EQ(vs.back(),"world");
+    EXPECT_EQ(vvi.front(),vector<int>({1,2,3}));
+    vvi.front() = {4,5,6};
+    EXPECT_EQ(vvi.front(),vector<int>({4,5,6}));
+    EXPECT_EQ(vvi.back(),vector<int>({1,2,3}));
+    vvi.back() = {4,5,6};
+    EXPECT_EQ(vvi.back(),vector<int>({4,5,6}));
+}
+
+TEST_F(VectorTest,RANDOMACCESS){
+    for(size_t i = 0;i != vi.size(); ++i) EXPECT_EQ(vi[i],i+1);
+    for(size_t i = 0;i != vf.size(); ++i) EXPECT_EQ(vf[i],i+1.0f);
+    for(size_t i = 0;i != vd.size(); ++i) EXPECT_EQ(vd[i],i+1.0f);
+    for(size_t i = 0;i != vs.size(); ++i) EXPECT_EQ(vs[i],"hello");
+    for(size_t i = 0;i != vvi.size(); ++i) EXPECT_EQ(vvi[i],vector<int>({1,2,3}));
+}
+
+TEST_F(VectorTest,SIZE_AND_CAPACITY){
+    EXPECT_EQ(vi.size(),5);EXPECT_EQ(vi.capacity(),5);
+    vi.resize(3);
+    EXPECT_EQ(vi.size(),3);EXPECT_EQ(vi.capacity(),5);
+    vi.resize(10,5);
+    for(size_t i = 3; i != 10; ++i) EXPECT_EQ(vi[i],5);
+    EXPECT_EQ(vi.size(),10);EXPECT_EQ(vi.capacity(),10);
+    vi.reserve(3);
+    EXPECT_NE(vi.size(),3);EXPECT_NE(vi.capacity(),3);
+    vi.reserve(20);
+    EXPECT_EQ(vi.size(),10);EXPECT_EQ(vi.capacity(),20);
+    vi.shrink_to_fit();
+    EXPECT_EQ(vi.size(),10);EXPECT_EQ(vi.size(),vi.capacity());
+}
+
 TEST_F(VectorTest,COMPARATOR){
     vector<int> temp_vi = {1,2,3,4,5};
     EXPECT_TRUE(temp_vi == vi);
+    EXPECT_FALSE(temp_vi != vi);
     vector<float> temp_vf(vf);
     EXPECT_TRUE(temp_vf == vf);
+    EXPECT_FALSE(temp_vf != vf);
     vector<double> temp_vd(vd.cbegin(),vd.cend());
     EXPECT_TRUE(temp_vd == vd);
+    EXPECT_FALSE(temp_vd != vd);
     vector<string> temp_vs(std::move(vs));
     EXPECT_FALSE(temp_vs == vs);
+    EXPECT_TRUE(temp_vs != vs);
     vector<vector<int> > temp_vvi({{1,2,3},{1,2,3}});
     EXPECT_TRUE(temp_vvi == vvi);
+    EXPECT_FALSE(temp_vvi != vvi);
+}
+
+TEST_F(VectorTest,PUSH_AND_POP){
+    vi.push_back(6);
+    EXPECT_EQ(vi.back(),6);
+    EXPECT_EQ(vi.size(),6);EXPECT_EQ(vi.capacity(),10);
+    vi.pop_back();
+    EXPECT_EQ(vi.back(),5);
+    EXPECT_EQ(vi.size(),5);EXPECT_EQ(vi.capacity(),10);
+    vf.push_back(6.0f);
+    EXPECT_EQ(vf.back(),6.0f);
+    EXPECT_EQ(vf.size(),6);EXPECT_EQ(vf.capacity(),10);
+    vf.pop_back();
+    EXPECT_EQ(vf.back(),5.0f);
+    EXPECT_EQ(vf.size(),5);EXPECT_EQ(vf.capacity(),10);
+    vd.push_back(6.0f);
+    EXPECT_EQ(vd.back(),6.0f);
+    EXPECT_EQ(vd.size(),6);EXPECT_EQ(vd.capacity(),10);
+    vd.pop_back();
+    EXPECT_EQ(vd.back(),5.0f);
+    EXPECT_EQ(vd.size(),5);EXPECT_EQ(vd.capacity(),10);
+    vs.push_back("world");
+    EXPECT_EQ(vs.back(),"world");
+    EXPECT_EQ(vs.size(),3);EXPECT_EQ(vs.capacity(),4);
+    vs.pop_back();
+    EXPECT_EQ(vs.back(),"hello");
+    EXPECT_EQ(vs.size(),2);EXPECT_EQ(vs.capacity(),4);
+    vvi.push_back({4,5,6});
+    EXPECT_EQ(vvi.back(),vector<int>({4,5,6}));
+    EXPECT_EQ(vvi.size(),3);EXPECT_EQ(vvi.capacity(),4);
+    vvi.pop_back();
+    EXPECT_EQ(vvi.back(),vector<int>({1,2,3}));
+    EXPECT_EQ(vvi.size(),2);EXPECT_EQ(vvi.capacity(),4);
+}
+
+TEST_F(VectorTest,ERASE){
+    vi.erase(vi.begin());
+    EXPECT_EQ(vi.front(),2);
+    EXPECT_EQ(vi.size(),4);EXPECT_EQ(vi.capacity(),5);
+    vi.erase(vi.end()-1,vi.end());
+    EXPECT_EQ(vi.back(),4);
+    EXPECT_EQ(vi.size(),3);EXPECT_EQ(vi.capacity(),5);
+    vi.clear();
+    EXPECT_EQ(vi.size(),0);EXPECT_EQ(vi.capacity(),5);
+    vf.erase(vf.begin());
+    EXPECT_EQ(vf.front(),2.0f);
+    EXPECT_EQ(vf.size(),4);EXPECT_EQ(vf.capacity(),5);
+    vf.erase(vf.end()-1,vf.end());
+    EXPECT_EQ(vf.back(),4.0f);
+    EXPECT_EQ(vf.size(),3);EXPECT_EQ(vf.capacity(),5);
+    vf.clear();
+    EXPECT_EQ(vf.size(),0);EXPECT_EQ(vf.capacity(),5);
+    vd.erase(vd.begin()+1,vd.begin()+2);
+    EXPECT_EQ(vd[1],3.0f);
+    EXPECT_EQ(vd.size(),4);EXPECT_EQ(vd.capacity(),5);
+    vs.erase(vs.begin()+1,vs.begin()+2);
+    EXPECT_EQ(vs.size(),1);EXPECT_EQ(vs.capacity(),2);
+    vvi.erase(vvi.begin()+1,vvi.begin()+2);
+    EXPECT_EQ(vvi[1],vector<int>({1,2,3}));
+    EXPECT_EQ(vvi.size(),1);EXPECT_EQ(vvi.capacity(),2);
+}
+
+TEST_F(VectorTest,INSERT){
+    vi.insert(vi.begin());
+    EXPECT_EQ(vi.front(),0);
+    EXPECT_EQ(vi.size(),6);EXPECT_EQ(vi.capacity(),10);
+    vi.insert(vi.begin()+1,5);
+    EXPECT_EQ(vi[1],5);
+    EXPECT_EQ(vi.size(),7);EXPECT_EQ(vi.capacity(),10);
+    vector<int> temp_vi = {1,2,3};
+    vi.insert(vi.end(),temp_vi.begin(),temp_vi.end());
+    EXPECT_EQ(vi.back(),3);
+    EXPECT_EQ(vi.size(),10);EXPECT_EQ(vi.capacity(),10);
+    vf.insert(vf.begin());
+    EXPECT_EQ(vf.front(),0.0f);
+    EXPECT_EQ(vf.size(),6);EXPECT_EQ(vf.capacity(),10);
+    vf.insert(vf.begin()+1,5.0f);
+    EXPECT_EQ(vf[1],5.0f);
+    EXPECT_EQ(vf.size(),7);EXPECT_EQ(vi.capacity(),10);
+    vector<float> temp_vf = {1.0,2.0,3.0,4.0};
+    vf.insert(vf.end(),temp_vf.begin(),temp_vf.end());
+    EXPECT_EQ(vf.back(),4.0f);
+    EXPECT_EQ(vf.size(),11);EXPECT_EQ(vf.capacity(),14);
 }
 
 int main(int argc, char *argv[])

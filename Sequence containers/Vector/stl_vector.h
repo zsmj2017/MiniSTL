@@ -21,7 +21,8 @@ public:// alias declarartions
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
-private:// iterator to indicate the vector's memory location
+private:// data member
+	// iterator to indicate the vector's memory location
 	iterator start;
 	iterator finish;
 	iterator end_of_storage;
@@ -141,6 +142,10 @@ private:// aux_interface for insert
 	void range_insert(iterator pos,InputIterator first,InputIterator last,input_iterator_tag);
 	template <class ForwardIterator>
 	void range_insert(iterator pos,ForwardIterator first,ForwardIterator last,forward_iterator_tag);
+	template <class Integer>
+	void insert_dispatch(iterator pos,Integer n,Integer value,_true_type) { 
+		fill_insert(pos,n,value);
+	}
 	template <class InputIterator>
 	void insert_dispatch(iterator pos,InputIterator first,InputIterator last,_false_type) { 
 		range_insert(pos,first,last,iterator_category_t<InputIterator>());
@@ -383,10 +388,20 @@ void vector<T, Alloc>::fill_insert(iterator position, size_type n, const value_t
 }
 
 template<class T, class Alloc>
+inline typename vector<T, Alloc>::iterator vector<T, Alloc>::insert(iterator position) {
+	return insert(position,value_type());
+}
+
+template<class T, class Alloc>
 inline typename vector<T, Alloc>::iterator vector<T, Alloc>::insert(iterator position, const value_type &value) {
-	difference_type diff = position - begin();
-	insert(position, 1, value);
-	return begin() + diff;
+	size_type n = position - begin();
+	if( finish != end_of_storage && position == end()){
+		construct(finish,value);
+		++finish;
+	}
+	else
+		insert_aux(position,value);
+	return begin()+n;
 }
 
 template<class T, class Alloc>
