@@ -81,7 +81,7 @@ inline difference_type_t<InputIterator> __distance(InputIterator first, InputIte
 
 template<class InputIterator>
 inline difference_type_t<InputIterator> __distance(InputIterator first, InputIterator last, random_access_iterator_tag) {
-	return first - last;
+	return last - first;
 }
 
 template<class InputIterator>
