@@ -59,9 +59,6 @@ private:// allocate and construct aux functions
 		deallocate();
 	}
 
-private:// aux_interface
-	void insert_aux(iterator position, const value_type& value);
-
 public:// swap
 	void swap(vector&) noexcept;
 
@@ -69,7 +66,9 @@ public:// ctor && dtor
 	vector() :start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
 	explicit vector(size_type n) { fill_initialize(n, value_type()); }
 	vector(size_type n, const value_type &value) { fill_initialize(n, value); }
+	// TODO:
 	// Without this,int would be deduced as InputIterator
+	// Replace this ctor with is_integer later
 	vector(int n, const value_type &value) { fill_initialize(n, value); }
 	template<class InputIterator>
 	vector(InputIterator first, InputIterator last) { allocate_and_copy(first, last); }
@@ -78,7 +77,7 @@ public:// ctor && dtor
 	vector(vector&&) noexcept;
 
 	~vector() {
-		destroy(start, finish); // destory in "construct.h"
+		destroy(start, finish);// destory in "construct.h"
 		deallocate();
 	}
 
@@ -96,8 +95,12 @@ public:// getter
 	const_iterator cend() const noexcept { return finish; }
 	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(finish); }
 	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(start); }
+	// TODO:
+	// have no empty check
 	const_reference front() const noexcept { return *begin(); }
 	const_reference back() const noexcept { return *(end() - 1); }
+	// TODO:
+	// have no boundary check and don't use proxy
 	const_reference operator[](const size_type n) const noexcept { return *(start + n); }
 	size_type size() const noexcept { return static_cast<size_type>(finish - start); }
 	size_type capacity() const noexcept { return static_cast<size_type>(end_of_storage - start); }
@@ -122,16 +125,34 @@ public:// compare operator(member function)
 	bool operator== (const vector&) const noexcept;
 	bool operator!= (const vector& rhs) const noexcept { return !(*this == rhs); }
 
-public:// interface for back operation
+public:// push && pop
 	void push_back(const value_type&);
 	void pop_back() {--finish;destroy(finish);}
 
-public:// interface for insert and erase
+public:// erase
 	iterator erase(iterator, iterator);
 	iterator erase(iterator position) { return erase(position, position + 1); }
 	void clear() { erase(begin(), end()); }
-	void insert(iterator, size_type, const value_type&);
+
+private:// aux_interface for insert
+	void insert_aux(iterator, const value_type&);
+	void fill_insert(iterator, size_type, const value_type&);
+	template <class InputIterator>
+	void range_insert(iterator pos,InputIterator first,InputIterator last,input_iterator_tag);
+	template <class ForwardIterator>
+	void range_insert(iterator pos,ForwardIterator first,ForwardIterator last,forward_iterator_tag);
+	template <class InputIterator>
+	void insert_dispatch(iterator pos,InputIterator first,InputIterator last,_false_type) { 
+		range_insert(pos,first,last,iterator_category_t<InputIterator>());
+	}
+
+public:// insert
+	iterator insert(iterator);
 	iterator insert(iterator, const value_type&);
+	template <class InputIterator>
+	void insert(iterator pos,InputIterator first,InputIterator last) { 
+		insert_dispatch(pos,first,last,_is_integer_t<InputIterator>());
+	}
 };
 
 template<class T, class Alloc>
@@ -164,6 +185,62 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
 		start = new_start;
 		finish = new_finish;
 		end_of_storage = new_start + new_size;
+	}
+}
+
+template<class T, class Alloc>
+template <class InputIterator>
+void vector<T, Alloc>::range_insert(iterator pos,InputIterator first,InputIterator last,input_iterator_tag){
+	for(;first != last;++first) {
+		pos = insert(pos,*first);
+		++pos;
+	}
+}
+
+template<class T, class Alloc>
+template <class ForwardIterator>
+void vector<T, Alloc>::range_insert(iterator position,ForwardIterator first,ForwardIterator last,forward_iterator_tag){
+	if(first != last){
+		size_type n = distance(first,last);
+		if (static_cast<size_type>(end_of_storage - finish) >= n) {
+			const size_type elems_after = finish - position;
+			iterator old_finish = finish;
+			if(elems_after > n){
+				MiniSTL::uninitialized_copy(finish - n, finish, finish);
+				finish += n;
+				std::copy_backward(position, old_finish - n, old_finish);
+				copy(position, position + n, position);
+			}
+			else {
+				ForwardIterator mid = first;
+				advance(mid, elems_after);
+				MiniSTL::uninitialized_copy(mid, last, finish);
+				finish += n - elems_after;
+				MiniSTL::uninitialized_copy(position, old_finish, finish);
+				finish += elems_after;
+				copy(first, mid, position);
+			}
+		}
+		else {// expand
+			const size_type old_size = size();
+			const size_type new_size = old_size + MiniSTL::max(old_size,n);
+			iterator new_start = data_allocator::allocate(new_size);
+			iterator new_finish = new_start;
+			try {
+				new_finish = MiniSTL::uninitialized_copy(start, position, new_start);
+				new_finish = MiniSTL::uninitialized_copy(first, last, new_finish);
+				new_finish = MiniSTL::uninitialized_copy(position, finish, new_finish);
+			}
+			catch (std::exception&) {
+				destroy(new_start, new_finish);
+				data_allocator::deallocate(new_start, new_size);
+				throw;
+			}
+			destroy_and_deallocate();
+			start = new_start;
+			finish = new_finish;
+			end_of_storage = new_start + new_size;
+		}
 	}
 }
 
@@ -213,7 +290,7 @@ inline void vector<T, Alloc>::resize(size_type new_size, const value_type & valu
 	if (new_size < size())
 		erase(begin() + new_size, end());
 	else
-		insert(end(), new_size - size(), value);
+		fill_insert(end(), new_size - size(), value);
 }
 
 template<class T, class Alloc>
@@ -255,14 +332,14 @@ inline void vector<T, Alloc>::push_back(const value_type & value){
 
 template<class T, class Alloc>
 inline typename vector<T,Alloc>::iterator vector<T, Alloc>::erase(iterator first, iterator last){
-	iterator i = copy(last, finish, first);
+	iterator i = MiniSTL::copy(last, finish, first);
 	destroy(i, finish);
 	finish -= (last - first);
 	return first;
 }
 
 template<class T, class Alloc>
-void vector<T, Alloc>::insert(iterator position, size_type n, const value_type & value) {
+void vector<T, Alloc>::fill_insert(iterator position, size_type n, const value_type & value) {
 	if (n) {
 		if (static_cast<size_type>(end_of_storage - finish) >= n) {// needn't expand
 			value_type value_copy = value;
@@ -272,19 +349,19 @@ void vector<T, Alloc>::insert(iterator position, size_type n, const value_type &
 				MiniSTL::uninitialized_copy(finish - n, finish, finish);
 				finish += n;
 				std::copy_backward(position, old_finish - n, old_finish);
-				std::fill(position, position + n, value_copy);
+				MiniSTL::fill(position, position + n, value_copy);
 			}
 			else {
 				MiniSTL::uninitialized_fill_n(finish, n - elems_after, value_copy);
 				finish += n - elems_after;
 				MiniSTL::uninitialized_copy(position, old_finish, finish);
 				finish += elems_after;
-				std::fill(position, old_finish, value_copy);// complement 
+				MiniSTL::fill(position, old_finish, value_copy);// complement 
 			}
 		}
-		else { // expand
+		else {// expand
 			const size_type old_size = size();
-			const size_type new_size = old_size + (old_size > n ? old_size : n);
+			const size_type new_size = old_size + MiniSTL::max(old_size,n);
 			iterator new_start = data_allocator::allocate(new_size);
 			iterator new_finish = new_start;
 			try {
