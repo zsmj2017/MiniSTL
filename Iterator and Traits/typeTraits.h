@@ -243,4 +243,81 @@ struct _type_traits<const signed char*> {
 	using has_trivial_destructor = _true_type;
 	using is_POD_type = _true_type;
 };
-}
+
+// is_integer(默认自定义类型为false)
+
+template<class T>
+struct _is_integer {
+	using _integral = _false_type;
+};
+
+// simluate C++14
+template<class T>
+using _is_integer_t = typename _is_integer<T>::_integral;
+
+template<>
+struct _is_integer<bool> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<char> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<signed char> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<unsigned char> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<wchar_t> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<short> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<unsigned short> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<int> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<unsigned int> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<long> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<unsigned long> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<long long> {
+	using _integral = _true_type;
+};
+
+template<>
+struct _is_integer<unsigned long long> {
+	using _integral = _true_type;
+};
+
+}// end namespace::MiniSTL
