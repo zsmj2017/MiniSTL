@@ -4,6 +4,7 @@
 #include "allocator.h"
 #include "uninitialized.h"
 #include "stl_algobase.h"
+#include "initializer_list.h"
 
 namespace MiniSTL {
 // use sub_allocator as default allocator
@@ -83,7 +84,7 @@ public:// ctor && dtor
 	}
 
 public:// copy assignment operator
-	vector & operator=(const vector&);
+	vector& operator=(const vector&);
 	vector& operator=(std::initializer_list<value_type>);
 
 public:// move assignment
@@ -144,7 +145,7 @@ private:// aux_interface for insert
 	void range_insert(iterator pos,ForwardIterator first,ForwardIterator last,forward_iterator_tag);
 	template <class Integer>
 	void insert_dispatch(iterator pos,Integer n,Integer value,_true_type) { 
-		fill_insert(pos,n,value);
+		fill_insert(pos,static_cast<int>(n),value_type(value));
 	}
 	template <class InputIterator>
 	void insert_dispatch(iterator pos,InputIterator first,InputIterator last,_false_type) { 
@@ -166,7 +167,7 @@ void vector<T, Alloc>::insert_aux(iterator position, const value_type& value) {
 		construct(finish, *(finish - 1));
 		++finish;
 		value_type value_copy = value;// STL copy in copy out
-		std::copy_backward(position, finish - 2, finish - 1);
+		MiniSTL::copy_backward(position, finish - 2, finish - 1);
 		*position = value_copy;
 	}
 	else {// expand
@@ -213,7 +214,7 @@ void vector<T, Alloc>::range_insert(iterator position,ForwardIterator first,Forw
 			if(elems_after > n){
 				MiniSTL::uninitialized_copy(finish - n, finish, finish);
 				finish += n;
-				std::copy_backward(position, old_finish - n, old_finish);
+				MiniSTL::copy_backward(position, old_finish - n, old_finish);
 				copy(position, position + n, position);
 			}
 			else {
@@ -353,7 +354,7 @@ void vector<T, Alloc>::fill_insert(iterator position, size_type n, const value_t
 			if (elems_after > n) {
 				MiniSTL::uninitialized_copy(finish - n, finish, finish);
 				finish += n;
-				std::copy_backward(position, old_finish - n, old_finish);
+				MiniSTL::copy_backward(position, old_finish - n, old_finish);
 				MiniSTL::fill(position, position + n, value_copy);
 			}
 			else {

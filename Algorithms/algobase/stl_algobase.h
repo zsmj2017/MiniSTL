@@ -8,7 +8,7 @@
 
 namespace MiniSTL {
 
-//不能保证长度相等
+// 不能保证长度相等
 template <class InputIterator1, class InputIterator2>
 inline bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2) {
 	for (; first1 != last1; ++first1, ++first2)
@@ -17,7 +17,7 @@ inline bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 fi
 	return true;
 }
 
-//接受自定义比较器
+// 接受自定义比较器
 template <class InputIterator1, class InputIterator2, class BinaryPredicate>
 inline bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, BinaryPredicate binary_pred) {
 	for (; first1 != last1; ++first1, ++first2)
@@ -32,7 +32,7 @@ void fill(ForwardIterator first, ForwardIterator last, const T& value) {
 		*first = value;
 }
 
-//显然，本算法执行覆写操作，因此通常配合inserter完成
+// 显然，本算法执行覆写操作，因此通常配合inserter完成
 template <class OutputIterator, class Size, class T>
 OutputIterator fill_n(OutputIterator first, OutputIterator last, Size n, const T& value) {
 	for (; n > 0; --n, ++first)
@@ -134,13 +134,13 @@ inline void swap(T& a, T& b) {
 }
 
 template <class InputIterator, class OutputIterator>
-struct __copy_dispatch {//仿函数对象
+struct __copy_dispatch {// 仿函数对象
 	OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) {
 		return __copy(first, last, result, iterator_category_t<InputIterator>());
 	}
 };
 
-//偏特化处理
+// 偏特化处理
 template <class T>
 struct __copy_dispatch<T*, T*> {
 	T* operator()(T* first, T* last, T* result) {
@@ -149,7 +149,7 @@ struct __copy_dispatch<T*, T*> {
 	}
 };
 
-//偏特化处理
+// 偏特化处理
 template <class T>
 struct __copy_dispatch<const T*, T*> {
 	T* operator()(const T* first, const T* last, T* result) {
@@ -163,7 +163,7 @@ inline OutputIterator copy(InputIterator first, InputIterator last, OutputIterat
 	return __copy_dispatch<InputIterator, OutputIterator>()(first, last, result); // __copy_dispatch是一个仿函数对象
 }
 
-//针对指针的偏特化
+// 针对指针的偏特化
 inline char* copy(const char* first, const char* last, char* result) {
 	memmove(result, first, last - first);
 	return result + (last - first);
@@ -185,29 +185,72 @@ inline OutputIterator __copy(InputIterator first, InputIterator last, OutputIter
 //RandomIterator
 template <class InputIterator, class OutputIterator>
 inline OutputIterator __copy(InputIterator first, InputIterator last, OutputIterator result, random_access_iterator_tag) {
-	return __copy_d(first, last, result, distance_type(first));// 再细分函数以便复用
+	return __copy_d(first, last, result, difference_type_t<InputIterator>());// 再细分函数以便复用
 }
 
 template <class InputIterator, class OutputIterator, class Distance>
-inline OutputIterator __copy_d(InputIterator first, InputIterator last, OutputIterator result, Distance*) {
+inline OutputIterator __copy_d(InputIterator first, InputIterator last, OutputIterator result, Distance) {
 	for (Distance n = last - first; n > 0; --n, ++first, ++result)// 以n决定循环次数，速度较快
 		*result = *first;
 	return result;
 }
 
-//具备trivial copy assignment operator，可执行memmove
+// 具备trivial copy assignment operator，可执行memmove
 template <class T>
 inline T* __copy_t(const T* first, const T* last, T* result, _true_type) {
 	memmove(result, first, sizeof(T)*(last - first));
 	return result + (last - first);
 }
 
-
-//原始指针是一种random_access_iterator
+// 原始指针是一种random_access_iterator
 template <class T>
 inline T* __copy_t(const T* first, const T* last, T* result, _false_type) {
-	return __copy_d(first, last, result, static_cast<ptrdiff_t*>(nullptr));
+	return __copy_d(first, last, result, ptrdiff_t());
 }
 
-//copy_backward的实现与copy类似，本篇出于时间原因，并不列出
+template<class BidirectionalIter1,class BidirectionalIter2,class Distance>
+inline BidirectionalIter2 __copy_backward(BidirectionalIter1 first,BidirectionalIter1 last,
+		BidirectionalIter2 result,bidirectional_iterator_tag,Distance){
+	while(first != last)
+		*--result = *--last;
+	return result;
+}
+
+template<class RandomAccessIter,class BidirectionalIter2,class Distance>
+inline BidirectionalIter2 __copy_backward(RandomAccessIter first,RandomAccessIter last,
+		BidirectionalIter2 result,random_access_iterator_tag,Distance){
+	for(Distance n = last - first;n > 0; --n)
+		*--result = *--last;
+	return result;
+}
+
+template<class BidirectionalIter1,class BidirectionalIter2,class BoolType>
+struct __copy_backward_dispatch{
+	BidirectionalIter2 operator()(BidirectionalIter1 first,BidirectionalIter1 last,BidirectionalIter2 result){
+		return __copy_backward(first,last,result,iterator_category_t<BidirectionalIter1>(),difference_type_t<BidirectionalIter1>());
+	}
+};
+
+template<class T>
+struct __copy_backward_dispatch<T*,T*,_true_type>{
+	T* operator()(const T* first,const T* last,T* result){
+		const ptrdiff_t n = last - first;
+		memmove(result - n,first,sizeof(T) * n);
+		return result - n;
+	}
+};
+
+template<class T>
+struct __copy_backward_dispatch<const T*,T*,_true_type>{
+	T* operator()(const T* first,const T* last,T* result){
+		return __copy_backward_dispatch<T*,T*,_true_type>()(first,last,result);
+	}
+};
+
+template<class BI1,class BI2>
+inline BI2 copy_backward(BI1 first,BI1 last,BI2 result){
+	using Trivial = typename _type_traits<value_type_t<BI2> >::has_trivial_assignment_operator;
+	return __copy_backward_dispatch<BI1,BI2,Trivial>()(first,last,result);
+}
+
 }// end namespace::MiniSTL
