@@ -2,6 +2,7 @@
 #include "construct.h"
 #include "typeTraits.h"
 #include "stl_iterator.h"
+#include "stl_algobase.h"
 #include <cstring> // memove
 
 namespace MiniSTL {
@@ -14,8 +15,7 @@ inline ForwardIterator uninitialized_copy(InputIterator first, InputIterator las
 
 template<class InputIterator, class ForwardIterator>
 inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, _true_type) {
-	memcpy(result, first, (last - first) * sizeof(*first));
-	return result + (last - first);
+	return MiniSTL::copy(first,last,result); // in stl_algobase.h
 }
 
 template<class InputIterator, class ForwardIterator>
@@ -27,12 +27,12 @@ inline ForwardIterator  __uninitialized_copy_aux(InputIterator first, InputItera
 }
 
 //针对char*、wchar_t*存在特化版本 memmove直接移动内存
-inline char* uninitialized_copy(char* first, char* last, char* result) {
+inline char* uninitialized_copy(const char* first, const char* last, char* result) {
 	memmove(result, first, last - first);
 	return result + (last - first);
 }
 
-inline wchar_t* uninitialized_copy(wchar_t* first, wchar_t* last, wchar_t* result) {
+inline wchar_t* uninitialized_copy(const wchar_t* first, const wchar_t* last, wchar_t* result) {
 	memmove(result, first, sizeof(wchar_t)*(last - first));
 	return result + (last - first);
 }
@@ -45,7 +45,7 @@ inline void uninitialized_fill(ForwardIterator first, ForwardIterator last, cons
 
 template<class ForwardIterator, class T>
 inline void  __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, _true_type) {
-	std::fill(first, last, value);
+	MiniSTL::fill(first, last, value);
 }
 
 template<class ForwardIterator, class T>
@@ -63,13 +63,13 @@ inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const
 
 template<class ForwardIterator, class Size, class T>
 inline ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & value, _true_type) {
-	return std::fill_n(first, n, value);
+	return MiniSTL::fill_n(first, n, value);
 }
 
 template<class ForwardIterator, class Size, class T>
 ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T & value, _false_type) {
-	//忽略异常处理
-	//明确明确的是一旦一个对象构造失败则需要析构所有对象
+	// 忽略异常处理
+	// 需要明确的是一旦一个对象构造失败则需要析构所有对象
 	ForwardIterator cur = first;
 	for (; n > 0; --n, ++cur)
 		construct(&*cur, value);

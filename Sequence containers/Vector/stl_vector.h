@@ -36,26 +36,22 @@ private:// allocate and construct aux functions
 		finish = start + n;
 		end_of_storage = finish;
 	}
-
 	iterator allocate_and_fill(size_type n, const value_type& value) {
 		iterator result = data_allocator::allocate(n);
 		MiniSTL::uninitialized_fill_n(result, n, value);
 		return result;
 	}
-
 	template<class InputIterator>
 	iterator allocate_and_copy(InputIterator first, InputIterator last) {
-		start = data_allocator::allocate(last - first);
-		finish = MiniSTL::uninitialized_copy(first, last, start);
-		end_of_storage = finish;
-		return start;
+		size_type n = MiniSTL::distance(first,last);
+		iterator result = data_allocator::allocate(n);
+		MiniSTL::uninitialized_copy(first,last,result);
+		return result;
 	}
-
 	void deallocate() noexcept {
 		if (start) 
 			data_allocator::deallocate(start, end_of_storage - start);
 	}
-
 	void destroy_and_deallocate() noexcept {
 		destroy(start, finish); // destroy in "construct.h"
 		deallocate();
@@ -73,9 +69,9 @@ public:// ctor && dtor
 	// Replace this ctor with is_integer later
 	vector(int n, const value_type &value) { fill_initialize(n, value); }
 	template<class InputIterator>
-	vector(InputIterator first, InputIterator last) { allocate_and_copy(first, last); }
+	vector(InputIterator, InputIterator);
 	vector(std::initializer_list<T>);
-	vector(const vector& rhs) { allocate_and_copy(rhs.start, rhs.finish); }
+	vector(const vector&);
 	vector(vector&&) noexcept;
 
 	~vector() {
@@ -159,6 +155,29 @@ public:// insert
 	void insert(iterator pos,InputIterator first,InputIterator last) { 
 		insert_dispatch(pos,first,last,_is_integer_t<InputIterator>());
 	}
+
+private:// aux_interface for assign
+	void fill_assign(size_type,const value_type&);
+	template <class Integer>
+	void assign_dispatch(Integer n,Integer val,_true_type){
+		fill_assign(static_cast<size_type>(n),static_cast<value_type>(val));
+	}
+	template <class InputIterator>
+	void assign_dispatch(InputIterator first,InputIterator last,_false_type){
+		assign_aux(first,last,iterator_category_t<InputIterator>());
+	}
+	template <class InputIterator>
+	void assign_aux(InputIterator first,InputIterator last,input_iterator_tag);
+	template <class ForwardIterator>
+	void assign_aux(ForwardIterator first,ForwardIterator last,forward_iterator_tag);
+
+public:// assign
+	void assign(size_type n,const value_type& val) { fill_assign(n,val); }
+	template <class InputIterator>
+	void assign(InputIterator first,InputIterator last){
+		assign_dispatch(first,last,_is_integer_t<InputIterator>());
+	}
+	void assign(std::initializer_list<value_type> ils) { assign(ils.begin(),ils.end()); }
 };
 
 template<class T, class Alloc>
@@ -207,7 +226,7 @@ template<class T, class Alloc>
 template <class ForwardIterator>
 void vector<T, Alloc>::range_insert(iterator position,ForwardIterator first,ForwardIterator last,forward_iterator_tag){
 	if(first != last){
-		size_type n = distance(first,last);
+		size_type n = MiniSTL::distance(first,last);
 		if (static_cast<size_type>(end_of_storage - finish) >= n) {
 			const size_type elems_after = finish - position;
 			iterator old_finish = finish;
@@ -215,7 +234,7 @@ void vector<T, Alloc>::range_insert(iterator position,ForwardIterator first,Forw
 				MiniSTL::uninitialized_copy(finish - n, finish, finish);
 				finish += n;
 				MiniSTL::copy_backward(position, old_finish - n, old_finish);
-				copy(position, position + n, position);
+				MiniSTL::copy(position, position + n, position);
 			}
 			else {
 				ForwardIterator mid = first;
@@ -224,7 +243,7 @@ void vector<T, Alloc>::range_insert(iterator position,ForwardIterator first,Forw
 				finish += n - elems_after;
 				MiniSTL::uninitialized_copy(position, old_finish, finish);
 				finish += elems_after;
-				copy(first, mid, position);
+				MiniSTL::copy(first, mid, position);
 			}
 		}
 		else {// expand
@@ -406,9 +425,71 @@ inline typename vector<T, Alloc>::iterator vector<T, Alloc>::insert(iterator pos
 }
 
 template<class T, class Alloc>
+void vector<T, Alloc>::fill_assign(size_type n,const value_type& val) {
+	if(n > capacity()){
+		vector<T,Alloc> temp(n,val);
+		temp.swap(*this);
+	}
+	else if(n > size()){
+		MiniSTL::fill(begin(),end(),val);
+		finish = MiniSTL::uninitialized_fill_n(finish,n-size(),val);
+	}
+	else
+		erase(MiniSTL::fill_n(begin(),n,val),end());
+}
+
+template<class T, class Alloc>
+template <class InputIterator>
+void vector<T, Alloc>::assign_aux(InputIterator first,InputIterator last,input_iterator_tag){
+	iterator cur = begin();
+	for(;first != last && cur != end();++cur,++first)
+		*cur = *first;
+	if(first == last)
+		erase(cur,end());
+	else
+		insert(end(),first,last);
+}
+
+template<class T, class Alloc>
+template <class ForwardIterator>
+void vector<T, Alloc>::assign_aux(ForwardIterator first,ForwardIterator last,forward_iterator_tag){
+	size_type len = MiniSTL::distance(first,last);
+	if(len > capacity()){
+		iterator temp = allocate_and_copy(first,last);
+		destroy_and_deallocate();
+		start = temp;
+		end_of_storage = finish = start + len;
+	}
+	else if(size() >= len){
+		iterator new_finish = MiniSTL::copy(first,last,start);
+		destroy(new_finish,finish);
+		finish = new_finish;
+	}
+	else{
+		ForwardIterator mid = first;
+		MiniSTL::advance(mid,size());
+		MiniSTL::copy(first,mid,start);
+		finish = MiniSTL::uninitialized_copy(mid,last,finish);
+	}
+}
+
+template<class T, class Alloc>
+template<class InputIterator>
+inline vector<T, Alloc>::vector(InputIterator first, InputIterator last){
+	start = allocate_and_copy(first, last);
+	finish = end_of_storage = start + MiniSTL::distance(first,last);
+}
+
+template<class T, class Alloc>
+inline vector<T, Alloc>::vector(const vector& rhs){
+	start = allocate_and_copy(rhs.begin(), rhs.end());
+	finish = end_of_storage = start + rhs.size();
+}
+
+template<class T, class Alloc>
 inline vector<T, Alloc>::vector(std::initializer_list<T> il) {
 	start = allocate_and_copy(il.begin(), il.end());
-	finish = end_of_storage = start + (il.end() - il.begin());
+	finish = end_of_storage = start + il.size();
 }
 
 template<class T, class Alloc>
@@ -426,4 +507,4 @@ inline void swap(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 	lhs.swap(rhs);
 }
 
-}// endnamespace::MiniSTL
+}// end namespace::MiniSTL

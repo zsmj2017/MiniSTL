@@ -349,6 +349,36 @@ TEST_F(VectorTest,INSERT){
     EXPECT_EQ(vf.size(),11);EXPECT_EQ(vf.capacity(),14);
 }
 
+TEST_F(VectorTest,ASSIGN){
+    vi.assign(5,2);
+    for(auto i:vi) EXPECT_EQ(i,2);
+    vector<int> temp_vi ={1,2};
+    vi.assign(temp_vi.begin(),temp_vi.end());
+    EXPECT_EQ(vi,temp_vi);
+    EXPECT_EQ(vi.size(),2);EXPECT_EQ(vi.capacity(),5);
+    vi.assign({3,3,3,3,3,3});
+    for(auto i:vi) EXPECT_EQ(i,3);
+    EXPECT_EQ(vi.size(),6);EXPECT_EQ(vi.capacity(),6);
+    vf.assign(5,2.0f);
+    for(auto f:vf) EXPECT_EQ(f,2.0f);
+    vector<float> temp_vf ={1.0f,2.0f};
+    vf.assign(temp_vf.begin(),temp_vf.end());
+    EXPECT_EQ(vf,temp_vf);
+    EXPECT_EQ(vf.size(),2);EXPECT_EQ(vf.capacity(),5);
+    vf.assign({3.1f,3.1f,3.1f,3.1f,3.1f,3.1f});
+    for(auto f:vf) EXPECT_EQ(f,3.1f);
+    EXPECT_EQ(vf.size(),6);EXPECT_EQ(vf.capacity(),6);
+    vs.assign(5,"hi");
+    for(auto s:vs) EXPECT_EQ(s,"hi");
+    vector<string> temp_vs ={"world"};
+    vs.assign(temp_vs.begin(),temp_vs.end());
+    EXPECT_EQ(vs,temp_vs);
+    EXPECT_EQ(vs.size(),1);EXPECT_EQ(vs.capacity(),5);
+    vs.assign({"cat","cat","cat"});
+    for(auto s:vs) EXPECT_EQ(s,"cat");
+    EXPECT_EQ(vs.size(),3);EXPECT_EQ(vs.capacity(),5);
+}
+
 int main(int argc, char *argv[])
 {
     testing::InitGoogleTest(&argc, argv);
