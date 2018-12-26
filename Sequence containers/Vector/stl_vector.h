@@ -36,6 +36,15 @@ private:// allocate and construct aux functions
 		finish = start + n;
 		end_of_storage = finish;
 	}
+	template <class Integer>
+	void initialize_aux(Integer n,Integer val,_true_type){
+		fill_initialize(static_cast<size_type>(n),static_cast<value_type>(val));
+	}
+	template <class InputIterator>
+	void initialize_aux(InputIterator first,InputIterator last,_false_type){
+		start = allocate_and_copy(first, last);
+		finish = end_of_storage = start + MiniSTL::distance(first,last);
+	}
 	iterator allocate_and_fill(size_type n, const value_type& value) {
 		iterator result = data_allocator::allocate(n);
 		MiniSTL::uninitialized_fill_n(result, n, value);
@@ -64,12 +73,8 @@ public:// ctor && dtor
 	vector() :start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
 	explicit vector(size_type n) { fill_initialize(n, value_type()); }
 	vector(size_type n, const value_type &value) { fill_initialize(n, value); }
-	// TODO:
-	// Without this,int would be deduced as InputIterator
-	// Replace this ctor with is_integer later
-	vector(int n, const value_type &value) { fill_initialize(n, value); }
 	template<class InputIterator>
-	vector(InputIterator, InputIterator);
+	vector(InputIterator first, InputIterator last) { initialize_aux(first,last,_is_integer_t<InputIterator>()); }
 	vector(std::initializer_list<T>);
 	vector(const vector&);
 	vector(vector&&) noexcept;
@@ -471,13 +476,6 @@ void vector<T, Alloc>::assign_aux(ForwardIterator first,ForwardIterator last,for
 		MiniSTL::copy(first,mid,start);
 		finish = MiniSTL::uninitialized_copy(mid,last,finish);
 	}
-}
-
-template<class T, class Alloc>
-template<class InputIterator>
-inline vector<T, Alloc>::vector(InputIterator first, InputIterator last){
-	start = allocate_and_copy(first, last);
-	finish = end_of_storage = start + MiniSTL::distance(first,last);
 }
 
 template<class T, class Alloc>
