@@ -34,7 +34,7 @@ void fill(ForwardIterator first, ForwardIterator last, const T& value) {
 
 // 显然，本算法执行覆写操作，因此通常配合inserter完成
 template <class OutputIterator, class Size, class T>
-OutputIterator fill_n(OutputIterator first, OutputIterator last, Size n, const T& value) {
+OutputIterator fill_n(OutputIterator first, Size n, const T& value) {
 	for (; n > 0; --n, ++first)
 		*first = value;
 	return first;
