@@ -7,48 +7,46 @@ namespace MiniSTL {
 
 template<class T, class Alloc = simpleAlloc<T> >
 class list {
-	// friend declarations
-	template<class T>
-	friend void swap(list<T>&, list<T>&);
-	template <class T>
-	friend bool operator== (const list<T>& lhs, const list<T>& rhs);
-	template <class T>
-	friend bool operator!= (const list<T>& lhs, const list<T>& rhs);
-
 public:// alias declarations
+	using value_type = T;
+	using pointer = value_type*;
+	using const_pointer = const value_type*;
+	using reference = value_type&;
+	using const_reference = const value_type&;
+	using size_type = size_t;
+	using difference_type = ptrdiff_t;
+	using link_type = typename __list_iterator<T, T&, T*>::link_type;
+
 	using iterator = __list_iterator<T, T&, T*>;
 	using const_iterator = __list_iterator<T, const T&, const T*>;
-	using reverse_iterator = MiniSTL::reverse_iterator<iterator>;
-	using const_reverse_iterator = MiniSTL::reverse_iterator<const_iterator>;
-	using value_type = typename __list_iterator<T, T&, T*>::value_type;
-	using pointer = typename __list_iterator<T, T&, T*>::pointer;
-	using reference = typename __list_iterator<T, T&, T*>::reference;
-	using link_type = typename __list_iterator<T, T&, T*>::link_type;
-	using size_type = typename __list_iterator<T, T&, T*>::size_type;
-	using difference_type = typename __list_iterator<T, T&, T*>::difference_type;
+	using reverse_iterator = MiniSTL::__reverse_iterator<iterator>;
+	using const_reverse_iterator = MiniSTL::__reverse_iterator<const_iterator>;
 
-private: // interface about allocate/deallocate litsNode
+private:// interface about allocate/deallocate litsNode
 	using list_node = __list_node<T>;
 	using list_node_allocator = simpleAlloc<list_node>;
+
 	link_type get_node() { return list_node_allocator::allocate(); }
 	void put_node(link_type p) { list_node_allocator::deallocate(p); }
 	link_type create_node(const T&);
 	void destroy_node(link_type p) { destroy(&(p->data));put_node(p);}
 
-private: // only data member(tail)
+private:// only data member(tail)
 	link_type node;
 
 private:// aux_interface
 	void empety_initialized();
 	// Move [first, last) before pos
 	void transfer(iterator position, iterator first, iterator last);
-	void swap(list&) noexcept;
 
 public:// ctor && dtor
 	list() { empety_initialized(); }
 	explicit list(size_type, const value_type& value = value_type());
 	list(std::initializer_list<T> il) { empety_initialized(); insert(begin(), il.begin(), il.end()); }
 	~list() { clear(); put_node(node); }
+
+public:// swap
+	void swap(list& rhs) noexcept { MiniSTL::swap(node,rhs.node); }
 
 public:// copy operation
 	list(const list&);
@@ -60,34 +58,48 @@ public:// move operation
 
 public:// getter
 	bool empty() const noexcept { return node->next == node; }
-	size_type size() const noexcept { return distance(cbegin(), cend());}
-	const_iterator cbegin() const noexcept {return static_cast<link_type>(node->next);}
+	size_type size() const noexcept { return MiniSTL::distance(cbegin(), cend());}
+	const_iterator cbegin() const noexcept {return reinterpret_cast<link_type>(node->next);}
 	const_iterator cend() const noexcept  { return node; }
 	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
 	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(cbegin()); }
+	const_reference front() const noexcept { return *begin(); }
+	const_reference back() const noexcept { return *(--end()); }
 
 public:// setter
-	iterator begin() noexcept { return static_cast<link_type>(node->next); }
+	iterator begin() noexcept { return reinterpret_cast<link_type>(node->next); }
 	iterator end() noexcept { return node; }
 	reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
 	reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
 	reference front() noexcept { return *begin(); }
 	reference back() noexcept { return *(--end()); }
 
-public:// interafce about insert && erase
+private:// aux interface for insert
+	void fill_insert(iterator, size_type, const value_type&);
+	template <class Integer>
+	void insert_dispatch(iterator pos,Integer n,Integer val,_true_type){
+		fill_insert(pos,static_cast<size_type>(n),static_cast<value_type>(val));
+	}
+	template <class InputIterator>
+	void insert_dispatch(iterator,InputIterator,InputIterator,_false_type);
+
+
+public:// insert
 	iterator insert(iterator, const value_type&);
-	void insert(iterator, size_type, const value_type&);
 	template<class InputIterator>
-	void insert(iterator,InputIterator, InputIterator);
-	// without this,InputIterator can be deduced as int
-	void insert(iterator, int, int);
+	void insert(iterator pos,InputIterator first, InputIterator last){
+		insert_dispatch(pos,first,last,_is_integer_t<InputIterator>());
+	}
+
+public:// erase
 	iterator erase(iterator);
 	iterator erase(iterator, iterator);
+
+public:// push && pop
 	void push_front(const T&value) { insert(begin(), value); }
 	void push_back(const T&value) { insert(end(), value); }
 	void pop_fornt() { erase(begin()); }
 	void pop_back() { iterator temp = end();erase(--temp);}
-	
 
 public:// other interface
 	void unique();
@@ -103,7 +115,13 @@ public:// other interface
 template<class T, class Alloc>
 inline typename list<T, Alloc>::link_type list<T, Alloc>::create_node(const T & value){
 	link_type p = get_node();
-	construct(&p->data, value);
+	try{
+		construct(&p->data, value);
+	}
+	catch(std::exception){
+		put_node(p);
+		throw;
+	}
 	return p;
 }
 
@@ -119,39 +137,33 @@ inline typename list<T, Alloc>::iterator list<T, Alloc>::insert(iterator positio
 	link_type temp = create_node(value);
 	temp->next = position.node;
 	temp->prev = position.node->prev;
-	static_cast<link_type>(position.node->prev)->next = temp;
+	position.node->prev->next = temp;
 	position.node->prev = temp;
 	return temp;
 }
 
 template<class T, class Alloc>
-void list<T, Alloc>::insert(iterator position, size_type n, const value_type& value){
+void list<T, Alloc>::fill_insert(iterator position, size_type n, const value_type& value){
 	for (size_type i = n; i != 0; --i)
 		position = insert(position, value);
 }
 
 template<class T, class Alloc>
 template<class InputIterator>
-void list<T, Alloc>::insert(iterator position, InputIterator first, InputIterator last){
+void list<T, Alloc>::insert_dispatch(iterator position, InputIterator first, InputIterator last, _false_type){
 	for (--last; first != last; --last)
 		position = insert(position, *last);
 	insert(position, *last);
 }
 
 template<class T, class Alloc>
-void list<T, Alloc>::insert(iterator position, int n, int value){
-	for (int i = n; i != 0; --i)
-		position = insert(position, value);
-}
-
-template<class T, class Alloc>
 inline typename list<T, Alloc>::iterator list<T, Alloc>::erase(iterator position){
-	link_type next_node = static_cast<link_type>(position.node->next);
-	link_type prev_node = static_cast<link_type>(position.node->prev);
+	link_type next_node = reinterpret_cast<link_type>(position.node->next);
+	link_type prev_node = reinterpret_cast<link_type>(position.node->prev);
 	prev_node->next = next_node;
 	next_node->prev = prev_node;
 	destroy_node(position.node);
-	return static_cast<iterator>(next_node);
+	return iterator(next_node);
 }
 
 template<class T, class Alloc>
@@ -173,12 +185,6 @@ inline void list<T, Alloc>::transfer(iterator position, iterator first, iterator
 		last.node->prev = first.node->prev;
 		first.node->prev = temp;
 	}
-}
-
-template<class T, class Alloc>
-inline void list<T, Alloc>::swap(list & rhs) noexcept{
-	using std::swap;
-	swap(node, rhs.node);
 }
 
 template<class T, class Alloc>
@@ -220,13 +226,12 @@ inline list<T, Alloc>& list<T, Alloc>::operator=(list&& rhs) noexcept{
 
 template<class T, class Alloc>
 void list<T, Alloc>::clear() {
-	link_type cur = static_cast<link_type>(node->next);
+	link_type cur = reinterpret_cast<link_type>(node->next);
 	while (cur != node) {
 		link_type temp = cur;
-		cur = static_cast<link_type>(cur->next);
+		cur = reinterpret_cast<link_type>(cur->next);
 		destroy_node(temp);
 	}
-	//恢复原始状态
 	node->next = node;
 	node->prev = node;
 }
@@ -252,7 +257,7 @@ void list<T, Alloc>::unique() {
 	while (++next != last) {
 		if (*first == *next) {
 			erase(next);
-			next = first;//修正next
+			next = first;
 		}
 		else
 			first = next;
@@ -269,8 +274,8 @@ template<class T, class Alloc>
 inline void list<T, Alloc>::splice(iterator position, list &, iterator i) {
 	iterator j = i;
 	++j;
-	//i==pos 自身无法插于自身之前
-	//j==pos 已处于pos之前
+	// i==pos 自身无法插于自身之前
+	// j==pos 已处于pos之前
 	if (position == i || position == j) return;
 	transfer(position, i, j);
 }
@@ -296,10 +301,10 @@ void list<T, Alloc>::merge(list& x) {
 
 template<class T, class Alloc>
 void list<T, Alloc>::reverse() {
-	//空list或仅有一个元素
+	// 空list或仅有一个元素
 	if (node->next == node || static_cast<link_type>(node->next)->next == node) return;
 	iterator first = begin();
-	++first;//begin自身并不需要移动，它将作为指示末元素的哨兵（确切地说，最终begin.node->next == end.node)
+	++first;// begin自身并不需要移动，它将作为指示末元素的哨兵（确切地说，最终begin.node->next == end.node)
 	while (first != end()) {
 		iterator old = first;
 		++first;
@@ -311,7 +316,7 @@ void list<T, Alloc>::reverse() {
 template<class T, class Alloc>
 void list<T, Alloc>::sort() {
 	if (node->next == node || static_cast<link_type>(node->next)->next == node) return;
-	//中介数据存放区 counter[n]中最多存放2^(n+1)个元素，若大于则与counter[n+1]作归并
+	// 数据缓存区 counter[n]中最多存放2^(n+1)个元素，若大于则与counter[n+1]作归并
 	list carry;
 	list counter[64];
 	int fill = 0;
