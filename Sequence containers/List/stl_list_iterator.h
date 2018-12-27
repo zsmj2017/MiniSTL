@@ -41,7 +41,7 @@ struct __list_iterator {
 
 	// increasement
 	self& operator++() {
-		node = reinterpret_cast<link_type>(node->next); // convert void* into __list_node<T>*
+		node = node->next;
 		return *this;
 	}
 
@@ -53,7 +53,7 @@ struct __list_iterator {
 
 	// decreasement
 	self& operator--() {
-		node = reinterpret_cast<link_type>(node->prev);
+		node = node->prev;
 		return *this;
 	}
 

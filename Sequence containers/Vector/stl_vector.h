@@ -181,7 +181,7 @@ public:// assign
 		assign_dispatch(first,last,_is_integer_t<InputIterator>());
 	}
 	void assign(std::initializer_list<value_type> ils) { assign(ils.begin(),ils.end()); }
-	vector& operator=(std::initializer_list<value_type>);
+	vector& operator=(std::initializer_list<value_type> ils) { assign(ils);return *this; }
 };
 
 template<class T, class Alloc>
@@ -293,11 +293,6 @@ inline vector<T, Alloc>& vector<T, Alloc>::operator=(const vector &rhs) {
 	vector temp(rhs);
 	swap(temp);
 	return *this;
-}
-
-template<class T, class Alloc>
-inline vector<T, Alloc> & vector<T, Alloc>::operator=(std::initializer_list<value_type> il) {
-	assign(il.begin(),il.end());
 }
 
 template<class T, class Alloc>
