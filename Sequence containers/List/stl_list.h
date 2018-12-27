@@ -41,6 +41,9 @@ private:// aux_interface
 public:// ctor && dtor
 	list() { empety_initialized(); }
 	explicit list(size_type, const value_type& value = value_type());
+	// don't need any dispatching tricks here, because insert does all of that anyway
+	template <class InputIterator>
+	list(InputIterator first,InputIterator last) { empety_initialized(); insert(begin(),first,last); }
 	list(std::initializer_list<value_type> il) { empety_initialized(); insert(begin(), il.begin(), il.end()); }
 	~list() { clear(); put_node(node); }
 
@@ -69,12 +72,17 @@ public:// assignment
 	list& operator=(std::initializer_list<T> ils) { assign(ils.begin(),ils.end()); return *this; }
 
 public:// move operation
-	list(list&&) noexcept;
-	list& operator=(list&&) noexcept;
+	list(list&& rhs) noexcept { 
+		empety_initialized();
+		MiniSTL::swap(node,rhs.node); 
+	}
+	list& operator=(list&& rhs) noexcept { MiniSTL::swap(node,rhs.node);return *this; }
 
 public:// getter
 	bool empty() const noexcept { return node->next == node; }
 	size_type size() const noexcept { return MiniSTL::distance(cbegin(), cend());}
+	const_iterator begin() const noexcept {return node->next;}
+	const_iterator end() const noexcept  { return node; }
 	const_iterator cbegin() const noexcept {return node->next;}
 	const_iterator cend() const noexcept  { return node; }
 	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
@@ -155,12 +163,12 @@ template<class InputIterator>
 void list<T, Alloc>::assign_dispatch(InputIterator first,InputIterator last,_false_type){
 	iterator start = begin();
 	iterator finish = end();
-	for(;start != finish && first != last;++start,++finish)
+	for(;start != finish && first != last;++start,++first)
 		*start = *first;
 	if(first == last)
 		erase(start,finish);
 	else
-		insert(start,first,last);
+		insert(finish,first,last);
 }
 
 template<class T, class Alloc>
@@ -171,12 +179,12 @@ inline void list<T, Alloc>::resize(size_type new_size,const value_type& val){
 	if(len == new_size)
 		erase(cur,end());
 	else // i == end()
-		insert(end(),new_size-len,val);
+		fill_insert(end(),new_size-len,val);
 }
 
 template<class T, class Alloc>
-inline typename list<T, Alloc>::iterator list<T, Alloc>::insert(iterator position, const value_type& value){
-	list_node* temp = create_node(value);
+inline typename list<T, Alloc>::iterator list<T, Alloc>::insert(iterator position, const value_type& val){
+	list_node* temp = create_node(val);
 	temp->next = position.node;
 	temp->prev = position.node->prev;
 	position.node->prev->next = temp;
@@ -185,16 +193,16 @@ inline typename list<T, Alloc>::iterator list<T, Alloc>::insert(iterator positio
 }
 
 template<class T, class Alloc>
-void list<T, Alloc>::fill_insert(iterator position, size_type n, const value_type& value){
+void list<T, Alloc>::fill_insert(iterator position, size_type n, const value_type& val){
 	for (size_type i = n; i != 0; --i)
-		position = insert(position, value);
+		position = insert(position, val);
 }
 
 template<class T, class Alloc>
 template<class InputIterator>
 void list<T, Alloc>::insert_dispatch(iterator position, InputIterator first, InputIterator last, _false_type){
 	for (; first != last; ++first)
-		position = insert(position, *first);
+		insert(position, *first);
 }
 
 template<class T, class Alloc>
@@ -218,46 +226,32 @@ typename list<T, Alloc>::iterator list<T, Alloc>::erase(iterator first, iterator
 template<class T, class Alloc>
 inline void list<T, Alloc>::transfer(iterator position, iterator first, iterator last){
 	if (position != last) {
-		(*(static_cast<list_node*>((*last.node).prev))).next = position.node;
-		(*(static_cast<list_node*>((*first.node).prev))).next = last.node;
-		(*(static_cast<list_node*>((*position.node).prev))).next = first.node;
-		list_node* temp = static_cast<list_node*>((*position.node).prev);
-		(*position.node).prev = (*last.node).prev;
+		last.node->prev->next = position.node;
+		first.node->prev->next = last.node;
+		position.node->prev->next = first.node;
+		list_node* temp = position.node->prev;
+		position.node->prev = last.node->prev;
 		last.node->prev = first.node->prev;
 		first.node->prev = temp;
 	}
 }
 
 template<class T, class Alloc>
-list<T, Alloc>::list(size_type n, const value_type & value){
+list<T, Alloc>::list(size_type n, const value_type & val){
 	empety_initialized();
-	while (n--)
-		push_back(value);
+	fill_insert(begin(),n,val);
 }
 
 template<class T, class Alloc>
 list<T, Alloc>::list(const list &rhs){
 	empety_initialized();
-	for (auto it = rhs.cbegin(); it != rhs.cend(); ++it)
-		push_back(*it);
+	insert(begin(),rhs.begin(),rhs.end());
 }
 
 template<class T, class Alloc>
 inline list<T, Alloc>& list<T, Alloc>::operator=(const list &rhs) noexcept{
 	list temp(rhs);
 	swap(temp);
-	return *this;
-}
-
-template<class T, class Alloc>
-inline list<T, Alloc>::list(list &&rhs) noexcept{
-	node = rhs.node;
-	rhs.node = nullptr;
-}
-
-template<class T, class Alloc>
-inline list<T, Alloc>& list<T, Alloc>::operator=(list&& rhs) noexcept{
-	MiniSTL::swap(node,rhs.node);
 	return *this;
 }
 
