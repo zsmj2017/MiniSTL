@@ -4,7 +4,6 @@
 #include "allocator.h"
 #include "uninitialized.h"
 #include "stl_algobase.h"
-#include "initializer_list.h"
 
 namespace MiniSTL {
 // use sub_allocator as default allocator
@@ -86,7 +85,6 @@ public:// ctor && dtor
 
 public:// copy assignment operator
 	vector& operator=(const vector&);
-	vector& operator=(std::initializer_list<value_type>);
 
 public:// move assignment
 	vector& operator=(vector&&) noexcept;
@@ -183,6 +181,7 @@ public:// assign
 		assign_dispatch(first,last,_is_integer_t<InputIterator>());
 	}
 	void assign(std::initializer_list<value_type> ils) { assign(ils.begin(),ils.end()); }
+	vector& operator=(std::initializer_list<value_type>);
 };
 
 template<class T, class Alloc>
@@ -298,9 +297,7 @@ inline vector<T, Alloc>& vector<T, Alloc>::operator=(const vector &rhs) {
 
 template<class T, class Alloc>
 inline vector<T, Alloc> & vector<T, Alloc>::operator=(std::initializer_list<value_type> il) {
-	destroy_and_deallocate();
-	start = allocate_and_copy(il.begin(), il.end());
-	finish = end_of_storage = start + (il.end() - il.begin());
+	assign(il.begin(),il.end());
 }
 
 template<class T, class Alloc>
