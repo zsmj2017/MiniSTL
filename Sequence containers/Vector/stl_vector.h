@@ -489,7 +489,7 @@ inline bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
 template<class T, class Alloc>
 inline bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 	return !(lhs == rhs);
-}list
+}
 
 template<class T>
 inline bool operator<(const vector<T>& lhs, const vector<T>& rhs){
