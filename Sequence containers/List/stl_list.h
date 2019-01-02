@@ -16,8 +16,8 @@ public:// alias declarations
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
 
-	using iterator = __list_iterator<T, T&, T*>;
-	using const_iterator = __list_iterator<T, const T&, const T*>;
+	using iterator = __list_iterator<T>;
+	using const_iterator = __list_const_iterator<T>;
 	using reverse_iterator = MiniSTL::__reverse_iterator<iterator>;
 	using const_reverse_iterator = MiniSTL::__reverse_iterator<const_iterator>;
 
@@ -28,7 +28,7 @@ private:// interface about allocate/deallocate litsNode
 	list_node* get_node() { return list_node_allocator::allocate(); }
 	void put_node(list_node* p) { list_node_allocator::deallocate(p); }
 	list_node* create_node(const value_type&);
-	void destroy_node(list_node* p) { destroy(&(p->data));put_node(p);}
+	void destroy_node(list_node* p) { destroy(&p->data);put_node(p);}
 
 private:// only data member(tail)
 	list_node* node;
@@ -72,27 +72,24 @@ public:// assignment
 	list& operator=(std::initializer_list<T> ils) { assign(ils.begin(),ils.end()); return *this; }
 
 public:// move operation
-	list(list&& rhs) noexcept { 
-		empety_initialized();
-		MiniSTL::swap(node,rhs.node); 
-	}
-	list& operator=(list&& rhs) noexcept { MiniSTL::swap(node,rhs.node);return *this; }
+	list(list&& rhs) noexcept { empety_initialized();MiniSTL::swap(node,rhs.node); }
+	list& operator=(list&& rhs) noexcept { clear();swap(rhs);return *this; }
 
 public:// getter
 	bool empty() const noexcept { return node->next == node; }
 	size_type size() const noexcept { return MiniSTL::distance(cbegin(), cend());}
-	const_iterator begin() const noexcept {return node->next;}
-	const_iterator end() const noexcept  { return node; }
-	const_iterator cbegin() const noexcept {return node->next;}
-	const_iterator cend() const noexcept  { return node; }
+	const_iterator begin() const noexcept {return const_iterator(node->next);}
+	const_iterator end() const noexcept  { return const_iterator(node); }
+	const_iterator cbegin() const noexcept {return const_iterator(node->next);}
+	const_iterator cend() const noexcept  { return const_iterator(node); }
 	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
 	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(cbegin()); }
 	const_reference front() const noexcept { return *begin(); }
 	const_reference back() const noexcept { return *(--end()); }
 
 public:// setter
-	iterator begin() noexcept { return node->next; }
-	iterator end() noexcept { return node; }
+	iterator begin() noexcept { return iterator(node->next); }
+	iterator end() noexcept { return iterator(node); }
 	reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
 	reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
 	reference front() noexcept { return *begin(); }
@@ -120,6 +117,7 @@ public:// insert
 public:// erase
 	iterator erase(iterator);
 	iterator erase(iterator, iterator);
+	void clear();
 
 public:// push && pop
 	void push_front(const T& value) { insert(begin(), value); }
@@ -134,7 +132,6 @@ public:// other interface
 	void merge(list&);
 	void reverse();
 	void sort();
-	void clear();
 	void remove(const T&);
 };
 
@@ -189,7 +186,7 @@ inline typename list<T, Alloc>::iterator list<T, Alloc>::insert(iterator positio
 	temp->prev = position.node->prev;
 	position.node->prev->next = temp;
 	position.node->prev = temp;
-	return temp;
+	return iterator(temp);
 }
 
 template<class T, class Alloc>
