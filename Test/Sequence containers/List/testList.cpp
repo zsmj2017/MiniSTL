@@ -253,24 +253,44 @@ TEST_F(ListTest,PUSH_AND_POP){
     EXPECT_EQ(li.back(),6); EXPECT_EQ(li.size(),6);
     li.pop_back();
     EXPECT_EQ(li.back(),5);EXPECT_EQ(li.size(),5);
+    li.push_front(0);
+    EXPECT_EQ(li.front(),0); EXPECT_EQ(li.size(),6);
+    li.pop_fornt();
+    EXPECT_EQ(li.front(),1);EXPECT_EQ(li.size(),5);
     lf.push_back(6.0f);
     EXPECT_EQ(lf.back(),6.0f);EXPECT_EQ(lf.size(),6);
     lf.pop_back();
     EXPECT_EQ(lf.back(),5.0f);EXPECT_EQ(lf.size(),5);
+    lf.push_front(0.0f);
+    EXPECT_EQ(lf.front(),0.0f); EXPECT_EQ(lf.size(),6);
+    lf.pop_fornt();
+    EXPECT_EQ(lf.front(),1.0f);EXPECT_EQ(lf.size(),5);
     ld.push_back(6.0f);
     EXPECT_EQ(ld.back(),6.0f);EXPECT_EQ(ld.size(),6);
     ld.pop_back();
     EXPECT_EQ(ld.back(),5.0f);EXPECT_EQ(ld.size(),5);
+    ld.push_front(0.0f);
+    EXPECT_EQ(ld.front(),0); EXPECT_EQ(ld.size(),6);
+    ld.pop_fornt();
+    EXPECT_EQ(ld.front(),1);EXPECT_EQ(ld.size(),5);
     ls.push_back("world");
     EXPECT_EQ(ls.back(),"world");EXPECT_EQ(ls.size(),3);
     ls.pop_back();
     EXPECT_EQ(ls.back(),"hello");EXPECT_EQ(ls.size(),2);
+    ls.push_front("miemie");
+    EXPECT_EQ(ls.front(),"miemie"); EXPECT_EQ(ls.size(),3);
+    ls.pop_fornt();
+    EXPECT_EQ(ls.front(),"hello");EXPECT_EQ(ls.size(),2);
     lli.push_back({4,5,6});
     EXPECT_EQ(lli.back(),list<int>({4,5,6}));
     EXPECT_EQ(lli.size(),3);
     lli.pop_back();
     EXPECT_EQ(lli.back(),list<int>({1,2,3}));
     EXPECT_EQ(lli.size(),2);
+    lli.push_front({0,0,0});
+    EXPECT_EQ(lli.front(),list<int>({0,0,0})); EXPECT_EQ(lli.size(),3);
+    lli.pop_fornt();
+    EXPECT_EQ(lli.front(),list<int>({1,2,3}));EXPECT_EQ(lli.size(),2);
 }
 
 TEST_F(ListTest,ERASE){
@@ -331,6 +351,65 @@ TEST_F(ListTest,ASSIGN){
     ls.assign({"cat","cat","cat"});
     for(auto s:ls) EXPECT_EQ(s,"cat");
     EXPECT_EQ(ls.size(),3);
+}
+
+TEST_F(ListTest,UNIQUE){
+    ls.unique();
+    EXPECT_EQ(ls.size(),1);
+    EXPECT_EQ(ls.front(),"hello");
+    lli.unique();
+    EXPECT_EQ(lli.size(),1);
+    EXPECT_EQ(lli.front(),list<int>({1,2,3}));
+}
+
+TEST_F(ListTest,SPLICE){
+    list<int> temp_li = {6,7,8,9,10};
+    li.splice(li.end(),temp_li);
+    int i = 1;
+    for(auto it = li.cbegin();it != li.cend(); ++it, ++i) EXPECT_EQ(*it,i);
+    EXPECT_EQ(temp_li.size(),0);
+    list<float> temp_lf = {6.0f,7.0f,8.0f,9.0f,10.0f};
+    lf.splice(lf.begin(),temp_lf,temp_lf.begin());
+    EXPECT_EQ(lf.size(),6);EXPECT_EQ(lf.front(),6.0f);
+    lf.splice(lf.end(),temp_lf,temp_lf.begin());
+    EXPECT_EQ(lf.size(),7);EXPECT_EQ(lf.back(),7.0f);
+    EXPECT_EQ(temp_lf.size(),3);EXPECT_EQ(temp_lf.front(),8.0f);
+    list<string> temp_ls = {"world","world"};
+    ls.splice(ls.end(),temp_ls,temp_ls.begin(),temp_ls.end());
+    EXPECT_EQ(ls.size(),4);EXPECT_EQ(ls.back(),"world");
+    EXPECT_EQ(temp_ls.size(),0);
+}
+
+TEST_F(ListTest,MERGE){
+    list<int> temp_li1 = {1,3,5,7,9};
+    list<int> temp_li2 = {2,4,6,8,10};
+    temp_li1.merge(temp_li2);
+    int i = 1;
+    for(auto it = temp_li1.cbegin();it != temp_li1.cend(); ++it, ++i) EXPECT_EQ(*it,i);
+}
+
+TEST_F(ListTest,REVERSE){
+    list<int> temp_li(li);
+    li.reverse();
+    auto it = li.begin();
+    auto rit = temp_li.rbegin();
+    while(it != li.end()) EXPECT_EQ(*it++,*rit++);
+}
+
+TEST_F(ListTest,SORT){
+    li = {5,3,1,2,6,7,10,9,8,4};
+    li.sort();
+    int i = 1;
+    for(auto it = li.cbegin();it != li.cend(); ++it, ++i) EXPECT_EQ(*it,i);
+}
+
+TEST_F(ListTest,REMOVE){
+    li.remove(1);
+    EXPECT_EQ(li.size(),4);EXPECT_EQ(li.front(),2);
+    li.remove(5);
+    EXPECT_EQ(li.size(),3);EXPECT_EQ(li.back(),4);
+    ls.remove("hello");
+    EXPECT_EQ(ls.size(),0);
 }
 
 int main(int argc, char *argv[])

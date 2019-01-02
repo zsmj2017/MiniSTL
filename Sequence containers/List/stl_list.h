@@ -65,6 +65,7 @@ private:// aux interface for assign
 
 public:// assignment
 	void assign(size_type n,const value_type& val) { fill_assign(n,val); }
+	void assign(std::initializer_list<value_type> ils) { assign_dispatch(ils.begin(),ils.end(),_false_type()); }
 	template<class InputIterator>
 	void assign(InputIterator first,InputIterator last){
 		assign_dispatch(first,last,_is_integer_t<InputIterator>());
@@ -108,6 +109,7 @@ private:// aux interface for insert
 	void insert_dispatch(iterator,InputIterator,InputIterator,_false_type);
 
 public:// insert
+	iterator insert(iterator pos) { return insert(pos,value_type()); }
 	iterator insert(iterator, const value_type&);
 	template<class InputIterator>
 	void insert(iterator pos,InputIterator first, InputIterator last){
@@ -127,8 +129,11 @@ public:// push && pop
 
 public:// other interface
 	void unique();
-	void splice(iterator, list&);
+	void splice(iterator pos, list& rhs) { if(!rhs.empty()) transfer(pos, rhs.begin(), rhs.end());}
 	void splice(iterator, list&, iterator);
+	void splice(iterator pos, list&, iterator first,iterator last){
+		if(first != last) transfer(pos,first,last);
+	}
 	void merge(list&);
 	void reverse();
 	void sort();
@@ -153,6 +158,17 @@ inline void list<T, Alloc>::empety_initialized(){
 	node = get_node();
 	node->next = node;
 	node->prev = node;
+}
+
+template<class T, class Alloc>
+void list<T, Alloc>::fill_assign(size_type n,const value_type& val){
+	iterator i = begin();
+	for(;i != end();++i,--n)
+		*i = val;
+	if(n > 0)
+		fill_insert(end(),n,val);
+	else
+		erase(i,end());
 }
 
 template<class T, class Alloc>
@@ -290,12 +306,6 @@ void list<T, Alloc>::unique() {
 		else
 			first = next;
 	}
-}
-
-template<class T, class Alloc>
-inline void list<T, Alloc>::splice(iterator position, list& x) {
-	if (!x.empty())
-		transfer(position, x.begin(), x.end());
 }
 
 template<class T, class Alloc>
