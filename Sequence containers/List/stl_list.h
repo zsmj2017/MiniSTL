@@ -374,15 +374,35 @@ inline void swap(list<T>& lhs, list<T>& rhs){
 
 template<class T>
 bool operator==(const list<T>& lhs, const list<T>& rhs){
-	auto it1 = lhs.cbegin(), it2 = rhs.cbegin();
-	for (; it1 != lhs.cend() && it2 != rhs.cend(); ++it1, ++it2)
+	auto it1 = lhs.begin(), it2 = rhs.begin(); // same as cbegin()
+	for (; it1 != lhs.end() && it2 != rhs.end(); ++it1, ++it2)
 		if (*it1 != *it2) return false;
-	return it1 == lhs.cend() && it2 == rhs.cend();
+	return it1 == lhs.end() && it2 == rhs.end();
 }
 
 template<class T>
 inline bool operator!=(const list<T>& lhs, const list<T>& rhs){
 	return !(lhs == rhs);
+}
+
+template<class T>
+inline bool operator<(const list<T>& lhs, const list<T>& rhs){
+	return lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end()); // in stl_algobase.h
+}
+
+template<class T>
+inline bool operator>(const list<T>& lhs, const list<T>& rhs){
+	return rhs < lhs;
+}
+
+template<class T>
+inline bool operator<=(const list<T>& lhs, const list<T>& rhs){
+	return !(rhs < lhs);
+}
+
+template<class T>
+inline bool operator>=(const list<T>& lhs, const list<T>& rhs){
+	return !(lhs < rhs);
 }
 
 }// end namespace::MiniSTL

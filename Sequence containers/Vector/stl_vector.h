@@ -3,7 +3,6 @@
 #include <cstddef> // ptrdiff_t
 #include "allocator.h"
 #include "uninitialized.h"
-#include "stl_algobase.h"
 
 namespace MiniSTL {
 // use sub_allocator as default allocator
@@ -490,6 +489,26 @@ inline bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
 template<class T, class Alloc>
 inline bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 	return !(lhs == rhs);
+}list
+
+template<class T>
+inline bool operator<(const vector<T>& lhs, const vector<T>& rhs){
+	return lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end()); // in stl_algobase.h
+}
+
+template<class T>
+inline bool operator>(const vector<T>& lhs, const vector<T>& rhs){
+	return rhs < lhs;
+}
+
+template<class T>
+inline bool operator<=(const vector<T>& lhs, const vector<T>& rhs){
+	return !(rhs < lhs);
+}
+
+template<class T>
+inline bool operator>=(const vector<T>& lhs, const vector<T>& rhs){
+	return !(lhs < rhs);
 }
 
 template<class T,class Alloc>
