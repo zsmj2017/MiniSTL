@@ -73,7 +73,7 @@ public:// copy operations
 public:// move operations
 	deque(deque&&);
 	// TODO:
-	//deque& operator=(const deque&);
+	//deque& operator=(deque&&);
 
 public:// getter
 	const_iterator begin() const noexcept { return start; }
@@ -111,6 +111,28 @@ public:// push && pop
 
 private:// aux_interface for insert
 	iterator insert_aux(iterator, const value_type&);
+
+private:// aux_interface for assign
+	void fill_assign(size_type,const value_type&);
+	template<class Integer>
+	void assign_dispatch(Integer n,Integer val,_true_type) { 
+		fill_assign(static_cast<size_type>(n),static_cast<value_type>(val));
+	}
+	template<class InputIterator>
+	void assign_dispatch(InputIterator first,InputIterator last,_false_type) { 
+		assign_aux(first,last,iterator_category_t<InputIterator>());
+	}
+	template<class InputIterator>
+	void assign_aux(InputIterator,InputIterator,input_iterator_tag);
+	template<class ForwardIterator>
+	void assign_aux(ForwardIterator,ForwardIterator,forward_iterator_tag);
+
+public:// assign
+	void assign(size_type n,const value_type& val) { fill_assign(n,val); }
+	template<class InputIterator>
+	void assign(InputIterator first,InputIterator last) { 
+		assign_dispatch(first,last,_is_integer_t<InputIterator>());
+	}
 
 public:// insert
 	iterator insert(iterator pos, const value_type &value);
@@ -463,6 +485,32 @@ deque<T, Alloc>::insert(iterator pos, const value_type& value) {
 	}
 	else
 		return insert_aux(pos, value);
+}
+
+template<class T, class Alloc>
+template<class InputIterator>
+void deque<T, Alloc>::assign_aux(InputIterator first,InputIterator last,input_iterator_tag){
+	iterator cur = start;
+	for(;first != last && cur != finish;++cur,++first)
+		*cur = *first;
+	if(first == last)
+		erase(cur,finish);
+	else
+		insert(cur,first,last);
+}
+
+template<class T, class Alloc>
+template<class ForwardIterator>
+void deque<T, Alloc>::assign_aux(ForwardIterator first,ForwardIterator last,forward_iterator_tag){
+	size_type len = MiniSTL::distance(first,last);
+	if(len > size()){
+		ForwardIterator mid = first;
+		MiniSTL::advance(mid,size());
+		copy(first,mid,start);
+		insert(end(),mid,last);
+	}
+	else
+		erase(copy(first,last,start),finish);
 }
 
 template<class T, class Alloc>
