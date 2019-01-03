@@ -30,10 +30,6 @@ private:// data member
 	iterator finish;// 最后一个节点
 	map_pointer map;// 指向节点的指针
 	size_type map_size;
-
-private:// init aux interface
-	size_type initial_map_size() const noexcept { return 8U; }
-	size_type buffer_size() const noexcept { return iterator::buffer_size(); }
 	
 private:// aux_interface for node
 	value_type* allocate_node() { return node_allocator::allocate(__deque_buf_size(sizeof(value_type))); }
@@ -49,6 +45,8 @@ private:// aux_interface for map
 	void reverse_map_at_front(size_type nodes_to_add = 1);
 
 private:// aux_interface for ctor
+	size_type initial_map_size() const noexcept { return 8U; }
+	size_type buffer_size() const noexcept { return iterator::buffer_size(); }
 	void fill_initialize(const value_type&);
 	template<class Integer>
 	void initialize_dispatch(Integer n,Integer val,_true_type){
@@ -70,8 +68,7 @@ public:// ctor && dtor
 
 public:// copy operations
 	deque(const deque& rhs) { initialize_map(rhs.size());MiniSTL::uninitialized_copy(rhs.begin(), rhs.end(), start); }
-	// TODO:
-	//deque& operator=(const deque&);
+	deque& operator=(const deque&);
 
 public:// move operations
 	deque(deque&&);
@@ -122,6 +119,9 @@ public:// erase
 	iterator erase(iterator pos);
 	iterator erase(iterator first, iterator last);
 	void clear();
+
+public:// swap
+	void swap(deque& rhs) noexcept;
 };
 
 template<class T, class Alloc>
@@ -196,9 +196,9 @@ inline void deque<T, Alloc>::reallocate_map(size_type nodes_to_add, bool add_at_
 		// 规定新的nstart，若添加在前端则向后多移动n个单位
 		new_nstart = map + (map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
 		if (new_nstart < start.node)// 整体前移
-			copy(start.node, finish.node + 1, new_nstart);
+			MiniSTL::copy(start.node, finish.node + 1, new_nstart);
 		else// 整体后移
-			std::copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);
+			MiniSTL::copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);
 	}
 	else {
 		size_type new_map_size = map_size + max(map_size, nodes_to_add) + 2;
@@ -206,7 +206,7 @@ inline void deque<T, Alloc>::reallocate_map(size_type nodes_to_add, bool add_at_
 		map_pointer new_map = map_allocator::allocate(new_map_size);
 		new_nstart = new_map + (new_map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
 		// 拷贝原有内容
-		copy(start.node, finish.node + 1, new_nstart);
+		MiniSTL::copy(start.node, finish.node + 1, new_nstart);
 		// 释放原map
 		map_allocator::deallocate(map, map_size);
 		// 重新设定map
@@ -217,6 +217,21 @@ inline void deque<T, Alloc>::reallocate_map(size_type nodes_to_add, bool add_at_
 	//设定start与finish
 	start.set_node(new_nstart);
 	finish.set_node(new_nstart + old_num_nodes - 1);// 注意并非new_num,接下来的设定转交其他函数处理
+}
+
+template<class T, class Alloc>
+inline deque<T, Alloc>& deque<T, Alloc>::operator=(const deque& rhs) {
+	const size_type len = size();
+	if(&rhs != this){
+		if( len >= rhs.size())
+			erase(MiniSTL::copy(rhs.begin(),rhs.end(),start),finish);
+		else{
+			const_iterator mid = rhs.begin() + static_cast<difference_type>(len);
+			MiniSTL::copy(rhs.begin(),mid,start);
+			insert(finish,mid,rhs.end());
+		}
+	}
+	return *this;
 }
 
 template<class T, class Alloc>
@@ -311,10 +326,7 @@ template<class T, class Alloc>
 inline deque<T, Alloc>::deque(deque&& rhs){
 	initialize_map(0);
 	if(rhs.map){
-		MiniSTL::swap(start,rhs.start);
-		MiniSTL::swap(finish,rhs.finish);
-		MiniSTL::swap(map,rhs.map);
-		MiniSTL::swap(map_size,rhs.map_size);
+		swap(rhs);
 	}
 }
 
@@ -451,6 +463,14 @@ deque<T, Alloc>::insert(iterator pos, const value_type& value) {
 	}
 	else
 		return insert_aux(pos, value);
+}
+
+template<class T, class Alloc>
+void deque<T, Alloc>::swap(deque& rhs) noexcept {
+	MiniSTL::swap(start,rhs.start);
+	MiniSTL::swap(finish,rhs.finish);
+	MiniSTL::swap(map,rhs.map);
+	MiniSTL::swap(map_size,rhs.map_size);
 }
 
 }// end namespace::MiniSTL
