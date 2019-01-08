@@ -41,8 +41,12 @@ private:// aux_interface for map
 	void initialize_map(size_type);
 	void deallocate_map(map_pointer p,size_type n) { map_allocator::deallocate(p,n); }
 	void reallocate_map(size_type, bool);
-	void reverse_map_at_back(size_type nodes_to_add = 1);
-	void reverse_map_at_front(size_type nodes_to_add = 1);
+	void reserve_map_at_front(size_type nodes_to_add = 1);
+	void reserve_map_at_back(size_type nodes_to_add = 1);
+	iterator reserve_elements_at_front(size_type);
+	iterator reserve_elements_at_back(size_type);
+	void new_elements_at_front(size_type);
+	void new_elements_at_back(size_type);
 
 private:// aux_interface for ctor
 	size_type initial_map_size() const noexcept { return 8U; }
@@ -68,7 +72,7 @@ public:// ctor && dtor
 	deque(size_type n,const value_type& val) :start(), finish(), map(nullptr), map_size(0) { initialize_map(n);fill_initialize(val); }
 	template<class InputIterator>
 	deque(InputIterator first, InputIterator last) { initialize_dispatch(first,last,_is_integer_t<InputIterator>()); }
-	deque(std::initializer_list<value_type> ils) { range_initialize(ils.begin(),ils.end()); }
+	deque(std::initializer_list<value_type> ils) { range_initialize(ils.begin(),ils.end(),random_access_iterator_tag()); }
 	~deque();
 
 public:// copy operations
@@ -77,8 +81,7 @@ public:// copy operations
 
 public:// move operations
 	deque(deque&&);
-	// TODO:
-	//deque& operator=(deque&&);
+	deque& operator=(deque&&) noexcept ;
 
 public:// getter
 	const_iterator begin() const noexcept { return start; }
@@ -94,13 +97,13 @@ public:// getter
 	bool empty() const noexcept { return finish == start; }
 
 public:// setter
-	iterator begin() { return start; }
-	iterator end() { return finish; }
-	reverse_iterator rbegin() { return reverse_iterator(finish); }
-	reverse_iterator rend() { return reverse_iterator(start); }
+	iterator begin() noexcept { return start; }
+	iterator end() noexcept { return finish; }
+	reverse_iterator rbegin() noexcept { return reverse_iterator(finish); }
+	reverse_iterator rend() noexcept { return reverse_iterator(start); }
 	reference operator[](size_type n) {return start[static_cast<difference_type>(n)];}
-	reference front() { return *start; }
-	reference back() { return *(finish - 1); }
+	reference front() noexcept { return *start; }
+	reference back() noexcept { return *(finish - 1); }
 
 private:// aux_interface for push && pop
 	void push_back_aux(const value_type&);
@@ -113,9 +116,6 @@ public:// push && pop
 	void push_front(const value_type&);
 	void pop_back();
 	void pop_front();
-
-private:// aux_interface for insert
-	iterator insert_aux(iterator, const value_type&);
 
 private:// aux_interface for assign
 	void fill_assign(size_type,const value_type&);
@@ -140,12 +140,34 @@ public:// assign
 	}
 	deque& operator=(std::initializer_list<value_type> ils){ assign(ils.begin(),ils.end()); }
 
+private:// aux_interface for insert
+	void fill_insert(iterator,size_type,const value_type&);
+	iterator insert_aux(iterator, const value_type&);
+	template<class Integer>
+	void insert_dispatch(iterator pos,Integer n,Integer val,_true_type){
+		fill_insert(pos,static_cast<size_type>(n),static_cast<value_type>(val));
+	}
+	template<class InputIterator>
+	void insert_dispatch(iterator pos,InputIterator first,InputIterator last,_false_type){
+		insert(pos,first,last,iterator_category_t<InputIterator>());
+	}
+	template<class InputIterator>
+	void insert(iterator,InputIterator,InputIterator,input_iterator_tag);
+	template<class ForwardIterator>
+	void insert(iterator,ForwardIterator,ForwardIterator,forward_iterator_tag);
+
 public:// insert
-	iterator insert(iterator pos, const value_type &value);
+	iterator insert(iterator, const value_type &);
+	iterator insert(iterator pos) { return insert(pos,value_type()); } 
+	void insert(itertaor pos,size_type n,const value_type& val) { fill_insert(pos,n,val); }
+	template<class InputIterator>
+	void insert(iterator pos,InputIterator first,InputIterator last){
+		insert_dispatch(pos,first,last,_is_integer_t<InputIterator>());
+	}
 
 public:// erase
-	iterator erase(iterator pos);
-	iterator erase(iterator first, iterator last);
+	iterator erase(iterator);
+	iterator erase(iterator, iterator);
 	void clear();
 
 public:// swap
@@ -299,23 +321,73 @@ inline deque<T, Alloc>& deque<T, Alloc>::operator=(const deque& rhs) {
 }
 
 template<class T, class Alloc>
-inline void deque<T, Alloc>::reverse_map_at_back(size_type nodes_to_add) {
+inline void deque<T, Alloc>::reserve_map_at_back(size_type nodes_to_add) {
 	// map_size-(finish.node-map+1) == 后端剩余node个数
 	if (nodes_to_add > map_size - (finish.node - map + 1))
 		reallocate_map(nodes_to_add, false);
 }
 
 template<class T, class Alloc>
-inline void deque<T, Alloc>::reverse_map_at_front(size_type nodes_to_add) {
+inline void deque<T, Alloc>::reserve_map_at_front(size_type nodes_to_add) {
 	// start.node-map==前端剩余node个数
 	if (nodes_to_add > start.node - map)
 		reallocate_map(nodes_to_add, true);
 }
 
 template<class T, class Alloc>
+inline typename deque<T, Alloc>::iterator
+deque<T, Alloc>::reserve_elements_at_front(size_type n) {
+	size_type vacancies = start.cur - start.first;
+	if(n > vacancies)
+		new_elements_at_front(n - vacancies);
+	return start - static_cast<difference_type>(n);
+}
+
+template<class T, class Alloc>
+inline typename deque<T, Alloc>::iterator
+deque<T, Alloc>::reserve_elements_at_back(size_type n) {
+	size_type vacancies = finish.last - finish.cur - 1;
+	if(n > vacancies)
+		new_elements_at_back(n - vacancies);
+	return start - static_cast<difference_type>(n);
+}
+
+template<class T, class Alloc>
+void deque<T, Alloc>::new_elements_at_front(size_type new_elems) {
+	size_type new_nodes = (new_elems + buffer_size() -1) / buffer_size();
+	reserve_map_at_front(new_nodes);
+	size_type i;
+	try{
+		for(i = 1; i <= new_nodes;++i)
+			*(start.node - i) = allocate_node();
+	}
+	catch(std::exception&){
+		for(size_type j = 1;j < i;++j)
+			deallocate_node(*(start.node - j));
+		throw;
+	}
+}
+
+template<class T, class Alloc>
+void deque<T, Alloc>::new_elements_at_back(size_type new_elems) {
+	size_type new_nodes = (new_elems + buffer_size() -1) / buffer_size();
+	reserve_map_at_front(new_nodes);
+	size_type i;
+	try{
+		for(i = 1; i <= new_nodes;++i)
+			*(finish.node + i) = allocate_node();
+	}
+	catch(std::exception&){
+		for(size_type j = 1;j < i;++j)
+			deallocate_node(*(finish.node + j));
+		throw;
+	}
+}
+
+template<class T, class Alloc>
 inline void deque<T, Alloc>::push_back_aux(const value_type & value) {
 	value_type value_copy = value;
-	reverse_map_at_back();// 若符合条件则重新更换map
+	reserve_map_at_back();// 若符合条件则重新更换map
 	*(finish.node + 1) = allocate_node();// 配置新节点
 	try {
 		construct(finish.cur, value_copy);
@@ -324,13 +396,14 @@ inline void deque<T, Alloc>::push_back_aux(const value_type & value) {
 	}
 	catch(std::exception&){
 		deallocate_node(*(finish.node + 1));
+		throw;
 	}
 }
 
 template<class T, class Alloc>
 inline void deque<T, Alloc>::push_front_aux(const value_type& value) {
 	value_type value_copy = value;
-	reverse_map_at_front();// 若符合条件则重新更换map
+	reserve_map_at_front();// 若符合条件则重新更换map
 	*(start.node - 1) = allocate_node();// 配置新节点
 	try {
 		start.set_node(start.node - 1);
@@ -338,9 +411,9 @@ inline void deque<T, Alloc>::push_front_aux(const value_type& value) {
 		construct(start.cur, value);
 	}
 	catch (std::exception&){
-		start.set_node(start.node + 1);
-		start.cur = start.first;
+		++start;
 		deallocate_node(*(start.node - 1));
+		throw;
 	}
 }
 
@@ -387,11 +460,52 @@ deque<T, Alloc>::insert_aux(iterator pos, const value_type & value) {
 }
 
 template<class T, class Alloc>
+template<class InputIterator>
+void deque<T, Alloc>::insert(iterator pos,InputIterator first,InputIterator last,input_iterator_tag) {
+	MiniSTL::copy(first,last,inserter(*this,pos));// 插入迭代器
+}
+
+template<class T, class Alloc>
+template<class ForwardIterator>
+void deque<T, Alloc>::insert(iterator pos,ForwardIterator first,ForwardIterator last,forward_iterator_tag) {
+	size_type n = MiniSTL::distance(first,last);
+	if(pos.cur == start.cur){
+		iterator new_start = reserve_elements_at_front(n);
+		try{
+			MiniSTL::uninitialized_copy(first,last,new_start);
+			start = new_start;
+		}
+		catch(std::exception&){
+			destroy_nodes(new_start.node,start.node);
+		}
+	}
+	else if(pos.cur == finish.cur){
+		iterator new_finish = reserve_elements_at_back(n);
+		try{
+			MiniSTL::uninitialized_copy(first,last,new_finish);
+			finish = new_finish;
+		}
+		catch(std::exception&){
+			destroy_nodes(finish.node + 1,new_finish.node + 1);
+		}
+	}
+	else
+		insert_aux(pos,first,last,n);
+}
+
+template<class T, class Alloc>
 inline deque<T, Alloc>::deque(deque&& rhs){
 	initialize_map(0);
 	if(rhs.map){
 		swap(rhs);
 	}
+}
+
+template<class T, class Alloc>
+deque<T, Alloc>& deque<T, Alloc>::operator=(deque&& rhs) noexcept {
+	clear();
+	swap(rhs);
+	return *this;
 }
 
 template<class T, class Alloc>
