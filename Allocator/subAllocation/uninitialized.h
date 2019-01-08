@@ -76,4 +76,54 @@ ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const
 	return cur;
 }
 
+// SGI_STL的扩展：
+// uninitialized_copy_copy, uninitialized_copy_fill, uninitialized_fill_copy
+
+// __uninitialized_copy_copy
+// Copies [first1, last1) into [result, result + (last1 - first1)), and
+// copies [first2, last2) into [result, result + (last1 - first1) + (last2 - first2)).
+
+template <class InputIterator1, class InputIterator2, class ForwardIterator>
+inline ForwardIterator uninitialized_copy_copy(InputIterator1 first1, InputIterator1 last1,
+	InputIterator2 first2, InputIterator2 last2, ForwardIterator result){
+	ForwardIterator mid = uninitialized_copy(first1, last1, result);
+	try {
+		return uninitialized_copy(first2, last2, mid);
+  	}
+  	catch(std::exception&){
+  		destroy(result,mid);
+		throw;
+  	}
 }
+
+// uninitialized_fill_copy
+// Fills [result, mid) with x, and copies [first, last) into [mid, mid + (last - first)).
+template <class ForwardIterator,class T,class InputIterator>
+inline ForwardIterator uninitialized_fill_copy(ForwardIterator result, ForwardIterator mid,
+	const T& val,InputIterator first,InputIterator last){
+  	uninitialized_fill(result, mid, val);
+  	try {
+    	return uninitialized_copy(first, last, mid);
+  	}
+  	catch(std::exception&){
+  		destroy(result,mid);
+		throw;
+  	}
+}
+
+// __uninitialized_copy_fill
+// Copies [first1, last1) into [first2, first2 + (last1 - first1)), and fills [first2 + (last1 - first1), last2) with x.
+template <class InputIterator,class ForwardIterator,class T>
+inline void uninitialized_copy_fill(InputIterator first1, InputIterator last1,
+	ForwardIterator first2, ForwardIterator last2, const T& val){
+  	ForwardIterator mid2 = uninitialized_copy(first1,last1,first2);
+	try{
+		uninitialized_fill(mid2,last2,val);
+	}
+	catch(std::exception&){
+		destroy(first2,mid2);
+		throw;
+	}
+}
+
+}// end namespace::MiniSTL
