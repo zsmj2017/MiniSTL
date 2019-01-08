@@ -57,6 +57,10 @@ private:// aux_interface for ctor
 	void initialize_dispatch(InputIterator first,InputIterator last,_false_type){
 		range_initialize(first,last,iterator_category_t<InputIterator>());
 	}
+	template<class InputIterator>
+	void range_initialize(InputIterator first,InputIterator last,input_iterator_tag);
+	template<class ForwardIterator>
+	void range_initialize(ForwardIterator first,ForwardIterator last,forward_iterator_tag);
 
 public:// ctor && dtor
 	deque():start(), finish(), map(nullptr), map_size(0) { initialize_map(0); }
@@ -64,6 +68,7 @@ public:// ctor && dtor
 	deque(size_type n,const value_type& val) :start(), finish(), map(nullptr), map_size(0) { initialize_map(n);fill_initialize(val); }
 	template<class InputIterator>
 	deque(InputIterator first, InputIterator last) { initialize_dispatch(first,last,_is_integer_t<InputIterator>()); }
+	deque(std::initializer_list<value_type> ils) { range_initialize(ils.begin(),ils.end()); }
 	~deque();
 
 public:// copy operations
@@ -133,6 +138,7 @@ public:// assign
 	void assign(InputIterator first,InputIterator last) { 
 		assign_dispatch(first,last,_is_integer_t<InputIterator>());
 	}
+	deque& operator=(std::initializer_list<value_type> ils){ assign(ils.begin(),ils.end()); }
 
 public:// insert
 	iterator insert(iterator pos, const value_type &value);
@@ -203,6 +209,42 @@ void deque<T, Alloc>::fill_initialize(const value_type & val) {
 	}
 	catch (std::exception&) {
 		destroy(start,iterator(*cur,cur));
+		throw;
+	}
+}
+
+template<class T, class Alloc>
+template<class InputIterator>
+void deque<T, Alloc>::range_initialize(InputIterator first,InputIterator last,input_iterator_tag) {
+	initialize_map(0);
+	try{
+		for(;first != last;++first)
+			push_back(*first);
+	}
+	catch(std::exception&){
+		clear();
+		throw;
+	}
+}
+
+template<class T, class Alloc>
+template<class ForwardIterator>
+void deque<T, Alloc>::range_initialize(ForwardIterator first,ForwardIterator last,forward_iterator_tag) {
+	size_type n = MiniSTL::distance(first,last);
+	initialize_map(n);
+
+	map_pointer cur_node;
+	try{
+		for(cur_node = start.node;cur_node < finish.node;++cur_node){
+			ForwardIterator mid = first;
+			advance(mid,buffer_size());
+			MiniSTL::uninitialized_copy(first,last,*cur_node);
+			first = mid;
+		}
+		MiniSTL::uninitialized_copy(first,last,finish.first);
+	}
+	catch(std::exception&){
+		destroy(start,iterator(*cur_node,cur_node));
 		throw;
 	}
 }
@@ -506,7 +548,7 @@ void deque<T, Alloc>::assign_aux(ForwardIterator first,ForwardIterator last,forw
 	if(len > size()){
 		ForwardIterator mid = first;
 		MiniSTL::advance(mid,size());
-		copy(first,mid,start);
+		MiniSTL::copy(first,mid,start);
 		insert(end(),mid,last);
 	}
 	else
