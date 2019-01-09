@@ -173,6 +173,10 @@ public:// erase
 	iterator erase(iterator, iterator);
 	void clear();
 
+public:// resize
+	void resize(size_type,const value_type&);
+	void resize(size_type new_size) { resize(new_size,value_type()); }
+
 public:// swap
 	void swap(deque& rhs) noexcept;
 };
@@ -785,11 +789,56 @@ void deque<T, Alloc>::assign_aux(ForwardIterator first,ForwardIterator last,forw
 }
 
 template<class T, class Alloc>
+void deque<T, Alloc>::resize(size_type new_size,const value_type& val){
+	const size_type len = size();
+	if(new_size < len)
+		erase(start + new_size,finish);
+	else
+		insert(finish,new_size - len,val);
+}
+
+template<class T, class Alloc>
 void deque<T, Alloc>::swap(deque& rhs) noexcept {
 	MiniSTL::swap(start,rhs.start);
 	MiniSTL::swap(finish,rhs.finish);
 	MiniSTL::swap(map,rhs.map);
 	MiniSTL::swap(map_size,rhs.map_size);
+}
+
+template<class T, class Alloc>
+inline bool operator==(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
+	return lhs.size() == rhs.size() &&
+		equal(lhs.begin(),lhs.end(),rhs.begin());
+}
+
+template<class T, class Alloc>
+inline bool operator!=(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
+	return !(lhs == rhs);
+}
+
+template<class T, class Alloc>
+inline bool operator<(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
+	return lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end());
+}
+
+template<class T, class Alloc>
+inline bool operator>(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
+	return y < x;
+}
+
+template<class T, class Alloc>
+inline bool operator<=(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
+	return !(y < x);
+}
+
+template<class T, class Alloc>
+inline bool operator>=(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
+	return !(x < y);
+}
+
+template<class T, class Alloc>
+inline void swap(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
+	return !(x < y);
 }
 
 }// end namespace::MiniSTL
