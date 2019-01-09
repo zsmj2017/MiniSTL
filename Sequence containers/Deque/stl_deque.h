@@ -142,24 +142,27 @@ public:// assign
 
 private:// aux_interface for insert
 	void fill_insert(iterator,size_type,const value_type&);
-	iterator insert_aux(iterator, const value_type&);
 	template<class Integer>
 	void insert_dispatch(iterator pos,Integer n,Integer val,_true_type){
 		fill_insert(pos,static_cast<size_type>(n),static_cast<value_type>(val));
 	}
 	template<class InputIterator>
 	void insert_dispatch(iterator pos,InputIterator first,InputIterator last,_false_type){
-		insert(pos,first,last,iterator_category_t<InputIterator>());
+		range_insert_aux(pos,first,last,iterator_category_t<InputIterator>());
 	}
 	template<class InputIterator>
-	void insert(iterator,InputIterator,InputIterator,input_iterator_tag);
+	void range_insert_aux(iterator,InputIterator,InputIterator,input_iterator_tag);
 	template<class ForwardIterator>
-	void insert(iterator,ForwardIterator,ForwardIterator,forward_iterator_tag);
+	void range_insert_aux(iterator,ForwardIterator,ForwardIterator,forward_iterator_tag);
+	iterator insert_aux(iterator, const value_type&);
+	void insert_aux(iterator,size_type,const value_type&);
+	template<class ForwardIterator>
+	void insert_aux(iterator,ForwardIterator,ForwardIterator,size_type);
 
 public:// insert
 	iterator insert(iterator, const value_type &);
 	iterator insert(iterator pos) { return insert(pos,value_type()); } 
-	void insert(itertaor pos,size_type n,const value_type& val) { fill_insert(pos,n,val); }
+	void insert(iterator pos,size_type n,const value_type& val) { fill_insert(pos,n,val); }
 	template<class InputIterator>
 	void insert(iterator pos,InputIterator first,InputIterator last){
 		insert_dispatch(pos,first,last,_is_integer_t<InputIterator>());
@@ -435,9 +438,9 @@ inline void deque<T, Alloc>::pop_front_aux() {
 
 template<class T, class Alloc>
 typename deque<T, Alloc>::iterator 
-deque<T, Alloc>::insert_aux(iterator pos, const value_type & value) {
+deque<T, Alloc>::insert_aux(iterator pos, const value_type & val) {
 	difference_type index = pos - start;// 插入点之前的元素个数
-	value_type value_copy = value;
+	value_type value_copy = val;
 	if (static_cast<size_type>(index) < size() / 2) {// 前移
 		// 插图见书
 		push_front(front());// 最前端加入哨兵以作标识，注意此时start发生了改变
@@ -460,14 +463,126 @@ deque<T, Alloc>::insert_aux(iterator pos, const value_type & value) {
 }
 
 template<class T, class Alloc>
+void deque<T, Alloc>::insert_aux(iterator pos,size_type n,const value_type& val) {
+	const difference_type elems_before = pos - start;
+	size_type length = size();
+	value_type value_copy = val;
+	if(elems_before < static_cast<difference_type>(length / 2)){
+		iterator new_start = reserve_elements_at_front(n);
+		iterator old_start = start;
+		pos = start + elems_before;
+		try{
+			if( elems_before >= static_cast<difference_type>(n)){
+				iterator start_n = start + static_cast<difference_type>(n);
+				MiniSTL::uninitialized_copy(start,start_n,new_start);
+				start = new_start;
+				MiniSTL::copy(start_n,pos,old_start);
+				MiniSTL::fill(pos - static_cast<difference_type>(n),pos,value_copy);
+			}
+			else{
+				MiniSTL::uninitialized_copy_fill(start,pos,new_start,start,value_copy); // extensions
+				start = new_start;
+				MiniSTL::fill(old_start,pos,val);
+			}
+		}
+		catch(std::exception&){
+			destroy_nodes(new_start.node,start.node);
+			throw;
+		}
+	}
+	else{
+		iterator new_finish = reserve_elements_at_back(n);
+		iterator old_finish = finish;
+		const difference_type elems_after = static_cast<difference_type>(length) - elems_before;
+		pos = finish - elems_after;
+		try{
+			if( elems_after >= static_cast<difference_type>(n)){
+				iterator finish_n = finish - static_cast<difference_type>(n);
+				MiniSTL::uninitialized_copy(finish_n,finish,finish);
+				finish = new_finish;
+				MiniSTL::copy_backward(pos,finish_n,old_finish);
+				MiniSTL::fill(pos,pos + static_cast<difference_type>(n),value_copy);
+			}
+			else{
+				MiniSTL::uninitialized_fill_copy(finish,pos + static_cast<difference_type>(n),value_copy,pos,finish); // extensions
+				finish = new_finish;
+				MiniSTL::fill(pos,old_finish,value_copy);
+			}
+		}
+		catch(std::exception&){
+			destroy_nodes(finish.node + 1,new_finish.node + 1);
+			throw;
+		}
+	}
+}
+
+template<class T, class Alloc>
+template<class ForwardIterator>
+void deque<T, Alloc>::insert_aux(iterator pos,ForwardIterator first,ForwardIterator last,size_type n) {
+	const difference_type elems_before = pos - start;
+	size_type length = size();
+	if(elems_before < static_cast<difference_type>(length / 2)){
+		iterator new_start = reserve_elements_at_front(n);
+		iterator old_start = start;
+		pos = start + elems_before;
+		try{
+			if( elems_before >= static_cast<difference_type>(n)){
+				iterator start_n = start + static_cast<difference_type>(n);
+				MiniSTL::uninitialized_copy(start,start_n,new_start);
+				start = new_start;
+				MiniSTL::copy(start_n,pos,old_start);
+				MiniSTL::copy(first,last,pos - static_cast<difference_type>(n));
+			}
+			else{
+				ForwardIterator mid = first;
+				MiniSTL::advance(mid,static_cast<difference_type>(n) - elems_before);
+				MiniSTL::uninitialized_copy_copy(start,pos,first,mid,new_start); // extensions
+				start = new_start;
+				MiniSTL::copy(mid,last,old_start);
+			}
+		}
+		catch(std::exception&){
+			destroy_nodes(new_start.node,start.node);
+			throw;
+		}
+	}
+	else{
+		iterator new_finish = reserve_elements_at_back(n);
+		iterator old_finish = finish;
+		const difference_type elems_after = static_cast<difference_type>(length) - elems_before;
+		pos = finish - elems_after;
+		try{
+			if( elems_after >= static_cast<difference_type>(n)){
+				iterator finish_n = finish - static_cast<difference_type>(n);
+				MiniSTL::uninitialized_copy(finish_n,finish,finish);
+				finish = new_finish;
+				MiniSTL::copy_backward(pos,finish_n,old_finish);
+				MiniSTL::copy(first,last,pos);
+			}
+			else{
+				ForwardIterator mid = first;
+				MiniSTL::advance(mid,elems_after);
+				MiniSTL::uninitialized_copy_copy(mid,last,pos,finish,finish); // extensions
+				finish = new_finish;
+				MiniSTL::copy(first,mid,pos);
+			}
+		}
+		catch(std::exception&){
+			destroy_nodes(finish.node + 1,new_finish.node + 1);
+			throw;
+		}
+	}
+}
+
+template<class T, class Alloc>
 template<class InputIterator>
-void deque<T, Alloc>::insert(iterator pos,InputIterator first,InputIterator last,input_iterator_tag) {
+void deque<T, Alloc>::range_insert_aux(iterator pos,InputIterator first,InputIterator last,input_iterator_tag) {
 	MiniSTL::copy(first,last,inserter(*this,pos));// 插入迭代器
 }
 
 template<class T, class Alloc>
 template<class ForwardIterator>
-void deque<T, Alloc>::insert(iterator pos,ForwardIterator first,ForwardIterator last,forward_iterator_tag) {
+void deque<T, Alloc>::range_insert_aux(iterator pos,ForwardIterator first,ForwardIterator last,forward_iterator_tag) {
 	size_type n = MiniSTL::distance(first,last);
 	if(pos.cur == start.cur){
 		iterator new_start = reserve_elements_at_front(n);
