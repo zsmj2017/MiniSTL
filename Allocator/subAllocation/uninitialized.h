@@ -86,9 +86,9 @@ ForwardIterator  __uninitialized_fill_n_aux(ForwardIterator first, Size n, const
 template <class InputIterator1, class InputIterator2, class ForwardIterator>
 inline ForwardIterator uninitialized_copy_copy(InputIterator1 first1, InputIterator1 last1,
 	InputIterator2 first2, InputIterator2 last2, ForwardIterator result){
-	ForwardIterator mid = uninitialized_copy(first1, last1, result);
+	ForwardIterator mid = MiniSTL::uninitialized_copy(first1, last1, result);
 	try {
-		return uninitialized_copy(first2, last2, mid);
+		return MiniSTL::uninitialized_copy(first2, last2, mid);
   	}
   	catch(std::exception&){
   		destroy(result,mid);
@@ -101,9 +101,9 @@ inline ForwardIterator uninitialized_copy_copy(InputIterator1 first1, InputItera
 template <class ForwardIterator,class T,class InputIterator>
 inline ForwardIterator uninitialized_fill_copy(ForwardIterator result, ForwardIterator mid,
 	const T& val,InputIterator first,InputIterator last){
-  	uninitialized_fill(result, mid, val);
+  	MiniSTL::uninitialized_fill(result, mid, val);
   	try {
-    	return uninitialized_copy(first, last, mid);
+    	return MiniSTL::uninitialized_copy(first, last, mid);
   	}
   	catch(std::exception&){
   		destroy(result,mid);
@@ -116,9 +116,9 @@ inline ForwardIterator uninitialized_fill_copy(ForwardIterator result, ForwardIt
 template <class InputIterator,class ForwardIterator,class T>
 inline void uninitialized_copy_fill(InputIterator first1, InputIterator last1,
 	ForwardIterator first2, ForwardIterator last2, const T& val){
-  	ForwardIterator mid2 = uninitialized_copy(first1,last1,first2);
+  	ForwardIterator mid2 = MiniSTL::uninitialized_copy(first1,last1,first2);
 	try{
-		uninitialized_fill(mid2,last2,val);
+		MiniSTL::uninitialized_fill(mid2,last2,val);
 	}
 	catch(std::exception&){
 		destroy(first2,mid2);

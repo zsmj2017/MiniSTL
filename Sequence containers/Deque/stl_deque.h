@@ -708,7 +708,7 @@ deque<T, Alloc>::erase(iterator pos) {
 		pop_front();
 	}
 	else {
-		copy(next, finish, pos);
+		MiniSTL::copy(next, finish, pos);
 		pop_back();
 	}
 	return start + index;
@@ -717,7 +717,7 @@ deque<T, Alloc>::erase(iterator pos) {
 template<class T, class Alloc>
 typename deque<T, Alloc>::iterator 
 deque<T, Alloc>::erase(iterator first, iterator last) {
-	if (first == start && last == end) {
+	if (first == start && last == finish) {
 		clear();
 		return finish;
 	}
@@ -734,7 +734,7 @@ deque<T, Alloc>::erase(iterator first, iterator last) {
 			start = new_start;
 		}
 		else {// 前移开销较低		
-			copy(last, finish, first);
+			MiniSTL::copy(last, finish, first);
 			iterator new_finish = finish - n;// 标记末尾
 			destroy(new_finish, finish);
 			// 释放多余缓冲区
@@ -785,7 +785,7 @@ void deque<T, Alloc>::assign_aux(ForwardIterator first,ForwardIterator last,forw
 		insert(end(),mid,last);
 	}
 	else
-		erase(copy(first,last,start),finish);
+		erase(MiniSTL::copy(first,last,start),finish);
 }
 
 template<class T, class Alloc>
@@ -823,17 +823,17 @@ inline bool operator<(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
 
 template<class T, class Alloc>
 inline bool operator>(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
-	return y < x;
+	return rhs < lhs;
 }
 
 template<class T, class Alloc>
 inline bool operator<=(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
-	return !(y < x);
+	return !(rhs < lhs);
 }
 
 template<class T, class Alloc>
 inline bool operator>=(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
-	return !(x < y);
+	return !(lhs < rhs);
 }
 
 template<class T, class Alloc>
