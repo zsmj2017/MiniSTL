@@ -210,7 +210,7 @@ void deque<T, Alloc>::initialize_map(size_type n) {
 	map = map_allocator::allocate(map_size);
 	// 令nstart与nfinish指向map所拥有的全部node的中部,以便日后扩充头尾
 	map_pointer nstart = map + (map_size - num_nodes) / 2;
-	map_pointer nfinish = nstart + num_nodes - 1;
+	map_pointer nfinish = nstart + num_nodes ;
 	try {
 		create_nodes(nstart,nfinish);
 	}
@@ -221,7 +221,7 @@ void deque<T, Alloc>::initialize_map(size_type n) {
 		throw;
 	}
 	start.set_node(nstart);
-	finish.set_node(nfinish);
+	finish.set_node(nfinish - 1);
 	start.cur = start.first;
 	finish.cur = finish.first + n % buffer_size();// 若n%buffer_size==0,会多配置一个节点，此时cur指向该节点头部
 }
@@ -266,7 +266,7 @@ void deque<T, Alloc>::range_initialize(ForwardIterator first,ForwardIterator las
 	try{
 		for(cur_node = start.node;cur_node < finish.node;++cur_node){
 			ForwardIterator mid = first;
-			advance(mid,buffer_size());
+			MiniSTL::advance(mid,buffer_size());
 			MiniSTL::uninitialized_copy(first,last,*cur_node);
 			first = mid;
 		}
@@ -294,7 +294,7 @@ inline void deque<T, Alloc>::reallocate_map(size_type nodes_to_add, bool add_at_
 			MiniSTL::copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);
 	}
 	else {
-		size_type new_map_size = map_size + max(map_size, nodes_to_add) + 2;
+		size_type new_map_size = map_size + MiniSTL::max(map_size, nodes_to_add) + 2;
 		// 分配新空间
 		map_pointer new_map = map_allocator::allocate(new_map_size);
 		new_nstart = new_map + (new_map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
@@ -330,14 +330,14 @@ inline deque<T, Alloc>& deque<T, Alloc>::operator=(const deque& rhs) {
 template<class T, class Alloc>
 inline void deque<T, Alloc>::reserve_map_at_back(size_type nodes_to_add) {
 	// map_size-(finish.node-map+1) == 后端剩余node个数
-	if (nodes_to_add > map_size - (finish.node - map + 1))
+	if (nodes_to_add +1 > map_size - (finish.node - map))
 		reallocate_map(nodes_to_add, false);
 }
 
 template<class T, class Alloc>
 inline void deque<T, Alloc>::reserve_map_at_front(size_type nodes_to_add) {
 	// start.node-map==前端剩余node个数
-	if (nodes_to_add > start.node - map)
+	if (nodes_to_add > static_cast<size_type>(start.node - map))
 		reallocate_map(nodes_to_add, true);
 }
 
@@ -356,7 +356,7 @@ deque<T, Alloc>::reserve_elements_at_back(size_type n) {
 	size_type vacancies = finish.last - finish.cur - 1;
 	if(n > vacancies)
 		new_elements_at_back(n - vacancies);
-	return start - static_cast<difference_type>(n);
+	return finish + static_cast<difference_type>(n);
 }
 
 template<class T, class Alloc>
@@ -378,7 +378,7 @@ void deque<T, Alloc>::new_elements_at_front(size_type new_elems) {
 template<class T, class Alloc>
 void deque<T, Alloc>::new_elements_at_back(size_type new_elems) {
 	size_type new_nodes = (new_elems + buffer_size() -1) / buffer_size();
-	reserve_map_at_front(new_nodes);
+	reserve_map_at_back(new_nodes);
 	size_type i;
 	try{
 		for(i = 1; i <= new_nodes;++i)
@@ -622,6 +622,7 @@ void deque<T, Alloc>::range_insert_aux(iterator pos,ForwardIterator first,Forwar
 		}
 		catch(std::exception&){
 			destroy_nodes(new_start.node,start.node);
+			throw;
 		}
 	}
 	else if(pos.cur == finish.cur){
@@ -632,6 +633,7 @@ void deque<T, Alloc>::range_insert_aux(iterator pos,ForwardIterator first,Forwar
 		}
 		catch(std::exception&){
 			destroy_nodes(finish.node + 1,new_finish.node + 1);
+			throw;
 		}
 	}
 	else
@@ -659,7 +661,7 @@ inline deque<T, Alloc>::~deque(){
 	if(map){
 		destroy_nodes(start.node,finish.node + 1); // 也需要destroy finish.node
 		deallocate_map(map,map_size);
-	}
+	} 
 }
 
 template<class T, class Alloc>
