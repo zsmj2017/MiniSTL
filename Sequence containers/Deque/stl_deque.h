@@ -628,7 +628,7 @@ void deque<T, Alloc>::range_insert_aux(iterator pos,ForwardIterator first,Forwar
 	else if(pos.cur == finish.cur){
 		iterator new_finish = reserve_elements_at_back(n);
 		try{
-			MiniSTL::uninitialized_copy(first,last,new_finish);
+			MiniSTL::uninitialized_copy(first,last,finish);
 			finish = new_finish;
 		}
 		catch(std::exception&){
