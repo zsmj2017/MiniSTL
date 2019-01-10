@@ -3,11 +3,22 @@
 
 namespace MiniSTL {
 
-template <class T, class Sequence = deque<T> >
+template <class T, class Sequence = deque<T>>
+class stack;
+
+template <class T, class Sequence>
+bool operator==(const stack<T,Sequence>&,const stack<T,Sequence>&);
+
+template <class T, class Sequence>
+bool operator<(const stack<T,Sequence>&,const stack<T,Sequence>&);
+
+template <class T, class Sequence>
 class stack {
-	// friend declarations
-	friend bool operator== <> (const stack&, const stack&);
-	friend bool operator!= <> (const stack&, const stack&);
+// friend declarations
+template <class _T, class _Sequence>
+friend bool operator==(const stack<_T,_Sequence>&,const stack<_T,_Sequence>&);
+template <class _T, class _Sequence>
+friend bool operator<(const stack<_T,_Sequence>&,const stack<_T,_Sequence>&);
 
 public:
 	using value_type = typename Sequence::value_type;
@@ -15,11 +26,10 @@ public:
 	using reference = typename Sequence::reference;
 	using const_reference = typename Sequence::const_reference;
 
-private:// data
+private:// only data member
 	Sequence c;
 
 public:// ctor
-	stack():c() {}
 	explicit stack(const Sequence& rhs) :c(rhs) {}
 
 public:// copy operations
@@ -29,7 +39,7 @@ public:// copy operations
 	}
 
 public:// move operations
-	stack(stack&& rhs)  noexcept:c(std::move(rhs.c)){}
+	stack(stack&& rhs) noexcept:c(std::move(rhs.c)){}
 	stack& operator=(stack&& rhs) noexcept{
 		c.operator=(std::move(rhs.c));
 	}
@@ -45,6 +55,9 @@ public:// setter
 public:// push && pop
 	void push(const value_type& value) { c.push_back(value); }
 	void pop() { c.pop_back(); }
+
+public://swap
+	void swap(stack& rhs) noexcept { using MiniSTL::swap;swap(c,rhs.c); }
 };
 
 template <class T, class Sequence>
@@ -53,8 +66,33 @@ inline bool operator==(const stack<T, Sequence>& lhs, const stack<T, Sequence>& 
 }
 
 template <class T, class Sequence>
+inline bool operator<(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs) {
+	return lhs.c < rhs.c;
+}
+
+template <class T, class Sequence>
 inline bool operator!=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs){
-	return !(lhs.c == rhs.c);
+	return !(lhs == rhs);
+}
+
+template <class T, class Sequence>
+inline bool operator>(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs){
+	return rhs < lhs;
+}
+
+template <class T, class Sequence>
+inline bool operator<=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs){
+	return !(rhs < lhs);
+}
+
+template <class T, class Sequence>
+inline bool operator>=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& rhs){
+	return !(lhs < rhs);
+}
+
+template <class T, class Sequence>
+inline void swap(stack<T, Sequence>& lhs,stack<T, Sequence>& rhs){
+	lhs.swap(rhs);
 }
 
 }// end namespace::MiniSTL
