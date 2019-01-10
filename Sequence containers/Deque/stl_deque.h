@@ -467,6 +467,32 @@ deque<T, Alloc>::insert_aux(iterator pos, const value_type & val) {
 }
 
 template<class T, class Alloc>
+void deque<T, Alloc>::fill_insert(iterator pos,size_type n,const value_type& val){
+	if(pos.cur == start.cur){
+		iterator new_start = reserve_elements_at_front(n);
+		try{
+			MiniSTL::uninitialized_fill(new_start,start,val);
+			start = new_start;
+		}
+		catch(std::exception&){
+			destroy_nodes(new_start.node,start.node);
+		}
+	}
+	else if(pos.cur == finish.cur){
+		iterator new_finish = reserve_elements_at_back(n);
+		try{
+			MiniSTL::uninitialized_fill(finish,new_finish,val);
+			finish = new_finish;
+		}
+		catch(std::exception&){
+			destroy_nodes(finish.node + 1,new_finish.node + 1);
+		}
+	}
+	else
+		insert_aux(pos,n,val);
+}
+
+template<class T, class Alloc>
 void deque<T, Alloc>::insert_aux(iterator pos,size_type n,const value_type& val) {
 	const difference_type elems_before = pos - start;
 	size_type length = size();

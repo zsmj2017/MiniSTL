@@ -53,7 +53,7 @@ struct __deque_iterator {
 	self& operator++() {
 		++cur;
 		if (cur == last) {// 若已抵达尾端
-			set_node(++node);
+			set_node(node + 1);
 			cur = first;
 		}
 		return *this;
@@ -67,7 +67,7 @@ struct __deque_iterator {
 
 	self& operator--() {
 		if (cur == first) {
-			set_node(--node);
+			set_node(node - 1);
 			cur = last;
 		}
 		--cur;
@@ -82,24 +82,24 @@ struct __deque_iterator {
 
 	// random access
 	self& operator+=(difference_type n) {
-		difference_type off_set = n + (cur - first);
-		if (off_set >= 0 && off_set < static_cast<difference_type>(buffer_size())) {
+		difference_type offset = n + (cur - first);
+		if (offset >= 0 && offset < static_cast<difference_type>(buffer_size())) {
 			// 不需要跳转
 			cur += n;
 		}
 		else {
 			// off_set小于0则必然需要跳转
-			difference_type node_offset = off_set > 0 ? off_set / static_cast<difference_type>(buffer_size())
-				: -static_cast<difference_type>((-off_set - 1) / buffer_size()) - 1;
-			node += node_offset;
-			cur = first + (off_set - static_cast<difference_type>(node_offset*(buffer_size())));
+			difference_type node_offset = offset > 0 ? offset / static_cast<difference_type>(buffer_size())
+				: -static_cast<difference_type>((-offset - 1) / buffer_size()) - 1;
+			set_node(node + node_offset);
+			cur = first + (offset - node_offset * static_cast<difference_type>(buffer_size()));
 		}
 		return *this;
 	}
 
 	self operator+(difference_type n) {
 		self temp = *this;
-		return temp += (n);
+		return temp += n;
 	}
 
 	self& operator-=(difference_type n) {
@@ -112,7 +112,7 @@ struct __deque_iterator {
 	}
 
 	reference operator[](difference_type n) {
-		return *(*this += n);
+		return *(*this + n);
 	}
 };
 
