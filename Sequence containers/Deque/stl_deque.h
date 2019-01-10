@@ -134,11 +134,12 @@ private:// aux_interface for assign
 
 public:// assign
 	void assign(size_type n,const value_type& val) { fill_assign(n,val); }
+	void assign(std::initializer_list<value_type> ils) { assign(ils.begin(),ils.end()); }
 	template<class InputIterator>
 	void assign(InputIterator first,InputIterator last) { 
 		assign_dispatch(first,last,_is_integer_t<InputIterator>());
 	}
-	deque& operator=(std::initializer_list<value_type> ils){ assign(ils.begin(),ils.end()); }
+	deque& operator=(std::initializer_list<value_type> ils){ assign(ils.begin(),ils.end());return *this; }
 
 private:// aux_interface for insert
 	void fill_insert(iterator,size_type,const value_type&);
@@ -791,6 +792,18 @@ deque<T, Alloc>::insert(iterator pos, const value_type& value) {
 }
 
 template<class T, class Alloc>
+void deque<T, Alloc>::fill_assign(size_type n,const value_type& val){
+	if(n > size()){
+		MiniSTL::fill(begin(),end(),val);
+		insert(end(),n-size(),val);
+	}
+	else{
+		erase(begin() + n,end());
+		MiniSTL::fill(begin(),end(),val);
+	}
+}
+
+template<class T, class Alloc>
 template<class InputIterator>
 void deque<T, Alloc>::assign_aux(InputIterator first,InputIterator last,input_iterator_tag){
 	iterator cur = start;
@@ -836,7 +849,7 @@ void deque<T, Alloc>::swap(deque& rhs) noexcept {
 template<class T, class Alloc>
 inline bool operator==(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
 	return lhs.size() == rhs.size() &&
-		equal(lhs.begin(),lhs.end(),rhs.begin());
+		MiniSTL::equal(lhs.begin(),lhs.end(),rhs.begin());
 }
 
 template<class T, class Alloc>
