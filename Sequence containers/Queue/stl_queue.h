@@ -3,11 +3,22 @@
 
 namespace MiniSTL {
 
-template <class T, class Sequence = deque<T> >
+template <class T, class Sequence = deque<T>>
+class queue;
+
+template <class T, class Sequence>
+bool operator==(const queue<T,Sequence>&,const queue<T,Sequence>&);
+
+template <class T, class Sequence>
+bool operator<(const queue<T,Sequence>&,const queue<T,Sequence>&);
+
+template <class T, class Sequence>
 class queue {
-	// friend declarations
-	friend bool operator== <>(const queue& lhs, const queue& rhs);
-	friend bool operator!= <>(const queue& lhs, const queue& rhs);
+// friend declarations
+template <class _T, class _Sequence>
+friend bool operator==(const queue<_T,_Sequence>&,const queue<_T,_Sequence>&);
+template <class _T, class _Sequence>
+friend bool operator<(const queue<_T,_Sequence>&,const queue<_T,_Sequence>&);
 
 public:// alias declarations
 	using value_type = typename Sequence::value_type;
@@ -19,7 +30,6 @@ private:// data member
 	Sequence c;
 
 public:// ctor
-	queue() :c() {}
 	explicit queue(const Sequence& rhs) :c(rhs) {}
 
 public:// copy operations
@@ -45,16 +55,44 @@ public:// setter
 public:// push && pop
 	void push(const value_type& value) { c.push_back(value); }
 	void pop() { c.pop_front(); }
+
+public://swap
+	void swap(queue& rhs) noexcept { using MiniSTL::swap;swap(c,rhs.c); }
 };
 
 template <class T, class Sequence>
-bool operator==(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs) {
+inline bool operator==(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs) {
 	return lhs.c == rhs.c;
 }
 
 template <class T, class Sequence>
-bool operator!=(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs) {
-	return !(lhs.c == rhs.c);
+inline bool operator<(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs) {
+	return lhs.c < rhs.c;
+}
+
+template <class T, class Sequence>
+inline bool operator!=(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs){
+	return !(lhs == rhs);
+}
+
+template <class T, class Sequence>
+inline bool operator>(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs){
+	return rhs < lhs;
+}
+
+template <class T, class Sequence>
+inline bool operator<=(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs){
+	return !(rhs < lhs);
+}
+
+template <class T, class Sequence>
+inline bool operator>=(const queue<T, Sequence>& lhs, const queue<T, Sequence>& rhs){
+	return !(lhs < rhs);
+}
+
+template <class T, class Sequence>
+inline void swap noexcept (queue<T, Sequence>& lhs,queue<T, Sequence>& rhs){
+	lhs.swap(rhs);
 }
 
 }// end namespace::MiniSTL

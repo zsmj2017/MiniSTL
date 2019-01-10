@@ -91,7 +91,7 @@ inline bool operator>=(const stack<T, Sequence>& lhs, const stack<T, Sequence>& 
 }
 
 template <class T, class Sequence>
-inline void swap(stack<T, Sequence>& lhs,stack<T, Sequence>& rhs){
+inline void swap(stack<T, Sequence>& lhs,stack<T, Sequence>& rhs) noexcept {
 	lhs.swap(rhs);
 }
 
