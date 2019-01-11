@@ -92,7 +92,7 @@ inline bool operator>=(const queue<T, Sequence>& lhs, const queue<T, Sequence>& 
 }
 
 template <class T, class Sequence>
-inline void swap noexcept (queue<T, Sequence>& lhs,queue<T, Sequence>& rhs){
+inline void swap (queue<T, Sequence>& lhs,queue<T, Sequence>& rhs) noexcept {
 	lhs.swap(rhs);
 }
 
