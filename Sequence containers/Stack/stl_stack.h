@@ -58,7 +58,7 @@ public:// push && pop
 	void pop() { c.pop_back(); }
 
 public://swap
-	void swap(stack& rhs) noexcept { using MiniSTL::swap;swap(c,rhs.c); }
+	void swap(stack& rhs) noexcept { MiniSTL::swap(c,rhs.c); }
 };
 
 template <class T, class Sequence>
