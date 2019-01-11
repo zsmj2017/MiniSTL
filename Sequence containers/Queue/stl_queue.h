@@ -30,6 +30,7 @@ private:// data member
 	Sequence c;
 
 public:// ctor
+	queue() = default;
 	explicit queue(const Sequence& rhs) :c(rhs) {}
 
 public:// copy operations

@@ -30,6 +30,7 @@ private:// only data member
 	Sequence c;
 
 public:// ctor
+	stack() = default;
 	explicit stack(const Sequence& rhs) :c(rhs) {}
 
 public:// copy operations
