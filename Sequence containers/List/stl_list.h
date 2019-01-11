@@ -397,7 +397,7 @@ inline bool operator!=(const list<T>& lhs, const list<T>& rhs){
 
 template<class T>
 inline bool operator<(const list<T>& lhs, const list<T>& rhs){
-	return lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end()); // in stl_algobase.h
+	return MiniSTL::lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end()); // in stl_algobase.h
 }
 
 template<class T>

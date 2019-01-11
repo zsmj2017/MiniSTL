@@ -859,7 +859,7 @@ inline bool operator!=(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
 
 template<class T, class Alloc>
 inline bool operator<(const deque<T,Alloc>& lhs,const deque<T,Alloc>& rhs){
-	return lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end());
+	return MiniSTL::lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end());
 }
 
 template<class T, class Alloc>
