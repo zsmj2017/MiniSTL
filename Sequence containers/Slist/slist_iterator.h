@@ -20,14 +20,9 @@ struct slist_iterator_base {
 
 	void incur() { node = node->next; }
 
-	//等值判断
-	bool operator ==(const slist_iterator_base& rhs) {
-		return node == rhs.node;
-	}
+	bool operator ==(const slist_iterator_base& rhs) { return node == rhs.node;}
 
-	bool operator !=(const slist_iterator_base& rhs) {
-		return node != rhs.node;
-	}
+	bool operator !=(const slist_iterator_base& rhs) { return node != rhs.node;}
 };
 
 template<class T, class Ref, class Ptr>
@@ -47,7 +42,7 @@ struct slist_iterator :public slist_iterator_base {
 	slist_iterator(const iterator& rhs) : slist_iterator_base(rhs.node) {}
 
 	// dereference
-	reference operator*() { return static_cast<list_node*>(node)->data; }
+	reference operator*() { return reinterpret_cast<list_node*>(node)->data; }
 	pointer operator->() { return &(operator*()); }
 
 	// incur
