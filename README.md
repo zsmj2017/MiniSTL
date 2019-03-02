@@ -34,7 +34,7 @@
 
  &emsp;[list(stl_list.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Sequence%20containers/List/stl_list.h):100%   
 
- &emsp;[deque(stl_deque.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Sequence%20containers/Deque/stl_deque.h):80%  
+ &emsp;[deque(stl_deque.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Sequence%20containers/Deque/stl_deque.h):100%  
 
  &emsp;[stack(stl_stack.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Sequence%20containers/Stack/stl_stack.h):100%  
 
