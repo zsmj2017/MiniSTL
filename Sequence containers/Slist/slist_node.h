@@ -20,7 +20,7 @@ slist_node_base* slist_previous(slist_node_base* head,const slist_node_base* nod
 	return head;
 }
 
-const slist_node_base* slist_previous(slist_node_base* head,const slist_node_base* node){
+const slist_node_base* slist_previous(const slist_node_base* head,const slist_node_base* node){
 	while(head && head->next != node)
 		head = head->next;
 	return head;
@@ -40,8 +40,8 @@ inline void slist_splice_after(slist_node_base* pos,slist_node_base* head){
 	slist_node_base* before_last = slist_previous(head,nullptr);
 	if(before_last != head){
 		slist_node_base* after = pos->next;
+		pos->next = head->next;
 		head->next = nullptr;
-		pos->next = first;
 		before_last->next = after;
 	}
 }

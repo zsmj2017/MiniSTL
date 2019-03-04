@@ -26,11 +26,11 @@ private:
 	using list_node_allocator = simpleAlloc<list_node>;
 
 private:// allocate && deallocate node
-	static list_node* create_node(const value_type& value) {
+	list_node* create_node(const value_type& value) {
 		list_node* node = list_node_allocator::allocate();
 		try {
 			construct(&node->data, value);
-			node->next = 0;
+			node->next = nullptr;
 		}
 		catch(std::exception&){
 			list_node_allocator::deallocate(node);
@@ -38,15 +38,9 @@ private:// allocate && deallocate node
 		return node;
 	}
 
-	static void destroy_node(list_node* node) {
+	void destroy_node(list_node* node) {
 		destroy(&node->data);
 		list_node_allocator::deallocate(node);
-	}
-
-	void clear() {
-		while (head.next) {
-			pop_front();
-		}
 	}
 
 private:// data member
@@ -54,37 +48,47 @@ private:// data member
 
 public:// ctor && dtor
 	slist() { head.next = nullptr; }
+	explicit slist(size_type n) { insert_after_fill(&head,n,value_type()); }
+	slist(size_type n,const value_type& val) { insert_after_fill(&head,n,val); }
+	// Here need not any dispatching tricks here, because insert_after_range already does them.
+	template<class InputIterator>
+	slist(InputIterator first,InputIterator last) { insert_after_range(&head,first,last); }
 	~slist() { clear(); }
 
+public:// copy operation
+	slist(const slist& rhs) { insert_after_range(&head,rhs.begin(),rhs.end()); }
+	slist& operator==(const slist&);
+
 public:// setter
-	iterator begin() { return iterator(static_cast<list_node*>(head.next)); }
+	iterator begin() { return iterator(reinterpret_cast<list_node*>(head.next)); }
 	iterator end() { return iterator(nullptr); }
-	reference front() { return static_cast<list_node*>(head.next)->data; }
+	reference front() { return reinterpret_cast<list_node*>(head.next)->data; }
 
 public:// getter
-	const_iterator cbegin() const noexcept { return iterator(static_cast<list_node*>(head.next)); }
+	const_iterator cbegin() const noexcept { return iterator(reinterpret_cast<list_node*>(head.next)); }
 	const_iterator cend() const noexcept { return iterator(nullptr); }
 	size_type size() const noexcept { return slist_size(head.next); }
 	bool empty() const noexcept { return head.next == nullptr; }
-	const_reference front() const noexcept { return static_cast<list_node*>(head.next)->data; }
+	const_reference front() const noexcept { return reinterpret_cast<list_node*>(head.next)->data; }
 
 public:// swap
-	void swap(slist& rhs) {
-		list_node_base* temp = head.next;
-		head.next = rhs.head.next;
-		rhs.head.next = temp;
+	void swap(slist& rhs) noexcept{
+		MiniSTL::swap(head.next,rhs.head.next);
 	}
 
-public:// push && pop
+public:// push && pop at front
 	void push_front(const value_type& value) {
 		slist_make_link(&head, create_node(value));
 	}
 
 	void pop_front() {
-		list_node* node = static_cast<list_node*>(head.next);
+		list_node* node = reinterpret_cast<list_node*>(head.next);
 		head.next = node->next;
 		destroy_node(node);
 	}
+
+public:// erase
+	void clear() { erase_after(&head,nullptr); }
 };
 
 }// end namespace::MiniSTL
