@@ -71,8 +71,45 @@ public:// getter
 	bool empty() const noexcept { return head.next == nullptr; }
 	const_reference front() const noexcept { return reinterpret_cast<list_node*>(head.next)->data; }
 
+private:// aux interface for insert
+	list_node* insert_after(list_node_base* pos, const value_type& val){
+		return reinterpret_cast<list_node*>(slist_make_link(pos,create_node(val)));
+	}
+	void insert_after_fill(list_node_base* pos, size_type n, const value_type& val){
+		for(size_type i = 0; i < n; ++i)
+			slist_make_link(pos,create_node(val));
+	}
+	template<class InputIterator>
+	void insert_after_range(list_node_base* pos, InputIterator first, InputIterator last){
+		insert_after_range_aux(pos,first,last,_is_integer_t<InputIterator>());
+	}
+	template<class Integer>
+	void insert_after_range_aux(list_node_base* pos, Integer n, Integer val, _true_type){
+		insert_after_fill(pos,static_cast<size_type>(n),static_cast<value_type>(val));
+	}
+	template<class InputIterator>
+	void insert_after_range_aux(list_node_base* pos, InputIterator first, InputIterator last, _false_type){
+		while(first != last) {
+			pos = slist_make_link(pos,create_node(*first));
+			++first;
+		}
+	}
+
+public:// insert
+	iterator insert(iterator pos,const value_type& val) { 
+		return iterator(insert_after(__slist_previous(&head,pos.node),val));
+	}
+	void insert(iterator pos,size_type n, const value_type& val) {
+		insert_after_fill(__slist_previous(&head,pos.node),n,val);
+	}
+	// Here need not any dispatching tricks here, because insert_after_range already does them.
+	template<class InputIterator>
+	void insert(iterator pos, InputIterator first, InputIterator last) {
+		insert_after_range(slist_previous(&head,pos.node),first,last);
+	}
+
 public:// swap
-	void swap(slist& rhs) noexcept{
+	void swap(slist& rhs) noexcept {
 		MiniSTL::swap(head.next,rhs.head.next);
 	}
 
