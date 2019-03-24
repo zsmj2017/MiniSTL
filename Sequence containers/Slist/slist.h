@@ -136,6 +136,22 @@ public:// erase
 	}
 	void clear() { erase_after(&head,nullptr); }
 
+private:// aux interface for assign
+	void fill_assign(size_type,const value_type&);
+	template<class Integer>
+	void assign_dispatch(Integer n,Integer val,_true_type) {
+		fill_assign(static_cast<size_type>(n),static_cast<value_type>(val));
+	}
+	template<class InputIterator>
+	void assign_dispatch(InputIterator first,InputIterator last,_false_type);
+
+public:// assign
+	void assign(size_type n,const value_type& val) { fill_assign(n,val); }
+	template<class InputIterator>
+	void assign(InputIterator first,InputIterator last) { 
+		assign_dispatch(first,last,_is_integer_t<InputIterator>()); 
+	}
+
 public:// swap
 	void swap(slist& rhs) noexcept {
 		MiniSTL::swap(head.next,rhs.head.next);
@@ -152,5 +168,37 @@ public:// push && pop at front
 		destroy_node(node);
 	}
 };
+
+template<class T,class Alloc>
+void slist<T,Alloc>::fill_assign(size_type n, const value_type& val) {
+	list_node_base* prev = head;
+	list_node* cur = reinterpret_cast<list_node*>(head.next);
+	for(;cur != nullptr && n > 0;--n) {
+		cur->data = val;
+		prev = cur;
+		cur = reinterpret_cast<list_node*>(cur->next);
+	}
+	if(n > 0)
+		insert_after_fill(prev,n,val);
+	else
+		erase_after(prev,nullptr);
+}
+
+template<class T,class Alloc>
+template<class InputIterator>
+void slist<T,Alloc>::assign_dispatch(InputIterator first,InputIterator last,_false_type) {
+	list_node_base* prev = head;
+	list_node* cur = reinterpret_cast<list_node*>(head.next);
+	while(first != last) {
+		cur->data = *first;
+		prev = cur;
+		cur = reinterpret_cast<list_node*>(cur->next);
+		++first;
+	}
+	if(first != last)
+		insert_after_range(prev,first,last);
+	else
+		erase_after(prev,nullptr);
+}
 
 }// end namespace::MiniSTL
