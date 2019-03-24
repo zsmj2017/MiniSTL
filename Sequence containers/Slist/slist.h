@@ -72,8 +72,8 @@ public:// getter
 	const_reference front() const noexcept { return reinterpret_cast<list_node*>(head.next)->data; }
 
 private:// aux interface for insert
-	list_node* insert_after(list_node_base* pos, const value_type& val){
-		return reinterpret_cast<list_node*>(slist_make_link(pos,create_node(val)));
+	iterator insert_after(list_node_base* pos, const value_type& val){
+		return slist_make_link(pos,create_node(val));
 	}
 	void insert_after_fill(list_node_base* pos, size_type n, const value_type& val){
 		for(size_type i = 0; i < n; ++i)
@@ -97,7 +97,7 @@ private:// aux interface for insert
 
 public:// insert
 	iterator insert(iterator pos,const value_type& val) { 
-		return iterator(insert_after(__slist_previous(&head,pos.node),val));
+		return insert_after(__slist_previous(&head,pos.node),val);
 	}
 	void insert(iterator pos,size_type n, const value_type& val) {
 		insert_after_fill(__slist_previous(&head,pos.node),n,val);
@@ -107,6 +107,34 @@ public:// insert
 	void insert(iterator pos, InputIterator first, InputIterator last) {
 		insert_after_range(slist_previous(&head,pos.node),first,last);
 	}
+
+private:// aux interface for erase
+	iterator erase_after(list_node_base* pos) {
+		list_node* next = reinterpret_cast<list_node*>(pos->next);
+		slist_node_base* next_next = next->next;
+		pos->next = next_next;
+		destroy_node(next);
+		return next_next;
+	}
+	iterator erase_after(list_node_base* before_first,list_node_base* last) {
+		list_node_base* cur = before_first->next;
+		while(cur != last) {
+			list_node* temp = reinterpret_cast<list_node*>(cur);
+			cur = cur->next;
+			destroy_node(temp); 
+		}
+		before_first->next = last;
+		return last;
+	}
+
+public:// erase
+	iterator erase(iterator pos) {
+		return erase_after(slist_previous(&head,pos.node));
+	}
+	iterator erase(iterator first,iterator last){
+		return erase_after(slist_previous(&head,first.node),last.node);
+	}
+	void clear() { erase_after(&head,nullptr); }
 
 public:// swap
 	void swap(slist& rhs) noexcept {
@@ -123,9 +151,6 @@ public:// push && pop at front
 		head.next = node->next;
 		destroy_node(node);
 	}
-
-public:// erase
-	void clear() { erase_after(&head,nullptr); }
 };
 
 }// end namespace::MiniSTL
