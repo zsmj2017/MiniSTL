@@ -50,14 +50,16 @@ public:// ctor && dtor
 	slist() { head.next = nullptr; }
 	explicit slist(size_type n) { insert_after_fill(&head,n,value_type()); }
 	slist(size_type n,const value_type& val) { insert_after_fill(&head,n,val); }
+	slist(std::initializer_list<value_type> ils) { insert_after_range(&head,ils.begin(),ils.cend()); }
 	// Here need not any dispatching tricks here, because insert_after_range already does them.
 	template<class InputIterator>
 	slist(InputIterator first,InputIterator last) { insert_after_range(&head,first,last); }
+
 	~slist() { clear(); }
 
 public:// copy operation
 	slist(const slist& rhs) { insert_after_range(&head,rhs.begin(),rhs.end()); }
-	slist& operator==(const slist&);
+	slist& operator=(const slist&);
 
 public:// setter
 	iterator begin() { return iterator(reinterpret_cast<list_node*>(head.next)); }
@@ -151,6 +153,8 @@ public:// assign
 	void assign(InputIterator first,InputIterator last) { 
 		assign_dispatch(first,last,_is_integer_t<InputIterator>()); 
 	}
+	void assign(std::initializer_list<value_type> ils) { assign(ils.begin(),ils.end()); }
+	slist& operator=(std::initializer_list<value_type> ils) { assign(ils); return *this; }
 
 public:// swap
 	void swap(slist& rhs) noexcept {
@@ -168,6 +172,26 @@ public:// push && pop at front
 		destroy_node(node);
 	}
 };
+
+template<class T,class Alloc>
+slist<T,Alloc>& slist<T,Alloc>::operator=(const slist& rhs) {
+	if(this != &rhs) {
+		list_node_base* p1 = &head;
+		list_node* n1 = reinterpret_cast<list_node*>(head.next);
+		const list_node* n2 = reinterpret_cast<const list_node*>(rhs.head.next);
+		while(n1 && n2) {
+			n1->data = n2->data;
+			p1 = n1;
+			n1 = reinterpret_cast<list_node*>(n1->next);
+			n2 = reinterpret_cast<const list_node*>(n2->next);
+		}
+		if(n2 == nullptr)
+			erase_after(p1, nullptr);
+		else
+			insert_after_range(p1, const_iterator(reinterpret_cast<list_node*>(n2)),const_iterator(nullptr));
+	}
+	return *this;
+}
 
 template<class T,class Alloc>
 void slist<T,Alloc>::fill_assign(size_type n, const value_type& val) {
