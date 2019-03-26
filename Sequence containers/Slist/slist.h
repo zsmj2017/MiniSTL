@@ -225,4 +225,52 @@ void slist<T,Alloc>::assign_dispatch(InputIterator first,InputIterator last,_fal
 		erase_after(prev,nullptr);
 }
 
+// operator
+template<class T,class Alloc>
+inline bool operator==(const slist<T,Alloc>& lhs,const slist<T,Alloc>& rhs) {
+	using const_iterator = typename slist<T,Alloc>::const_iterator;
+
+	const_iterator end1 = lhs.cend();
+	const_iterator end2 = rhs.cend();
+	const_iterator i1 = lhs.cbegin();
+	const_iterator i2 = rhs.cbegin();
+
+	while(i1 != end1 && i2 != end2 && *i1 == *i2) {
+		++i1;
+		++i2;
+	}
+	return i1 == end1 && i2 == end2;
+}
+
+template<class T,class Alloc>
+inline bool operator<(const slist<T,Alloc>& lhs,const slist<T,Alloc>& rhs) {
+	return MiniSTL::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+template<class T,class Alloc>
+inline bool operator!=(const slist<T,Alloc>& lhs,const slist<T,Alloc>& rhs) {
+	return !(lhs == rhs);
+}
+
+template<class T,class Alloc>
+inline bool operator>(const slist<T,Alloc>& lhs,const slist<T,Alloc>& rhs) {
+	return rhs < lhs;
+}
+
+template<class T,class Alloc>
+inline bool operator<=(const slist<T,Alloc>& lhs,const slist<T,Alloc>& rhs) {
+	return !(rhs < lhs);
+}
+
+template<class T,class Alloc>
+inline bool operator>=(const slist<T,Alloc>& lhs,const slist<T,Alloc>& rhs) {
+	return !(lhs < rhs);
+}
+
+// swap
+template<class T,class Alloc>
+inline void swap(slist<T,Alloc>& lhs,slist<T,Alloc>& rhs) {
+	lhs.swap(rhs);
+}
+
 }// end namespace::MiniSTL
