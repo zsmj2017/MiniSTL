@@ -162,15 +162,24 @@ public:// swap
 	}
 
 public:// push && pop at front
-	void push_front(const value_type& value) {
-		slist_make_link(&head, create_node(value));
+	void push_front(const value_type& val) {
+		slist_make_link(&head, create_node(val));
 	}
-
 	void pop_front() {
 		list_node* node = reinterpret_cast<list_node*>(head.next);
 		head.next = node->next;
 		destroy_node(node);
 	}
+
+public:// resize
+	void resize(size_type, const value_type&);
+	void resize(size_type new_size) { resize(new_size,value_type()); }
+
+public:// special interface for slist
+	void remove(const value_type&);
+	template<class Predicate>
+	void remove_if(Predicate);
+	void unique();
 };
 
 template<class T,class Alloc>
@@ -223,6 +232,56 @@ void slist<T,Alloc>::assign_dispatch(InputIterator first,InputIterator last,_fal
 		insert_after_range(prev,first,last);
 	else
 		erase_after(prev,nullptr);
+}
+
+template<class T,class Alloc>
+void slist<T,Alloc>::resize(size_type len,const value_type& val) {
+	list_node_base* cur = &head;
+	while(cur->next != nullptr && len > 0) {
+		--len;
+		cur = cur->next;
+	}
+	if(cur->next)
+		erase_after(cur,nullptr);
+	else
+		insert_after_fill(cur,len,val);
+}
+
+template<class T,class Alloc>
+void slist<T,Alloc>::remove(const value_type& val) {
+	list_node_base* cur = head;
+	while(cur && cur->next) {
+		if(reinterpret_cast<list_node*>(cur->next)->data == val)
+			erase_after(cur);
+		else
+			cur = cur->next;
+	}	
+}
+
+template<class T,class Alloc>
+template<class Predicate>
+void slist<T,Alloc>::remove_if(Predicate pred) {
+	list_node_base* cur = head;
+	while(cur && cur->next) {
+		if(pred(reinterpret_cast<list_node*>(cur->next)))
+			erase_after(cur);
+		else
+			cur = cur->next;
+	}	
+}
+
+template<class T,class Alloc>
+void slist<T,Alloc>::unique() {
+	list_node_base* cur = head.next;
+	if(cur){
+		while(cur->next) {
+			if(reinterpret_cast<list_node*>(cur)->data == 
+				reinterpret_cast<list_node*>(cur->next)->data)
+				erase_after(cur);
+			else
+				cur = cur->next;			
+		}
+	}
 }
 
 // operator
