@@ -1,4 +1,4 @@
-﻿﻿MiniSTL
+MiniSTL
 =======
 本仓库原是《STL源码剖析》一书的代码合集，并在其基础上运用部分C++11特性进行了代码改写。最终希望根据SGI STL SOURCE完成一个简易STL标准库。
 
@@ -90,7 +90,7 @@
 
 ## 编译环境
 
-本仓库代码编译环境为Ubuntu18.04，GCC 7.3.0。
+本仓库代码编译环境为macOS High Sierra 10.13.6，Homebrew GCC 7.4.0。
 
 ## LICENSE
 
