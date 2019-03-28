@@ -180,6 +180,9 @@ public:// special interface for slist
 	template<class Predicate>
 	void remove_if(Predicate);
 	void unique();
+	void reverse() { if(head.next) head.next = slist_reverse(head.next); }
+	void merge(slist&); // merge two sorted slists and make the new slist sorted too
+	void sort();
 };
 
 template<class T,class Alloc>
@@ -281,6 +284,47 @@ void slist<T,Alloc>::unique() {
 			else
 				cur = cur->next;			
 		}
+	}
+}
+
+template<class T,class Alloc>
+void slist<T,Alloc>::merge(slist& rhs){
+	list_node_base* n1 = head;
+	while(n1->next && rhs.head.next) {
+		if(reinterpret_cast<list_node*>(rhs.head.next)->data <
+			reinterpret_cast<list_node*>(n1->next)->data)
+			slist_splice_after(n1,&rhs.head,rhs.head.next);
+		n1 = n1->next;
+	}
+	if(rhs.head.next) {
+		n1->next = rhs.head.next;
+		rhs.head.next = nullptr;
+	}
+}
+
+template<class T,class Alloc>
+void slist<T,Alloc>::sort() {
+	// use merge sort
+	if(head.next && head.next->next) {
+		slist carry;
+		slist counter[64];
+		int fill = 0;
+		while(!empty()) {
+			slist_splice_after(&carry.head,head,head.next);
+			int i = 0;
+			while(i < fill && !counter[i].empty()) {
+				counter[i].merge(carry);
+				carry.swap(counter[i]);
+				++i;
+			}
+			carry.swap(counter[i]);
+			if(i == fill)
+				++fill
+		}
+
+		for(int i = 1; i < fill; ++i)
+			counter[i].merge(counter[i-1]);
+		swap(counter[fill-1]);
 	}
 }
 
