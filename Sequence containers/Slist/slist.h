@@ -175,6 +175,39 @@ public:// resize
 	void resize(size_type, const value_type&);
 	void resize(size_type new_size) { resize(new_size,value_type()); }
 
+public:// splice
+	// insert [before_first+1,before_last+1] after pos in constant time
+	void splice_after(iterator pos,iterator before_first,iterator before_last) {
+		if(before_first != before_last)
+			slist_splice_after(pos.node,before_first.node,before_last.node);
+	}
+	// insert all elements follows prev after pos in constant time
+	void splice_after(iterator pos,iterator prev) {
+		slist_splice_after(pos.node,pos.node,prev.node->next);
+	}
+	// insert all elements in rhs after pos in constant time, rhs must not be *this
+	void splice_after(iterator pos,slist& rhs) {
+		slist_splice_after(pos.node,&rhs.head);
+	}
+	// linear in distance(begin(),pos) and linerar in rhs.size()
+	void splice(iterator pos,slist& rhs) {
+		if(rhs.head.next)
+			slist_splice_after(slist_previous(head,pos.node),&rhs.head,
+				slist_previous(&rhs.head,nullptr));
+	}
+	// linear in distance(begin(),pos) and linerar in distance(rhs.begin(),i)
+	void splice(iterator pos,slist& rhs,iterator i) {
+		slist_splice_after(slist_previous(head,pos.node),
+			slist_previous(&rhs.head,i.node),i.node);
+	}
+	// linear in distance(begin(),pos),in distance(rhs.begin(),i) and in distance(first,last)
+	void splice(iterator pos,slist& rhs,iterator first,iterator last) {
+		if(first != last)
+			slist_splice_after(slist_previous(head,pos.node),
+				slist_previous(&rhs.head,first.node),
+				slist_previous(first.node,last.node));
+	}
+
 public:// special interface for slist
 	void remove(const value_type&);
 	template<class Predicate>
@@ -310,7 +343,7 @@ void slist<T,Alloc>::sort() {
 		slist counter[64];
 		int fill = 0;
 		while(!empty()) {
-			slist_splice_after(&carry.head,head,head.next);
+			slist_splice_after(&carry.head,&head,head.next);
 			int i = 0;
 			while(i < fill && !counter[i].empty()) {
 				counter[i].merge(carry);
@@ -319,7 +352,7 @@ void slist<T,Alloc>::sort() {
 			}
 			carry.swap(counter[i]);
 			if(i == fill)
-				++fill
+				++fill;
 		}
 
 		for(int i = 1; i < fill; ++i)
