@@ -208,14 +208,28 @@ public:// splice
 				slist_previous(first.node,last.node));
 	}
 
-public:// special interface for slist
+public:// remove
 	void remove(const value_type&);
 	template<class Predicate>
 	void remove_if(Predicate);
+
+public:// unique
 	void unique();
+	template<class BinaryPredicate>
+	void unique(BinaryPredicate);
+
+public:// reverse
 	void reverse() { if(head.next) head.next = slist_reverse(head.next); }
+
+public:// merge
 	void merge(slist&); // merge two sorted slists and make the new slist sorted too
+	template<class StrictWeakOrdering>
+	void merge(slist&,StrictWeakOrdering);
+
+public:// sort
 	void sort();
+	template<class StrictWeakOrdering>
+	void sort(StrictWeakOrdering);
 };
 
 template<class T,class Alloc>
@@ -321,11 +335,42 @@ void slist<T,Alloc>::unique() {
 }
 
 template<class T,class Alloc>
+template<class BinaryPredicate>
+void slist<T,Alloc>::unique(BinaryPredicate pred) {
+	list_node_base* cur = head.next;
+	if(cur){
+		while(cur->next) {
+			if(pred(reinterpret_cast<list_node*>(cur)->data,
+				reinterpret_cast<list_node*>(cur->next)->data))
+				erase_after(cur);
+			else
+				cur = cur->next;			
+		}
+	}
+}
+
+template<class T,class Alloc>
 void slist<T,Alloc>::merge(slist& rhs){
 	list_node_base* n1 = head;
 	while(n1->next && rhs.head.next) {
 		if(reinterpret_cast<list_node*>(rhs.head.next)->data <
 			reinterpret_cast<list_node*>(n1->next)->data)
+			slist_splice_after(n1,&rhs.head,rhs.head.next);
+		n1 = n1->next;
+	}
+	if(rhs.head.next) {
+		n1->next = rhs.head.next;
+		rhs.head.next = nullptr;
+	}
+}
+
+template<class T,class Alloc>
+template<class StrictWeakOrdering>
+void slist<T,Alloc>::merge(slist& rhs,StrictWeakOrdering comp){
+	list_node_base* n1 = head;
+	while(n1->next && rhs.head.next) {
+		if(comp(reinterpret_cast<list_node*>(rhs.head.next)->data,
+			reinterpret_cast<list_node*>(n1->next)->data))
 			slist_splice_after(n1,&rhs.head,rhs.head.next);
 		n1 = n1->next;
 	}
@@ -360,6 +405,34 @@ void slist<T,Alloc>::sort() {
 		swap(counter[fill-1]);
 	}
 }
+
+template<class T,class Alloc>
+template<class StrictWeakOrdering>
+void slist<T,Alloc>::sort(StrictWeakOrdering comp) {
+	// use merge sort
+	if(head.next && head.next->next) {
+		slist carry;
+		slist counter[64];
+		int fill = 0;
+		while(!empty()) {
+			slist_splice_after(&carry.head,&head,head.next);
+			int i = 0;
+			while(i < fill && !counter[i].empty()) {
+				counter[i].merge(carry,comp);
+				carry.swap(counter[i]);
+				++i;
+			}
+			carry.swap(counter[i]);
+			if(i == fill)
+				++fill;
+		}
+
+		for(int i = 1; i < fill; ++i)
+			counter[i].merge(counter[i-1],comp);
+		swap(counter[fill-1]);
+	}
+}
+
 
 // operator
 template<class T,class Alloc>
