@@ -62,16 +62,24 @@ public:// copy operation
 	slist& operator=(const slist&);
 
 public:// setter
+	iterator before_begin() { return iterator(reinterpret_cast<list_node*>(head)); }
 	iterator begin() { return iterator(reinterpret_cast<list_node*>(head.next)); }
 	iterator end() { return iterator(nullptr); }
 	reference front() { return reinterpret_cast<list_node*>(head.next)->data; }
+	iterator previous(const_iterator pos) {
+    	return iterator(reinterpret_cast<list_node*>(slist_previous(head, pos.node)));
+  	}
 
 public:// getter
-	const_iterator cbegin() const noexcept { return iterator(reinterpret_cast<list_node*>(head.next)); }
-	const_iterator cend() const noexcept { return iterator(nullptr); }
+	const_iterator before_begin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head)); }
+	const_iterator cbegin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head.next)); }
+	const_iterator cend() const noexcept { return const_iterator(nullptr); }
 	size_type size() const noexcept { return slist_size(head.next); }
 	bool empty() const noexcept { return head.next == nullptr; }
-	const_reference front() const noexcept { return reinterpret_cast<list_node*>(head.next)->data; }
+	const_reference front() const noexcept { return reinterpret_cast<list_node*>(head.next)->data; } 
+	const_iterator previous(const_iterator pos) const noexcept {
+    	return const_iterator(reinterpret_cast<list_node*>(slist_previous(head, pos.node)));
+  	}
 
 private:// aux interface for insert
 	iterator insert_after(list_node_base* pos, const value_type& val){
@@ -433,7 +441,6 @@ void slist<T,Alloc>::sort(StrictWeakOrdering comp) {
 	}
 }
 
-
 // operator
 template<class T,class Alloc>
 inline bool operator==(const slist<T,Alloc>& lhs,const slist<T,Alloc>& rhs) {
@@ -481,5 +488,45 @@ template<class T,class Alloc>
 inline void swap(slist<T,Alloc>& lhs,slist<T,Alloc>& rhs) {
 	lhs.swap(rhs);
 }
+
+// specialization of insert_iterator so that insertions will be constant rather than linear time
+template <class T, class Alloc>
+class insert_iterator<slist<T,Alloc> > {
+private:// data member
+	using container = slist<T,Alloc>;
+	container* con;
+	typename container::iterator iter;
+
+public:// alias declarations
+	using container_type = container;
+	using iterator_category = output_iterator_tag;
+	using value_type = void;
+	using difference_type = void;
+	using pointer = void;
+	using reference = void;
+
+public:// ctor
+  insert_iterator(container& c, typename container::iterator i) 
+    : con(&c) {
+    if (i == c.begin())
+      iter = c.before_begin();
+    else
+      iter = c.previous(i);
+  }
+
+  insert_iterator<container>&
+  operator=(const typename container::value_type& val) { 
+    iter = con->insert_after(iter, val);
+    return *this;
+  }
+
+public:// dereference
+  insert_iterator<container>& operator*() { return *this; }
+
+public:// increasement
+  insert_iterator<container>& operator++() { return *this; }
+  insert_iterator<container>& operator++(int) { return *this; }
+};
+
 
 }// end namespace::MiniSTL
