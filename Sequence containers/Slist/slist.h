@@ -205,19 +205,19 @@ public:// splice
 	void splice(iterator pos,slist& rhs) {
 		if(rhs.head.next)
 			slist_splice_after(slist_previous(head,pos.node),&rhs.head,
-				slist_previous(&rhs.head,nullptr));
+					slist_previous(&rhs.head,nullptr));
 	}
 	// linear in distance(begin(),pos) and linerar in distance(rhs.begin(),i)
 	void splice(iterator pos,slist& rhs,iterator i) {
 		slist_splice_after(slist_previous(head,pos.node),
-			slist_previous(&rhs.head,i.node),i.node);
+				slist_previous(&rhs.head,i.node),i.node);
 	}
 	// linear in distance(begin(),pos),in distance(rhs.begin(),i) and in distance(first,last)
 	void splice(iterator pos,slist& rhs,iterator first,iterator last) {
 		if(first != last)
 			slist_splice_after(slist_previous(head,pos.node),
-				slist_previous(&rhs.head,first.node),
-				slist_previous(first.node,last.node));
+					slist_previous(&rhs.head,first.node),
+					slist_previous(first.node,last.node));
 	}
 
 public:// remove
@@ -338,7 +338,7 @@ void slist<T,Alloc>::unique() {
 	if(cur){
 		while(cur->next) {
 			if(reinterpret_cast<list_node*>(cur)->data == 
-				reinterpret_cast<list_node*>(cur->next)->data)
+			reinterpret_cast<list_node*>(cur->next)->data)
 				erase_after(cur);
 			else
 				cur = cur->next;			
@@ -353,7 +353,7 @@ void slist<T,Alloc>::unique(BinaryPredicate pred) {
 	if(cur){
 		while(cur->next) {
 			if(pred(reinterpret_cast<list_node*>(cur)->data,
-				reinterpret_cast<list_node*>(cur->next)->data))
+			reinterpret_cast<list_node*>(cur->next)->data))
 				erase_after(cur);
 			else
 				cur = cur->next;			
@@ -512,15 +512,15 @@ public:// alias declarations
 public:// ctor
 	insert_iterator(container& c, typename container::iterator i) :con(&c) {
 		if(i == c.begin())
-      		iter = c.before_begin();
+			iter = c.before_begin();
     	else
-      		iter = c.previous(i);
+			iter = c.previous(i);
 	}
 
 public:// assignment(insert)
 	insert_iterator<container>& operator=(const typename container::value_type& val) { 
-    	iter = con->insert_after(iter, val);
-    	return *this;
+		iter = con->insert_after(iter, val);
+		return *this;
 	}
 
 public:// dereference
