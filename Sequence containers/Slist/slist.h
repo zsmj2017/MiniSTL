@@ -61,6 +61,10 @@ public:// copy operation
 	slist(const slist& rhs) { insert_after_range(&head,rhs.begin(),rhs.end()); }
 	slist& operator=(const slist&);
 
+public:// move operation
+	slist(slist&& rhs) noexcept { swap(rhs); }
+	slist& operator=(slist&& rhs) noexcept { clear();swap(rhs);return *this; }
+
 public:// setter
 	iterator before_begin() { return iterator(reinterpret_cast<list_node*>(head)); }
 	iterator begin() { return iterator(reinterpret_cast<list_node*>(head.next)); }
@@ -526,6 +530,5 @@ public:// increasement
   	insert_iterator<container>& operator++() { return *this; }
   	insert_iterator<container>& operator++(int) { return *this; }
 };
-
 
 }// end namespace::MiniSTL
