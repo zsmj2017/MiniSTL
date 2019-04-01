@@ -50,7 +50,7 @@ public:// ctor && dtor
 	slist() { head.next = nullptr; }
 	explicit slist(size_type n) { insert_after_fill(&head,n,value_type()); }
 	slist(size_type n,const value_type& val) { insert_after_fill(&head,n,val); }
-	slist(std::initializer_list<value_type> ils) { insert_after_range(&head,ils.begin(),ils.cend()); }
+	slist(std::initializer_list<value_type> ils) { insert_after_range(&head,ils.begin(),ils.end()); }
 	// Here need not any dispatching tricks here, because insert_after_range already does them.
 	template<class InputIterator>
 	slist(InputIterator first,InputIterator last) { insert_after_range(&head,first,last); }
@@ -76,6 +76,8 @@ public:// setter
 
 public:// getter
 	const_iterator before_begin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head)); }
+	const_iterator begin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head.next)); }
+	const_iterator end() const noexcept { return const_iterator(nullptr); }
 	const_iterator cbegin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head.next)); }
 	const_iterator cend() const noexcept { return const_iterator(nullptr); }
 	size_type size() const noexcept { return slist_size(head.next); }
@@ -138,7 +140,7 @@ private:// aux interface for erase
 			destroy_node(temp); 
 		}
 		before_first->next = last;
-		return last;
+		return reinterpret_cast<list_node*>(last);
 	}
 
 public:// erase
@@ -259,7 +261,7 @@ slist<T,Alloc>& slist<T,Alloc>::operator=(const slist& rhs) {
 		if(n2 == nullptr)
 			erase_after(p1, nullptr);
 		else
-			insert_after_range(p1, const_iterator(reinterpret_cast<list_node*>(n2)),const_iterator(nullptr));
+			insert_after_range(p1, const_iterator(const_cast<list_node*>(n2)),const_iterator(nullptr));
 	}
 	return *this;
 }
@@ -282,7 +284,7 @@ void slist<T,Alloc>::fill_assign(size_type n, const value_type& val) {
 template<class T,class Alloc>
 template<class InputIterator>
 void slist<T,Alloc>::assign_dispatch(InputIterator first,InputIterator last,_false_type) {
-	list_node_base* prev = head;
+	list_node_base* prev = &head;
 	list_node* cur = reinterpret_cast<list_node*>(head.next);
 	while(first != last) {
 		cur->data = *first;
@@ -513,7 +515,7 @@ public:// ctor
 	insert_iterator(container& c, typename container::iterator i) :con(&c) {
 		if(i == c.begin())
 			iter = c.before_begin();
-    	else
+		else
 			iter = c.previous(i);
 	}
 
