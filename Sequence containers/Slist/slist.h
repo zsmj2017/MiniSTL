@@ -44,7 +44,7 @@ private:// allocate && deallocate node
 	}
 
 private:// data member
-	list_node_base head;
+	list_node_base head;// on the stack
 
 private:// aux interface for ctor
 	void empety_initialized() {

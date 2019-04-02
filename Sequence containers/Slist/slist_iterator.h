@@ -20,9 +20,9 @@ struct slist_iterator_base {
 
 	void incur() { node = node->next; }
 
-	bool operator ==(const slist_iterator_base& rhs) { return node == rhs.node;}
+	bool operator ==(const slist_iterator_base& rhs) const { return node == rhs.node;}
 
-	bool operator !=(const slist_iterator_base& rhs) { return node != rhs.node;}
+	bool operator !=(const slist_iterator_base& rhs) const { return node != rhs.node;}
 };
 
 template<class T, class Ref, class Ptr>
@@ -37,7 +37,7 @@ struct slist_iterator :public slist_iterator_base {
 	using list_node = slist_node<T>;
 
 	// ctor
-	slist_iterator(list_node* node) : slist_iterator_base(node) {}//调用slit.end()时将触发slist_iterator(nullptr)
+	slist_iterator(list_node* node) : slist_iterator_base(node) {} // 调用slist.end()时将触发slist_iterator(nullptr)
 	slist_iterator() : slist_iterator_base(nullptr) {}
 	slist_iterator(const iterator& rhs) : slist_iterator_base(rhs.node) {}
 
@@ -52,7 +52,7 @@ struct slist_iterator :public slist_iterator_base {
 	}
 
 	self operator++(int) {
-		self temp;
+		self temp = *this;
 		incur();
 		return temp;
 	}
