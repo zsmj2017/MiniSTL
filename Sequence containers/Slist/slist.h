@@ -94,7 +94,7 @@ public:// getter
 
 private:// aux interface for insert
 	iterator insert_after(list_node_base* pos, const value_type& val){
-		return slist_make_link(pos,create_node(val));
+		return reinterpret_cast<list_node*>(slist_make_link(pos,create_node(val)));
 	}
 	void insert_after_fill(list_node_base* pos, size_type n, const value_type& val){
 		for(size_type i = 0; i < n; ++i)
@@ -117,11 +117,14 @@ private:// aux interface for insert
 	}
 
 public:// insert
+	iterator insert(iterator pos) { 
+		return insert_after(slist_previous(&head,pos.node),value_type());
+	}
 	iterator insert(iterator pos,const value_type& val) { 
-		return insert_after(__slist_previous(&head,pos.node),val);
+		return insert_after(slist_previous(&head,pos.node),val);
 	}
 	void insert(iterator pos,size_type n, const value_type& val) {
-		insert_after_fill(__slist_previous(&head,pos.node),n,val);
+		insert_after_fill(slist_previous(&head,pos.node),n,val);
 	}
 	// Here need not any dispatching tricks here, because insert_after_range already does them.
 	template<class InputIterator>
@@ -135,7 +138,7 @@ private:// aux interface for erase
 		slist_node_base* next_next = next->next;
 		pos->next = next_next;
 		destroy_node(next);
-		return next_next;
+		return reinterpret_cast<list_node*>(next_next);
 	}
 	iterator erase_after(list_node_base* before_first,list_node_base* last) {
 		list_node_base* cur = before_first->next;
@@ -211,18 +214,18 @@ public:// splice
 	// linear in distance(begin(),pos) and linerar in rhs.size()
 	void splice(iterator pos,slist& rhs) {
 		if(rhs.head.next)
-			slist_splice_after(slist_previous(head,pos.node),&rhs.head,
+			slist_splice_after(slist_previous(&head,pos.node),&rhs.head,
 					slist_previous(&rhs.head,nullptr));
 	}
 	// linear in distance(begin(),pos) and linerar in distance(rhs.begin(),i)
 	void splice(iterator pos,slist& rhs,iterator i) {
-		slist_splice_after(slist_previous(head,pos.node),
+		slist_splice_after(slist_previous(&head,pos.node),
 				slist_previous(&rhs.head,i.node),i.node);
 	}
 	// linear in distance(begin(),pos),in distance(rhs.begin(),i) and in distance(first,last)
 	void splice(iterator pos,slist& rhs,iterator first,iterator last) {
 		if(first != last)
-			slist_splice_after(slist_previous(head,pos.node),
+			slist_splice_after(slist_previous(&head,pos.node),
 					slist_previous(&rhs.head,first.node),
 					slist_previous(first.node,last.node));
 	}
@@ -273,7 +276,7 @@ slist<T,Alloc>& slist<T,Alloc>::operator=(const slist& rhs) {
 
 template<class T,class Alloc>
 void slist<T,Alloc>::fill_assign(size_type n, const value_type& val) {
-	list_node_base* prev = head;
+	list_node_base* prev = &head;
 	list_node* cur = reinterpret_cast<list_node*>(head.next);
 	for(;cur != nullptr && n > 0;--n) {
 		cur->data = val;
@@ -318,7 +321,7 @@ void slist<T,Alloc>::resize(size_type len,const value_type& val) {
 
 template<class T,class Alloc>
 void slist<T,Alloc>::remove(const value_type& val) {
-	list_node_base* cur = head;
+	list_node_base* cur = &head;
 	while(cur && cur->next) {
 		if(reinterpret_cast<list_node*>(cur->next)->data == val)
 			erase_after(cur);
@@ -330,7 +333,7 @@ void slist<T,Alloc>::remove(const value_type& val) {
 template<class T,class Alloc>
 template<class Predicate>
 void slist<T,Alloc>::remove_if(Predicate pred) {
-	list_node_base* cur = head;
+	list_node_base* cur = &head;
 	while(cur && cur->next) {
 		if(pred(reinterpret_cast<list_node*>(cur->next)))
 			erase_after(cur);
@@ -370,7 +373,7 @@ void slist<T,Alloc>::unique(BinaryPredicate pred) {
 
 template<class T,class Alloc>
 void slist<T,Alloc>::merge(slist& rhs){
-	list_node_base* n1 = head;
+	list_node_base* n1 = &head;
 	while(n1->next && rhs.head.next) {
 		if(reinterpret_cast<list_node*>(rhs.head.next)->data <
 			reinterpret_cast<list_node*>(n1->next)->data)
@@ -386,7 +389,7 @@ void slist<T,Alloc>::merge(slist& rhs){
 template<class T,class Alloc>
 template<class StrictWeakOrdering>
 void slist<T,Alloc>::merge(slist& rhs,StrictWeakOrdering comp){
-	list_node_base* n1 = head;
+	list_node_base* n1 = &head;
 	while(n1->next && rhs.head.next) {
 		if(comp(reinterpret_cast<list_node*>(rhs.head.next)->data,
 			reinterpret_cast<list_node*>(n1->next)->data))
