@@ -46,23 +46,28 @@ private:// allocate && deallocate node
 private:// data member
 	list_node_base head;
 
-public:// ctor && dtor
-	slist() { head.next = nullptr; }
-	explicit slist(size_type n) { insert_after_fill(&head,n,value_type()); }
-	slist(size_type n,const value_type& val) { insert_after_fill(&head,n,val); }
-	slist(std::initializer_list<value_type> ils) { insert_after_range(&head,ils.begin(),ils.end()); }
-	// Here need not any dispatching tricks here, because insert_after_range already does them.
-	template<class InputIterator>
-	slist(InputIterator first,InputIterator last) { insert_after_range(&head,first,last); }
+private:// aux interface for ctor
+	void empety_initialized() {
+		head.next = nullptr; 
+	}
 
-	~slist() { clear(); }
+public:// ctor && dtor
+  slist() { empety_initialized(); }
+  explicit slist(size_type n) { empety_initialized(); insert_after_fill(&head, n, value_type()); }
+  slist(size_type n, const value_type &val) { empety_initialized(); insert_after_fill(&head, n, val); }
+  slist(std::initializer_list<value_type> ils) { empety_initialized(); insert_after_range(&head, ils.begin(), ils.end()); }
+  // Here need not any dispatching tricks here, because insert_after_range already does them.
+  template <class InputIterator>
+  slist(InputIterator first, InputIterator last) { empety_initialized(); insert_after_range(&head, first, last); }
+
+  ~slist() { clear(); }
 
 public:// copy operation
-	slist(const slist& rhs) { insert_after_range(&head,rhs.begin(),rhs.end()); }
+	slist(const slist& rhs) { empety_initialized(); insert_after_range(&head,rhs.begin(),rhs.end()); }
 	slist& operator=(const slist&);
 
 public:// move operation
-	slist(slist&& rhs) noexcept { swap(rhs); }
+	slist(slist&& rhs) noexcept { empety_initialized(); swap(rhs); }
 	slist& operator=(slist&& rhs) noexcept { clear();swap(rhs);return *this; }
 
 public:// setter
@@ -286,7 +291,7 @@ template<class InputIterator>
 void slist<T,Alloc>::assign_dispatch(InputIterator first,InputIterator last,_false_type) {
 	list_node_base* prev = &head;
 	list_node* cur = reinterpret_cast<list_node*>(head.next);
-	while(first != last) {
+	while(cur != nullptr && first != last) {
 		cur->data = *first;
 		prev = cur;
 		cur = reinterpret_cast<list_node*>(cur->next);
