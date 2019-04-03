@@ -71,16 +71,16 @@ public:// move operation
 	slist& operator=(slist&& rhs) noexcept { clear();swap(rhs);return *this; }
 
 public:// setter
-	iterator before_begin() { return iterator(reinterpret_cast<list_node*>(head)); }
+	iterator before_begin() { return iterator(reinterpret_cast<list_node*>(&head)); }
 	iterator begin() { return iterator(reinterpret_cast<list_node*>(head.next)); }
 	iterator end() { return iterator(nullptr); }
 	reference front() { return reinterpret_cast<list_node*>(head.next)->data; }
 	iterator previous(const_iterator pos) {
-    	return iterator(reinterpret_cast<list_node*>(slist_previous(head, pos.node)));
+    	return iterator(reinterpret_cast<list_node*>(slist_previous(&head, pos.node)));
   	}
 
 public:// getter
-	const_iterator before_begin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head)); }
+	const_iterator before_begin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(&head)); }
 	const_iterator begin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head.next)); }
 	const_iterator end() const noexcept { return const_iterator(nullptr); }
 	const_iterator cbegin() const noexcept { return const_iterator(reinterpret_cast<list_node*>(head.next)); }
@@ -89,7 +89,7 @@ public:// getter
 	bool empty() const noexcept { return head.next == nullptr; }
 	const_reference front() const noexcept { return reinterpret_cast<list_node*>(head.next)->data; } 
 	const_iterator previous(const_iterator pos) const noexcept {
-    	return const_iterator(reinterpret_cast<list_node*>(slist_previous(head, pos.node)));
+    	return const_iterator(reinterpret_cast<list_node*>(slist_previous(&head, pos.node)));
   	}
 
 private:// aux interface for insert

@@ -91,6 +91,7 @@ TEST_F(SlistTest,COPY_CTOR){
     EXPECT_NO_THROW(slist<slist<int> >(lli));
 }
 
+
 TEST_F(SlistTest,MOVE_CTOR){
     EXPECT_NO_THROW(slist<int>(std::move(li)));
     EXPECT_NO_THROW(slist<float>(std::move(lf)));
@@ -183,6 +184,14 @@ TEST_F(SlistTest,FRONT_AND_BACK){
     lli.front() = {4,5,6};
 }
 
+TEST_F(SlistTest,PREVIOUS){
+    EXPECT_EQ(li.before_begin(),li.previous(li.begin()));
+    EXPECT_EQ(lf.before_begin(),lf.previous(lf.begin()));
+    EXPECT_EQ(ld.before_begin(),ld.previous(ld.begin()));
+    EXPECT_EQ(ls.before_begin(),ls.previous(ls.begin()));
+    EXPECT_EQ(lli.before_begin(),lli.previous(lli.begin()));
+}
+
 TEST_F(SlistTest,SIZE){
     EXPECT_EQ(li.size(),5);
     li.resize(3);
@@ -245,6 +254,8 @@ TEST_F(SlistTest,ERASE){
     EXPECT_EQ(lf.size(),4);
     lf.clear();
     EXPECT_EQ(lf.size(),0);
+    ld.erase(ld.begin(),ld.end());
+    EXPECT_EQ(ld.size(),0);
 }
 
 TEST_F(SlistTest,INSERT){
@@ -327,7 +338,9 @@ TEST_F(SlistTest,MERGE){
 }
 
 TEST_F(SlistTest,REVERSE){
-    // TODO
+    slist<int> temp_li = {5,4,3,2,1};
+    li.reverse();
+    EXPECT_EQ(li,temp_li);
 }
 
 TEST_F(SlistTest,SORT){
