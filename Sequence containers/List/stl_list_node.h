@@ -4,9 +4,9 @@ namespace MiniSTL {
 
 template <class T>
 struct __list_node {
-	__list_node* prev;
-	__list_node* next;
-	T data;
+  __list_node* prev;
+  __list_node* next;
+  T data;
 };
 
-}// end namespace::MiniSTL
+}  // namespace MiniSTL
