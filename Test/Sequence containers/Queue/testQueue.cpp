@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
+#include "stl_deque.h"
+#include "stl_list.h"
 #include "stl_queue.h"
 
 using namespace ::MiniSTL;
@@ -238,6 +240,177 @@ TEST_F(QueueTest, SWAP) {
   swap(qqi, temp_qqi);
   EXPECT_EQ(qqi.front().front(), 1);
   EXPECT_EQ(temp_qqi.front(), queue<int>());
+}
+
+class Priority_Queue_Test : public testing::Test {
+ protected:
+  virtual void SetUp() {
+    // set pre data
+    pqvl = {4, 3, 2, 1, 5};
+    pqdl = {2, 3, 4, 5, 1};
+    pqvg = {6, 8, 9, 10, 7};
+    pqdg = {6, 10, 9, 8, 7};
+  };
+  priority_queue<int, vector<int>, less<int> > pqvl;
+  priority_queue<int, deque<int>, less<int> > pqdl;
+  priority_queue<int, vector<int>, greater<int> > pqvg;
+  priority_queue<int, deque<int>, greater<int> > pqdg;
+};
+
+TEST_F(Priority_Queue_Test, DEFAULT_CTOR) {
+  EXPECT_NO_THROW((priority_queue<int, vector<int>, less<int> >{}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, less<int> >{}));
+  EXPECT_NO_THROW((priority_queue<float, vector<float>, greater<float> >{}));
+  EXPECT_NO_THROW((priority_queue<double, deque<double>, greater<double> >{}));
+}
+
+TEST_F(Priority_Queue_Test, CTOR_WITH_INITIALIZER_LIST) {
+  EXPECT_NO_THROW(
+      (priority_queue<int, vector<int>, less<int> >{1, 2, 3, 4, 5}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, less<int> >{1, 2, 3, 4, 5}));
+  EXPECT_NO_THROW(
+      (priority_queue<float, vector<float>, greater<float> >{1, 2, 3, 4, 5}));
+  EXPECT_NO_THROW(
+      (priority_queue<double, deque<double>, greater<double> >{1, 2, 3, 4, 5}));
+}
+
+TEST_F(Priority_Queue_Test, CTOR_WITH_INPUTITERATOR) {
+  vector<int> temp_vi{1, 2, 3, 4, 5};
+  list<int> temp_li{1, 2, 3, 4, 5};
+  EXPECT_NO_THROW((priority_queue<int, vector<int>, less<int> >{
+      temp_vi.begin(), temp_vi.end()}));
+  EXPECT_NO_THROW((priority_queue<int, vector<int>, less<int> >{
+      temp_li.begin(), temp_li.end()}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, less<int> >{temp_vi.begin(),
+                                                               temp_vi.end()}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, less<int> >{temp_li.begin(),
+                                                               temp_li.end()}));
+  // C API
+  int ai[5] = {1, 2, 3, 4, 5};
+  EXPECT_NO_THROW((priority_queue<int, vector<int>, less<int> >{ai, ai + 5}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, less<int> >{ai, ai + 5}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, greater<int> >{ai, ai + 5}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, greater<int> >{ai, ai + 5}));
+  double ad[5] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+  EXPECT_NO_THROW(
+      (priority_queue<double, vector<double>, less<double> >{ad, ad + 5}));
+  EXPECT_NO_THROW(
+      (priority_queue<double, deque<double>, less<double> >{ad, ad + 5}));
+  EXPECT_NO_THROW(
+      (priority_queue<double, deque<double>, greater<double> >{ai, ai + 5}));
+  EXPECT_NO_THROW(
+      (priority_queue<double, deque<double>, greater<double> >{ai, ai + 5}));
+}
+
+TEST_F(Priority_Queue_Test, COPY_CTOR) {
+  EXPECT_NO_THROW((priority_queue<int, vector<int>, less<int> >{pqvl}));
+  EXPECT_NO_THROW((priority_queue<int, vector<int>, greater<int> >{pqvg}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, less<int> >{pqdl}));
+  EXPECT_NO_THROW((priority_queue<int, deque<int>, greater<int> >{pqdg}));
+}
+
+TEST_F(Priority_Queue_Test, MOVE_CTOR) {
+  EXPECT_NO_THROW(
+      (priority_queue<int, vector<int>, less<int> >{std::move(pqvl)}));
+  EXPECT_NO_THROW(
+      (priority_queue<int, vector<int>, greater<int> >{std::move(pqvg)}));
+  EXPECT_NO_THROW(
+      (priority_queue<int, deque<int>, less<int> >{std::move(pqdl)}));
+  EXPECT_NO_THROW(
+      (priority_queue<int, deque<int>, greater<int> >{std::move(pqdg)}));
+}
+
+TEST_F(Priority_Queue_Test, DTOR) {
+  priority_queue<int> *p = new priority_queue<int>;
+  p->push(1);
+  const int *p2i = &(p->top());
+  EXPECT_EQ(*p2i, 1);
+  delete p;
+  EXPECT_NE(*p2i, 1);
+}
+
+TEST_F(Priority_Queue_Test, COPYASSIGN_WITH_SELF) {
+  priority_queue<int> temp_qi;
+  temp_qi.push(2);
+  pqvl = temp_qi;
+  EXPECT_EQ(pqvl.top(), 2);
+  pqvl.pop();
+  EXPECT_TRUE(pqvl.empty());
+}
+
+TEST_F(Priority_Queue_Test, MOVEASSIGN_WITH_SELF) {
+  priority_queue<int> temp_qi;
+  temp_qi.push(2);
+  pqvl = std::move(temp_qi);
+  EXPECT_EQ(pqvl.top(), 2);
+  pqvl.pop();
+  EXPECT_TRUE(pqvl.empty());
+}
+
+TEST_F(Priority_Queue_Test, PUSH_POP_TOP) {
+  EXPECT_EQ(pqvl.top(), 5);
+  pqvl.pop();
+  EXPECT_EQ(pqvl.top(), 4);
+  pqvl.pop();
+  EXPECT_EQ(pqvl.top(), 3);
+  pqvl.pop();
+  EXPECT_EQ(pqvl.top(), 2);
+  pqvl.pop();
+  EXPECT_EQ(pqvl.top(), 1);
+  pqvl.pop();
+  pqvl.push(5);
+  EXPECT_EQ(pqvl.top(), 5);
+  pqvl.push(4);
+  EXPECT_EQ(pqvl.top(), 5);
+  EXPECT_EQ(pqvg.top(), 6);
+  pqvg.pop();
+  EXPECT_EQ(pqvg.top(), 7);
+  pqvg.pop();
+  EXPECT_EQ(pqvg.top(), 8);
+  pqvg.pop();
+  EXPECT_EQ(pqvg.top(), 9);
+  pqvg.pop();
+  EXPECT_EQ(pqvg.top(), 10);
+  pqvg.pop();
+  pqvg.push(1);
+  EXPECT_EQ(pqvg.top(), 1);
+  pqvg.push(4);
+  EXPECT_EQ(pqvg.top(), 1);
+  EXPECT_EQ(pqdl.top(), 5);
+  pqdl.pop();
+  EXPECT_EQ(pqdl.top(), 4);
+  pqdl.pop();
+  EXPECT_EQ(pqdl.top(), 3);
+  pqdl.pop();
+  EXPECT_EQ(pqdl.top(), 2);
+  pqdl.pop();
+  EXPECT_EQ(pqdl.top(), 1);
+  pqdl.pop();
+  pqdl.push(5);
+  EXPECT_EQ(pqdl.top(), 5);
+  pqdl.push(4);
+  EXPECT_EQ(pqdl.top(), 5);
+  EXPECT_EQ(pqdg.top(), 6);
+  pqdg.pop();
+  EXPECT_EQ(pqdg.top(), 7);
+  pqdg.pop();
+  EXPECT_EQ(pqdg.top(), 8);
+  pqdg.pop();
+  EXPECT_EQ(pqdg.top(), 9);
+  pqdg.pop();
+  EXPECT_EQ(pqdg.top(), 10);
+  pqdg.pop();
+  pqdg.push(1);
+  EXPECT_EQ(pqdg.top(), 1);
+  pqdg.push(4);
+  EXPECT_EQ(pqdg.top(), 1);
+}
+
+TEST_F(Priority_Queue_Test, SWAP) {
+  priority_queue<int> temp{6, 7, 8, 9, 10};
+  temp.swap(pqvl);
+  EXPECT_EQ(temp.top(), 5);
+  EXPECT_EQ(pqvl.top(), 10);
 }
 
 int main(int argc, char *argv[]) {
