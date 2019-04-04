@@ -517,7 +517,7 @@ inline bool operator!=(const vector<T, Alloc>& lhs,
 
 template <class T>
 inline bool operator<(const vector<T>& lhs, const vector<T>& rhs) {
-  return MiniSTl::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+  return MiniSTL::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
                                           rhs.end());  // in stl_algobase.h
 }
 

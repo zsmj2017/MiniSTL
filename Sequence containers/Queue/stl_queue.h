@@ -40,11 +40,17 @@ class queue {
 
  public:  // copy operations
   queue(const queue& rhs) : c(rhs.c) {}
-  queue& operator=(const queue& rhs) { c.operator=(rhs.c); }
+  queue& operator=(const queue& rhs) {
+    c.operator=(rhs.c);
+    return *this;
+  }
 
  public:  // move operations
   queue(queue&& rhs) noexcept : c(std::move(rhs.c)) {}
-  queue& operator=(queue&& rhs) noexcept { c.operator=(std::move(rhs.c)); }
+  queue& operator=(queue&& rhs) noexcept {
+    c.operator=(std::move(rhs.c));
+    return *this;
+  }
 
  public:  // getter
   bool empty() const noexcept { return c.empty(); }
@@ -194,7 +200,7 @@ class priority_queue {
   }
 };
 
-// global swap for priority_queue
+// global swap for priority_
 template <class T, class Sequence, class Compare>
 inline void swap(priority_queue<T, Sequence, Compare>& lhs,
                  priority_queue<T, Sequence, Compare>& rhs) noexcept {
