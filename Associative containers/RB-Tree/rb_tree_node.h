@@ -7,14 +7,17 @@ const rb_tree_color_type rb_tree_red = false;
 const rb_tree_color_type rb_tree_black = true;
 
 struct __rb_tree_node_base {
+  // alias declarations
   using color_type = rb_tree_color_type;
   using base_ptr = __rb_tree_node_base*;
 
+  // data member
   color_type color;
   base_ptr parent;
   base_ptr left;
   base_ptr right;
 
+  // get min/max ptr
   static base_ptr minimum(base_ptr root) {
     while (root->left) root = root->left;
     return root;

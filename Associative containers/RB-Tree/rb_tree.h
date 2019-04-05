@@ -9,7 +9,7 @@ namespace MiniSTL {
 template <class Key, class Value, class KeyOfValue, class Compare,
           class Alloc = simpleAlloc<Value> >
 class rb_tree {
- private:  // Internalstd::pair alias declarations
+ private:  // Internal alias declarations
   using void_pointer = void*;
   using base_ptr = __rb_tree_node_base*;
   using rb_tree_node = __rb_tree_node<Value>;
@@ -31,9 +31,8 @@ class rb_tree {
   using iterator = rb_tree_iterator<value_type, reference, pointer>;
   using const_iterator =
       rb_tree_iterator<value_type, const_reference, const_pointer>;
-  // TODO:
-  // using reverse_iterator = reverse_iterator<iterator>;
-  // using const_reverse_iterator = reverse_iterator<const_iterator>;
+  using reverse_iterator = __reverse_iterator<iterator>;
+  using const_reverse_iterator = __reverse_iterator<const_iterator>;
 
  private:  // operations of node
   link_type get_node() { return rb_tree_node_allocator::allocate(); }
