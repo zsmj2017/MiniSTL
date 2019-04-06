@@ -2,6 +2,7 @@
 
 #include "allocator.h"
 #include "rb_tree_iterator.h"
+#include "stl_algobase.h"
 #include "stl_function.h"
 
 namespace MiniSTL {
@@ -64,52 +65,50 @@ class rb_tree {
  private:                // data member
   size_type node_count;  // 用节点数量表征树的大小
   link_type header;      // root的父亲，实现技巧
-  Compare key_compare;   // 比较器
+  Compare key_compare;
 
  private:  // data member getter && setter
-  // 获取header成员
+  // header成员
   link_type& root() const noexcept {
-    return reinterpret_cast<link_type&>(header->parent);
+    return reinterpret_cast<link_type>(header->parent);
   }
   link_type& leftmost() const noexcept {
-    return reinterpret_cast<link_type&>(header->left);
+    return reinterpret_cast<link_type>(header->left);
   }
   link_type& rightmost() const noexcept {
-    return reinterpret_cast<link_type&>(header->right);
+    return reinterpret_cast<link_type>(header->right);
   }
 
   // 普通node的快速访问与设定
   static link_type& left(link_type p) {
-    return reinterpret_cast<link_type&>(p->left);
+    return reinterpret_cast<link_type>(p->left);
   }
   static link_type& right(link_type p) {
-    return reinterpret_cast<link_type&>(p->right);
+    return reinterpret_cast<link_type>(p->right);
   }
   static link_type& parent(link_type p) {
-    return reinterpret_cast<link_type&>(p->parent);
+    return reinterpret_cast<link_type>(p->parent);
   }
   static reference& value(link_type p) { return p->value_field; }
-  static const Key& key(link_type p) {
-    return KeyOfValue()(value(p));
-  }  // KeyofValue是一个函数对象
+  static const Key& key(link_type p) { return KeyOfValue()(value(p)); }
   static color_type& color(link_type p) { return p->color; }
 
   // base_node的快速访问与设定
   static link_type& left(base_ptr p) {
-    return reinterpret_cast<link_type&>(p->left);
+    return reinterpret_cast<link_type>(p->left);
   }
   static link_type& right(base_ptr p) {
-    return reinterpret_cast<link_type&>(p->right);
+    return reinterpret_cast<link_type>(p->right);
   }
   static link_type& parent(base_ptr p) {
-    return reinterpret_cast<link_type&>(p->parent);
+    return reinterpret_cast<link_type>(p->parent);
   }
   static reference& value(base_ptr p) {
     return reinterpret_cast<link_type>(p)->value_field;
   }
   static const Key& key(base_ptr p) {
     return KeyOfValue()(value(reinterpret_cast<link_type>(p)));
-  }  // KeyofValue是一个函数对象
+  }
   static color_type& color(base_ptr p) {
     return reinterpret_cast<link_type>(p)->color;
   }
@@ -123,9 +122,7 @@ class rb_tree {
   }
 
  private:  // aux interface
-  iterator insert_aux(base_ptr, base_ptr, const value_type&);
   link_type copy(link_type, link_type);
-  void erase_aux(link_type);
   void init() {
     header = get_node();
     color(header) = rb_tree_red;
@@ -149,48 +146,56 @@ class rb_tree {
   ~rb_tree() { clear(); }
 
  public:  // copy operation
-  rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs)
-      : node_count(0), key_compare(lhs.key_compare) {
-    if (!lhs.root())
+  rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs)
+      : node_count(0), key_compare(rhs.key_compare) {
+    if (!rhs.root())
       init();
     else {
       header->color = rb_tree_red;
-      root() = copy(lhs.root(), header);
+      root() = copy(rhs.root(), header);
       leftmost() = minimum(root());
       rightmost() = maximum(root());
     }
-    node_count = lhs.node_count;
+    node_count = rhs.node_count;
   }
   rb_tree& operator=(const rb_tree&);
 
  public:  // getter
   Compare key_comp() const noexcept { return key_compare; }
+  const_iterator begin() const noexcept { return leftmost(); }
+  const_iterator end() const noexcept { return header; }
   const_iterator cbegin() const noexcept { return leftmost(); }
   const_iterator cend() const noexcept { return header; }
-  // TODO:
-  // const_reverse_iterator crbegin() const noexcept { return
-  // const_reverse_iterator(end()); } const_reverse_iterator crend() const
-  // noexcept { return const_reverse_iterator(begin()); }
+  const_reverse_iterator crbegin() const noexcept {
+    return const_reverse_iterator(end());
+  }
+  const_reverse_iterator crend() const noexcept {
+    return const_reverse_iterator(begin());
+  }
   bool empty() const noexcept { return node_count == 0; }
   size_type size() const noexcept { return node_count; }
-  size_type max_size() const noexcept { return static_cast<size_type>(-1); }
 
  public:  // setter
   iterator begin() { return leftmost(); }
   iterator end() { return header; }
-  // TODO:
-  // reverse_iterator rbegin() { return reverse_iterator(end()); }
-  // reverse_iterator rend() { return reverse_iterator(begin()); }
+  reverse_iterator rbegin() { return reverse_iterator(end()); }
+  reverse_iterator rend() { return reverse_iterator(begin()); }
+
+ private:  // aux interface for inset
+  iterator insert_aux(base_ptr, base_ptr, const value_type&);
 
  public:  // insert
   pair<iterator, bool> insert_unique(const value_type&);
   iterator insert_unique(iterator, const value_type&);
-  template <class _InputIterator>
-  void insert_unique(_InputIterator first, _InputIterator last);
+  template <class InputIterator>
+  void insert_unique(InputIterator first, InputIterator last);
   iterator insert_equal(iterator, const value_type&);
   iterator insert_equal(const value_type&);
-  template <class _InputIterator>
-  void insert_equal(_InputIterator first, _InputIterator last);
+  template <class InputIterator>
+  void insert_equal(InputIterator first, InputIterator last);
+
+ private:  // aux interface for erase
+  void erase_aux(link_type);
 
  public:  // erase
   void erase(iterator);
@@ -213,9 +218,10 @@ class rb_tree {
  public:  // swap
   void swap(rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs) noexcept {
     // swap data members
-    std::swap(header, lhs.header);
-    std::swap(node_count, lhs.node_count);
-    std::swap(key_compare, lhs.key_compare);
+    using MiniSTL::swap;
+    swap(header, lhs.header);
+    swap(node_count, lhs.node_count);
+    swap(key_compare, lhs.key_compare);
   }
 };
 
@@ -339,7 +345,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance_for_erase(
     else
       z->parent->right = y;
     y->parent = z->parent;
-    std::swap(y->color, z->color);
+    MiniSTL::swap(y->color, z->color);
     y = z;
   } else {
     x_parent = y->parent;
@@ -770,50 +776,50 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::copy(link_type x,
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator==(
     const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
-    rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
+    const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
   return lhs.size() == rhs.size() &&
-         std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+         MiniSTL::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator!=(
     const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
-    rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
+    const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
   return !(lhs == rhs);
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator<(
     const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
-    rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
-  return std::lexicographical_compare(lhs.cbegin(), lhs.cend(), rhs.cbegin(),
-                                      rhs.cend());
+    const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
+  return MiniSTL::lexicographical_compare(lhs.cbegin(), lhs.cend(),
+                                          rhs.cbegin(), rhs.cend());
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator>(
     const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
-    rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
+    const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
   return rhs < lhs;
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator<=(
     const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
-    rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
+    const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
   return !(rhs < lhs);
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline bool operator>=(
     const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
-    rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
+    const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) {
   return !(lhs < rhs);
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline void swap(
-    const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
+    rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs,
     rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs) noexcept {
   lhs.swap(rhs);
 }
