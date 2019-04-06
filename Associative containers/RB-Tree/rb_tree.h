@@ -123,7 +123,7 @@ class rb_tree {
 
  private:  // aux interface
   link_type copy(link_type, link_type);
-  void init() {
+  void empty_initialize() {
     header = get_node();
     color(header) = rb_tree_red;
     root() = nullptr;
@@ -139,9 +139,9 @@ class rb_tree {
                                        base_ptr&);
 
  public:  // ctor && dtor
-  rb_tree() : node_count(0), key_compare() { init(); }
+  rb_tree() : node_count(0), key_compare() { empty_initialize(); }
   explicit rb_tree(const Compare& comp) : node_count(0), key_compare(comp) {
-    init();
+    empty_initialize();
   }
   ~rb_tree() { clear(); }
 
@@ -149,7 +149,7 @@ class rb_tree {
   rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs)
       : node_count(0), key_compare(rhs.key_compare) {
     if (!rhs.root())
-      init();
+      empty_initialize();
     else {
       header->color = rb_tree_red;
       root() = copy(rhs.root(), header);
@@ -176,10 +176,10 @@ class rb_tree {
   size_type size() const noexcept { return node_count; }
 
  public:  // setter
-  iterator begin() { return leftmost(); }
-  iterator end() { return header; }
-  reverse_iterator rbegin() { return reverse_iterator(end()); }
-  reverse_iterator rend() { return reverse_iterator(begin()); }
+  iterator begin() noexcept { return leftmost(); }
+  iterator end() noexcept { return header; }
+  reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+  reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
 
  private:  // aux interface for inset
   iterator insert_aux(base_ptr, base_ptr, const value_type&);
@@ -195,13 +195,13 @@ class rb_tree {
   void insert_equal(InputIterator first, InputIterator last);
 
  private:  // aux interface for erase
-  void erase_aux(link_type);
+  void erase_aux(link_type) noexcept;
 
  public:  // erase
   void erase(iterator);
   size_type erase(const key_type&);
   void erase(iterator, iterator);
-  void clear();
+  void clear() noexcept;
 
  public:  // find
   iterator find(const key_type&) noexcept;
@@ -258,7 +258,8 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_aux(
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase_aux(link_type x) {
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase_aux(
+    link_type x) noexcept {
   while (x) {
     // 递归式删除
     erase_aux(right(x));
@@ -657,9 +658,9 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-template <class _InputIterator>
+template <class InputIterator>
 void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(
-    _InputIterator first, _InputIterator last) {
+    InputIterator first, InputIterator last) {
   for (; first != last; ++first) insert_unique(*first);
 }
 
@@ -706,9 +707,9 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-template <class _InputIterator>
+template <class InputIterator>
 void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(
-    _InputIterator first, _InputIterator last) {
+    InputIterator first, InputIterator last) {
   for (; first != last; ++first) insert_equal(*first);
 }
 
@@ -739,7 +740,7 @@ void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator first,
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear() {
+void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear() noexcept {
   if (node_count) {
     erase_aux(root());
     leftmost() = header;
