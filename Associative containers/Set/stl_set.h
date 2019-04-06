@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "rb_tree.h"
-#include "stl_function.h"
 
 namespace MiniSTL {
 // Forward declarations of operators == and <, needed for friend declarations.
@@ -16,7 +15,7 @@ template <class Key, class Compare, class Alloc>
 inline bool operator<(const set<Key, Compare, Alloc>& lhs,
                       const set<Key, Compare, Alloc>& rhs);
 
-template <class Key, class Compare = less<Key>, class Alloc = simpleAlloc<Key>>
+template <class Key, class Compare = less<Key>, class Alloc = simpleAlloc<Key> >
 class set {
   // friend declarations
   template <class _Key, class _Compare, class _Alloc>
@@ -26,7 +25,7 @@ class set {
   friend bool operator<(const set<_Key, _Compare, _Alloc>& lhs,
                         const set<_Key, _Compare, _Alloc>& rhs);
 
- public:  // Set的key与value是同一个
+ public:  // key_type is value_type
   using key_type = Key;
   using value_type = Key;
   using key_compare = Compare;
@@ -39,21 +38,19 @@ class set {
 
  public:
   // set禁止修改键值，因此其迭代器与指针均为const
-  // iterator或const_ptr，引用亦为const set迭代器无法执行任何写入操作
   using pointer = typename rep_type::const_pointer;
   using const_pointer = typename rep_type::const_pointer;
   using reference = typename rep_type::const_reference;
   using const_reference = typename rep_type::const_reference;
   using iterator = typename rep_type::const_iterator;
   using const_iterator = typename rep_type::const_iterator;
-  // TODO:
-  // using reverse_iterator = typename rep_type::const_reverse_iterator;
-  // using const_reverse_iterator = typename rep_type::const_reverse_iterator;
+  using reverse_iterator = typename rep_type::const_reverse_iterator;
+  using const_reverse_iterator = typename rep_type::const_reverse_iterator;
   using size_type = typename rep_type::size_type;
   using difference_type = typename rep_type::difference_type;
 
  public:  // ctor
-  // only use insert_unique
+  // use insert_unique
   set() : t(key_compare()) {}
   explicit set(const key_compare& comp) : t(comp) {}
   template <class InputIterator>
@@ -65,11 +62,22 @@ class set {
       : t(comp) {
     t.insert_unique(first, last);
   }
+  set(std::initializer_list<value_type> ils, const key_compare& comp)
+      : t(comp) {
+    t.insert_unique(ils.begin(), ils.end());
+  }
 
  public:  // copy operations
-  set(const set<Key, Compare, Alloc>& rhs) : t(rhs.t) {}
-  set<Key, Compare, Alloc>& operator=(const set<Key, Compare, Alloc>& rhs) {
+  set(const set& rhs) : t(rhs.t) {}
+  set& operator=(const set& rhs) {
     t = rhs.t;
+    return *this;
+  }
+
+ public:  // move operation
+  set(set&& rhs) : t(std::move(rhs.t)) {}
+  set& operator=(const set&& rhs) {
+    t = std::move(rhs.t);
     return *this;
   }
 
@@ -84,57 +92,67 @@ class set {
   iterator end() const noexcept { return t.cend(); }
   const_iterator cbegin() const noexcept { return t.cbegin(); }
   const_iterator cend() const noexcept { return t.cend(); }
-  // TODO:
-  // reverse_iterator rbegin() const noexcept { return t.rbegin(); }
-  // reverse_iterator rend() const noexcept { return t.rend(); }
+  reverse_iterator rbegin() const noexcept { return t.rbegin(); }
+  reverse_iterator rend() const noexcept { return t.rend(); }
 
  public:  // swap
-  void swap(set<Key, Compare, Alloc>& x) noexcept { t.swap(x.t); }
+  void swap(set<Key, Compare, Alloc>& rhs) noexcept { t.swap(rhs.t); }
 
- public:  // inset && erase
-  pair<iterator, bool> insert(const value_type& x) {
-    pair<typename rep_type::iterator, bool> p = t.insert_unique(x);
+ public:  // inset
+  pair<iterator, bool> insert(const value_type& val) {
+    pair<typename rep_type::iterator, bool> p = t.insert_unique(val);
     return pair<iterator, bool>(p.first, p.second);
   }
-
-  iterator insert(iterator pos, const value_type& x) {
+  iterator insert(iterator pos, const value_type& val) {
     using rep_iterator = typename rep_type::iterator;
-    return t.insert_unique(reinterpret_cast<rep_iterator&>(pos), x);
+    return t.insert_unique(reinterpret_cast<rep_iterator&>(pos), val);
   }
-
   template <class InputIterator>
   void insert(InputIterator first, InputIterator last) {
     t.insert_unique(first, last);
   }
+  void insert(std::initializer_list<value_type> ils) {
+    insert(ils.begin(), ils.end());
+  }
 
+ public:  // erase
   void erase(iterator pos) {
     using rep_iterator = typename rep_type::iterator;
-    t.erase(reinterpret_cast<rep_iterator&>(pos));
+    t.erase(reinterpret_cast<rep_iterator>(pos));
   }
-
-  size_type erase(const key_type& x) { return t.erase(x); }
-
+  size_type erase(const key_type& val) { return t.erase(val); }
   void erase(iterator first, iterator last) {
     using rep_iterator = typename rep_type::iterator;
-    t.erase(reinterpret_cast<rep_iterator&>(first),
-            reinterpret_cast<rep_iterator&>(last));
+    t.erase(reinterpret_cast<rep_iterator>(first),
+            reinterpret_cast<rep_iterator>(last));
   }
-
-  void clear() { t.clear(); }
+  void clear() noexcept { t.clear(); }
 
  public:  // find
-  iterator find(const key_type& x) const noexcept { return t.find(x); }
-  size_type count(const key_type& x) const noexcept {
-    return t.find(x) == t.end() ? 0 : 1;
+  iterator find(const key_type& key) noexcept { return t.find(key); }
+  const_iterator find(const key_type& key) const noexcept {
+    return t.find(key);
   }
-  iterator lower_bound(const key_type& x) const noexcept {
-    return t.lower_bound(x);
+  size_type count(const key_type& key) const noexcept {
+    return t.find(key) == t.end() ? 0 : 1;
   }
-  iterator upper_bound(const key_type& x) const noexcept {
-    return t.upper_bound(x);
+  iterator lower_bound(const key_type& key) noexcept {
+    return t.lower_bound(key);
   }
-  pair<iterator, iterator> equal_range(const key_type& x) const {
-    return t.equal_range(x);
+  const_iterator lower_bound(const key_type& key) const noexcept {
+    return t.lower_bound(key);
+  }
+  iterator upper_bound(const key_type& key) noexcept {
+    return t.upper_bound(key);
+  }
+  const_iterator upper_bound(const key_type& key) const noexcept {
+    return t.upper_bound(key);
+  }
+  pair<iterator, iterator> equal_range(const key_type& key) {
+    return t.equal_range(key);
+  }
+  pair<const_iterator, const_iterator> equal_range(const key_type& key) const {
+    return t.equal_range(key);
   }
 };
 
@@ -172,6 +190,12 @@ template <class Key, class Compare, class Alloc>
 inline bool operator>=(const set<Key, Compare, Alloc>& lhs,
                        const set<Key, Compare, Alloc>& rhs) {
   return !(lhs < rhs);
+}
+
+template <class Key, class Compare, class Alloc>
+inline void swap(const set<Key, Compare, Alloc>& lhs,
+                 const set<Key, Compare, Alloc>& rhs) {
+  lhs.swap(rhs);
 }
 
 }  // namespace MiniSTL
