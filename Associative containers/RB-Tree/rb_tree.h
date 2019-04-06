@@ -146,8 +146,7 @@ class rb_tree {
   ~rb_tree() { clear(); }
 
  public:  // copy operation
-  rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& rhs)
-      : node_count(0), key_compare(rhs.key_compare) {
+  rb_tree(const rb_tree& rhs) : node_count(0), key_compare(rhs.key_compare) {
     if (!rhs.root())
       empty_initialize();
     else {
@@ -159,6 +158,18 @@ class rb_tree {
     node_count = rhs.node_count;
   }
   rb_tree& operator=(const rb_tree&);
+
+ public:  // move operation
+  rb_tree(rb_tree&& rhs) noexcept {
+    empty_initialize();
+    swap(rhs);
+  }
+
+  rb_tree& operator=(rb_tree&& rhs) noexcept {
+    clear();
+    swap(rhs);
+    return *this;
+  }
 
  public:  // getter
   Compare key_comp() const noexcept { return key_compare; }
