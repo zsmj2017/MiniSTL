@@ -150,7 +150,8 @@ class rb_tree {
     if (!rhs.root())
       empty_initialize();
     else {
-      header->color = rb_tree_red;
+      header = get_node();
+      color(header) = rb_tree_red;
       root() = copy(rhs.root(), header);
       leftmost() = minimum(root());
       rightmost() = maximum(root());
@@ -229,10 +230,9 @@ class rb_tree {
  public:  // swap
   void swap(rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& lhs) noexcept {
     // swap data members
-    using MiniSTL::swap;
-    swap(header, lhs.header);
-    swap(node_count, lhs.node_count);
-    swap(key_compare, lhs.key_compare);
+    MiniSTL::swap(header, lhs.header);
+    MiniSTL::swap(node_count, lhs.node_count);
+    MiniSTL::swap(key_compare, lhs.key_compare);
   }
 };
 
