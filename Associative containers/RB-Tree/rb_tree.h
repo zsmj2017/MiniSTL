@@ -70,24 +70,24 @@ class rb_tree {
  private:  // data member getter && setter
   // header成员
   link_type& root() const noexcept {
-    return reinterpret_cast<link_type>(header->parent);
+    return reinterpret_cast<link_type&>(header->parent);
   }
   link_type& leftmost() const noexcept {
-    return reinterpret_cast<link_type>(header->left);
+    return reinterpret_cast<link_type&>(header->left);
   }
   link_type& rightmost() const noexcept {
-    return reinterpret_cast<link_type>(header->right);
+    return reinterpret_cast<link_type&>(header->right);
   }
 
   // 普通node的快速访问与设定
   static link_type& left(link_type p) {
-    return reinterpret_cast<link_type>(p->left);
+    return reinterpret_cast<link_type&>(p->left);
   }
   static link_type& right(link_type p) {
-    return reinterpret_cast<link_type>(p->right);
+    return reinterpret_cast<link_type&>(p->right);
   }
   static link_type& parent(link_type p) {
-    return reinterpret_cast<link_type>(p->parent);
+    return reinterpret_cast<link_type&>(p->parent);
   }
   static reference& value(link_type p) { return p->value_field; }
   static const Key& key(link_type p) { return KeyOfValue()(value(p)); }
@@ -95,13 +95,13 @@ class rb_tree {
 
   // base_node的快速访问与设定
   static link_type& left(base_ptr p) {
-    return reinterpret_cast<link_type>(p->left);
+    return reinterpret_cast<link_type&>(p->left);
   }
   static link_type& right(base_ptr p) {
-    return reinterpret_cast<link_type>(p->right);
+    return reinterpret_cast<link_type&>(p->right);
   }
   static link_type& parent(base_ptr p) {
-    return reinterpret_cast<link_type>(p->parent);
+    return reinterpret_cast<link_type&>(p->parent);
   }
   static reference& value(base_ptr p) {
     return reinterpret_cast<link_type>(p)->value_field;
