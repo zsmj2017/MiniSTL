@@ -91,6 +91,8 @@ class set {
   const_iterator cend() const noexcept { return t.cend(); }
   reverse_iterator rbegin() const noexcept { return t.rbegin(); }
   reverse_iterator rend() const noexcept { return t.rend(); }
+  const_reverse_iterator crbegin() const noexcept { return t.crbegin(); }
+  const_reverse_iterator crend() const noexcept { return t.crend(); }
 
  public:  // swap
   void swap(set<Key, Compare, Alloc>& rhs) noexcept { t.swap(rhs.t); }

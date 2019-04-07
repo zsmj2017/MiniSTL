@@ -178,6 +178,12 @@ class rb_tree {
   const_iterator end() const noexcept { return header; }
   const_iterator cbegin() const noexcept { return leftmost(); }
   const_iterator cend() const noexcept { return header; }
+  const_reverse_iterator rbegin() const noexcept {
+    return const_reverse_iterator(end());
+  }
+  const_reverse_iterator rend() const noexcept {
+    return const_reverse_iterator(begin());
+  }
   const_reverse_iterator crbegin() const noexcept {
     return const_reverse_iterator(end());
   }
