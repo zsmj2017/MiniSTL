@@ -245,13 +245,13 @@ class rb_tree {
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_aux(
-    base_ptr x_, base_ptr y_, const value_type& value) {
+    base_ptr x_, base_ptr y_, const value_type& val) {
   link_type x = reinterpret_cast<link_type>(x_);
   link_type y = reinterpret_cast<link_type>(y_);
   link_type z;
-  if (y == header || x || key_compare(KeyOfValue()(value), key(y))) {
+  if (y == header || x || key_compare(KeyOfValue()(val), key(y))) {
     // 待插入节点之父为header||待插入节点自身并不为nullptr(何时触发？）||父节点明确大于待插入值
-    z = create_node(value);
+    z = create_node(val);
     left(y) = z;  // 若y为header，此时leftmost==z
     if (y == header) {
       root() = z;
@@ -261,15 +261,14 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_aux(
     }
   } else {
     // 此时必成为y右子
-    z = create_node(value);
+    z = create_node(val);
     right(y) = z;
     if (y == rightmost()) rightmost() = z;
   }
   parent(z) = y;
   left(z) = nullptr;
   right(z) = nullptr;
-  rb_tree_rebalance(
-      z, header->parent);  // 重新调整红黑树（新增节点颜色在其中调整）
+  rb_tree_rebalance(z, header->parent);
   ++node_count;
   return iterator(z);
 }
@@ -475,11 +474,11 @@ inline void rb_tree<Key, Value, KeyOfValue, Compare,
   if (y->right) x->right->parent = x;
   y->parent = x->parent;
   if (x == root)
-    y = root;
+    root = y;
   else if (x == x->parent->left)
-    y = x->parent->left;
+    x->parent->right = y;
   else
-    y = x->parent->right;
+    x->parent->left = y;
   y->right = x;
   x->parent = y;
 }
@@ -624,53 +623,53 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::operator=(const rb_tree& lhs) {
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator, bool>
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(
-    const value_type& value) {
+    const value_type& val) {
   link_type y = header;
   link_type x = root();
   bool comp = true;
   while (x) {
     y = x;
-    comp = key_compare(KeyOfValue()(value), key(x));  // value是否小于x的键值
+    comp = key_compare(KeyOfValue()(val), key(x));  // value是否小于x的键值
     x = comp ? left(x) : right(x);
   }
   // 此时y必为待插入点的父节点（也必为叶节点）
   iterator j(y);
   if (comp)            // y键值大于value键值，插于左侧
     if (j == begin())  //待插入点之父为最左节点
-      return pair<iterator, bool>(insert_aux(x, y, value), true);
+      return pair<iterator, bool>(insert_aux(x, y, val), true);
     else
       --j;  // 调整j准备完成测试（可能与某键值重复）
-  if (key_compare(key(j.node), KeyOfValue()(value)))
+  if (key_compare(key(j.node), KeyOfValue()(val)))
     // 新键值不与旧有键值重复，放心插入
-    return pair<iterator, bool>(insert_aux(x, y, value), true);
+    return pair<iterator, bool>(insert_aux(x, y, val), true);
   return pair<iterator, bool>(j, false);  // 当前value为重复值
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(
-    iterator pos, const value_type& value) {
+    iterator pos, const value_type& val) {
   if (pos.node == header->left) {  // begin()
-    if (size() > 0 && key_compare(KeyOfValue()(value), key(pos.node)))
-      return insert_aux(pos.node, pos.node, value);
+    if (size() > 0 && key_compare(KeyOfValue()(val), key(pos.node)))
+      return insert_aux(pos.node, pos.node, val);
     else
-      return insert_unique(value).first;
+      return insert_unique(val).first;
   } else if (pos.node == header) {  // end()
-    if (key_compare(key(rightmost()), KeyOfValue()(value)))
-      return insert_aux(nullptr, rightmost(), value);
+    if (key_compare(key(rightmost()), KeyOfValue()(val)))
+      return insert_aux(nullptr, rightmost(), val);
     else
-      return insert_unique(value).first;
+      return insert_unique(val).first;
   } else {
     iterator before = pos;
     --before;
-    if (key_compare(key(before.node), KeyOfValue()(value)) &&
-        key_compare(KeyOfValue()(value), key(pos.node))) {
+    if (key_compare(key(before.node), KeyOfValue()(val)) &&
+        key_compare(KeyOfValue()(val), key(pos.node))) {
       if (!right(before.node))
-        return insert_aux(nullptr, before.node, value);
+        return insert_aux(nullptr, before.node, val);
       else
-        return insert_aux(pos.node, pos.node, value);
+        return insert_aux(pos.node, pos.node, val);
     } else
-      return insert_unique(value).first;
+      return insert_unique(val).first;
   }
 }
 
@@ -684,42 +683,42 @@ void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(
-    const value_type& value) {
+    const value_type& val) {
   link_type y = header;
   link_type x = root();
   while (x) {
     y = x;
-    x = key_compare(KeyOfValue()(value), key(x)) ? left(x)
-                                                 : right(x);  // 大则向左
+    x = key_compare(KeyOfValue()(val), key(x)) ? left(x)
+                                               : right(x);  // 大则向左
   }
-  return insert_aux(x, y, value);  // x为新值插入点，y为其父
+  return insert_aux(x, y, val);  // x为新值插入点，y为其父
 }
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(
-    iterator pos, const value_type& value) {
+    iterator pos, const value_type& val) {
   if (pos.node == header->left) {  // begin()
-    if (size() > 0 && !key_compare(key(pos.node), KeyOfValue()(value)))
+    if (size() > 0 && !key_compare(key(pos.node), KeyOfValue()(val)))
       return insert_aux(pos.node, pos.node, value);
     else
-      return insert_equal(value);
+      return insert_equal(val);
   } else if (pos.node == header) {  // end()
-    if (!key_compare(KeyOfValue()(value)), key(rightmost()))
-      return insert_aux(nullptr, rightmost(), value);
+    if (!key_compare(KeyOfValue()(val)), key(rightmost()))
+      return insert_aux(nullptr, rightmost(), val);
     else
-      return insert_equal(value);
+      return insert_equal(val);
   } else {
     iterator before = pos;
     --before;
-    if (!key_compare(KeyOfValue()(value), key(before.node)) &&
-        !key_compare(key(pos.node), KeyOfValue()(value))) {
+    if (!key_compare(KeyOfValue()(val), key(before.node)) &&
+        !key_compare(key(pos.node), KeyOfValue()(val))) {
       if (!right(before.node))
-        return insert_aux(nullptr, before.node, value);
+        return insert_aux(nullptr, before.node, val);
       else
-        return insert_aux(pos.node, pos.node, value);
+        return insert_aux(pos.node, pos.node, val);
     } else
-      return insert_equal(value);
+      return insert_equal(val);
   }
 }
 
