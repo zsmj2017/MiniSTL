@@ -95,6 +95,105 @@ TEST_F(SetTest, MOVE_CTOR) {
   EXPECT_NO_THROW((set<set<int>>(std::move(ssi))));
 }
 
+TEST_F(SetTest, COPYASSIGN_WITH_SELF) {
+  set<int> temp_si;
+  temp_si.insert(5);
+  temp_si.insert(2);
+  si = temp_si;
+  EXPECT_NE(si.find(5), si.end());
+  EXPECT_NE(si.find(2), si.end());
+  set<float> temp_sf;
+  temp_sf.insert(5.0);
+  temp_sf.insert(2.0);
+  sf = temp_sf;
+  EXPECT_NE(sf.find(5.0), sf.end());
+  EXPECT_NE(sf.find(2.0), sf.end());
+  set<double> temp_sd;
+  temp_sd.insert(5.0);
+  temp_sd.insert(2.0);
+  sd = temp_sd;
+  EXPECT_NE(sd.find(5.0), sd.end());
+  EXPECT_NE(sd.find(2.0), sd.end());
+  set<string> temp_ss;
+  temp_ss.insert("hello");
+  temp_ss.insert("world");
+  ss = temp_ss;
+  EXPECT_NE(ss.find("hello"), ss.end());
+  EXPECT_NE(ss.find("world"), ss.end());
+  set<set<int>> temp_ssi;
+  temp_ssi.insert({1, 2, 3});
+  temp_ssi.insert({4, 5, 6});
+  ssi = temp_ssi;
+  EXPECT_NE(ssi.find({1, 2, 3}), ssi.end());
+  EXPECT_NE(ssi.find({4, 5, 6}), ssi.end());
+}
+
+TEST_F(SetTest, COPYASSIGN_WITH_INITIALIZER_LIST) {
+  si = {5, 2};
+  EXPECT_EQ(si.size(), 2);
+  EXPECT_NE(si.find(5), si.end());
+  EXPECT_NE(si.find(2), si.end());
+  sf = {5.0f, 2.0f};
+  EXPECT_EQ(sf.size(), 2);
+  EXPECT_NE(sf.find(5), sf.end());
+  EXPECT_NE(sf.find(2), sf.end());
+  sd = {5.0, 2.0};
+  EXPECT_EQ(sd.size(), 2);
+  EXPECT_NE(sd.find(5.0), sd.end());
+  EXPECT_NE(sd.find(2.0), sd.end());
+  ss = {"hello", "world"};
+  EXPECT_EQ(ss.size(), 2);
+  EXPECT_NE(ss.find("hello"), ss.end());
+  EXPECT_NE(ss.find("world"), ss.end());
+  ssi = {{1, 2, 3}, {4, 5, 6}};
+  EXPECT_EQ(ssi.size(), 2);
+  EXPECT_NE(ssi.find({1, 2, 3}), ssi.end());
+  EXPECT_NE(ssi.find({4, 5, 6}), ssi.end());
+}
+
+TEST_F(SetTest, MOVEASSIGN_WITH_SELF) {
+  set<int> temp_si;
+  temp_si.insert(5);
+  temp_si.insert(2);
+  si = std::move(temp_si);
+  EXPECT_NE(si.find(5), si.end());
+  EXPECT_NE(si.find(2), si.end());
+  EXPECT_EQ(temp_si.find(5), temp_si.end());
+  EXPECT_EQ(temp_si.find(2), temp_si.end());
+  set<float> temp_sf;
+  temp_sf.insert(5.0);
+  temp_sf.insert(2.0);
+  sf = std::move(temp_sf);
+  EXPECT_NE(sf.find(5.0), sf.end());
+  EXPECT_NE(sf.find(2.0), sf.end());
+  EXPECT_EQ(temp_sf.find(5.0f), temp_sf.end());
+  EXPECT_EQ(temp_sf.find(2.0f), temp_sf.end());
+  set<double> temp_sd;
+  temp_sd.insert(5.0);
+  temp_sd.insert(2.0);
+  sd = std::move(temp_sd);
+  EXPECT_NE(sd.find(5.0), sd.end());
+  EXPECT_NE(sd.find(2.0), sd.end());
+  EXPECT_EQ(temp_sd.find(5.0), temp_sd.end());
+  EXPECT_EQ(temp_sd.find(2.0), temp_sd.end());
+  set<string> temp_ss;
+  temp_ss.insert("hello");
+  temp_ss.insert("world");
+  ss = std::move(temp_ss);
+  EXPECT_NE(ss.find("hello"), ss.end());
+  EXPECT_NE(ss.find("world"), ss.end());
+  EXPECT_EQ(temp_ss.find("hello"), temp_ss.end());
+  EXPECT_EQ(temp_ss.find("world"), temp_ss.end());
+  set<set<int>> temp_ssi;
+  temp_ssi.insert({1, 2, 3});
+  temp_ssi.insert({4, 5, 6});
+  ssi = std::move(temp_ssi);
+  EXPECT_NE(ssi.find({1, 2, 3}), ssi.end());
+  EXPECT_NE(ssi.find({4, 5, 6}), ssi.end());
+  EXPECT_EQ(temp_ssi.find({1, 2, 3}), temp_ssi.end());
+  EXPECT_EQ(temp_ssi.find({4, 5, 6}), temp_ssi.end());
+}
+
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
