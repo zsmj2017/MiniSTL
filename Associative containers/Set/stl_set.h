@@ -54,15 +54,13 @@ class set {
   set() : t(key_compare()) {}
   explicit set(const key_compare& comp) : t(comp) {}
   template <class InputIterator>
-  set(InputIterator first, InputIterator last) : t(key_compare()) {
-    t.insert_unique(first, last);
-  }
-  template <class InputIterator>
-  set(InputIterator first, InputIterator last, const key_compare& comp)
+  set(InputIterator first, InputIterator last,
+      const key_compare& comp = Compare())
       : t(comp) {
     t.insert_unique(first, last);
   }
-  set(std::initializer_list<value_type> ils, const key_compare& comp)
+  set(std::initializer_list<value_type> ils,
+      const key_compare& comp = Compare())
       : t(comp) {
     t.insert_unique(ils.begin(), ils.end());
   }
@@ -75,8 +73,8 @@ class set {
   }
 
  public:  // move operation
-  set(set&& rhs) : t(std::move(rhs.t)) {}
-  set& operator=(const set&& rhs) {
+  set(set&& rhs) noexcept : t(std::move(rhs.t)) {}
+  set& operator=(set&& rhs) noexcept {
     t = std::move(rhs.t);
     return *this;
   }
@@ -86,7 +84,6 @@ class set {
   value_compare value_comp() const noexcept { return t.key_comp(); }
   bool empty() const noexcept { return t.empty(); }
   size_type size() const noexcept { return t.size(); }
-  size_type max_size() const noexcept { return t.max_size(); }
   // read only
   iterator begin() const noexcept { return t.cbegin(); }
   iterator end() const noexcept { return t.cend(); }
@@ -98,14 +95,15 @@ class set {
  public:  // swap
   void swap(set<Key, Compare, Alloc>& rhs) noexcept { t.swap(rhs.t); }
 
- public:  // inset
+ public:  // insert
   pair<iterator, bool> insert(const value_type& val) {
     pair<typename rep_type::iterator, bool> p = t.insert_unique(val);
     return pair<iterator, bool>(p.first, p.second);
   }
-  iterator insert(iterator pos, const value_type& val) {
+  // hint:iterator to the position before which the new element will be inserted
+  iterator insert(const_iterator hint, const value_type& val) {
     using rep_iterator = typename rep_type::iterator;
-    return t.insert_unique(reinterpret_cast<rep_iterator&>(pos), val);
+    return t.insert_unique(reinterpret_cast<rep_iterator&>(hint), val);
   }
   template <class InputIterator>
   void insert(InputIterator first, InputIterator last) {
