@@ -143,7 +143,10 @@ class rb_tree {
   explicit rb_tree(const Compare& comp) : node_count(0), key_compare(comp) {
     empty_initialize();
   }
-  ~rb_tree() { clear(); }
+  ~rb_tree() {
+    clear();
+    put_node(header);
+  }
 
  public:  // copy operation
   rb_tree(const rb_tree& rhs) : node_count(0), key_compare(rhs.key_compare) {

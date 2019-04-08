@@ -32,8 +32,7 @@ struct rb_tree_base_iterator {
   void decrement() {
     if (node->color == rb_tree_red && node->parent->parent == node)
       // 此为特例，当迭代器指向end()将触发此情况
-      // root存在一个父节点header，其颜色为红色，左右子均为root
-      node = node->left;
+      node = node->right;
     else if (node->left) {  // 存在左子，前一节点必然是左子树的最右下角
       base_ptr l = node->left;
       while (l->right) l = l->right;
