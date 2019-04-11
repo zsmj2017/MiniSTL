@@ -71,6 +71,11 @@ class set {
     t = rhs.t;
     return *this;
   }
+  set& operator=(std::initializer_list<value_type> ils) {
+    clear();
+    insert(ils.begin(), ils.end());
+    return *this;
+  }
 
  public:  // move operation
   set(set&& rhs) noexcept : t(std::move(rhs.t)) {}
@@ -95,7 +100,7 @@ class set {
   const_reverse_iterator crend() const noexcept { return t.crend(); }
 
  public:  // swap
-  void swap(set<Key, Compare, Alloc>& rhs) noexcept { t.swap(rhs.t); }
+  void swap(set& rhs) noexcept { t.swap(rhs.t); }
 
  public:  // insert
   pair<iterator, bool> insert(const value_type& val) {
