@@ -62,10 +62,10 @@ struct rb_tree_iterator : public rb_tree_base_iterator {
   rb_tree_iterator(link_type x) { node = x; }
   rb_tree_iterator(const iterator& it) { node = it.node; }
 
-  reference operator*() {
+  reference operator*() const {
     return reinterpret_cast<link_type>(node)->value_field;
   }
-  pointer operator->() { return &(operator*()); }
+  pointer operator->() const { return &(operator*()); }
 
   self& operator++() {
     increment();

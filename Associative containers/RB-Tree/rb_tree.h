@@ -11,13 +11,12 @@ template <class Key, class Value, class KeyOfValue, class Compare,
           class Alloc = simpleAlloc<Value> >
 class rb_tree {
  private:  // Internal alias declarations
-  using void_pointer = void*;
   using base_ptr = __rb_tree_node_base*;
   using rb_tree_node = __rb_tree_node<Value>;
   using rb_tree_node_allocator = simpleAlloc<rb_tree_node>;
   using color_type = rb_tree_color_type;
 
- public:  // Basic types
+ public:  // Basic type declarations
   using key_type = Key;
   using value_type = Value;
   using pointer = value_type*;
@@ -28,7 +27,7 @@ class rb_tree {
   using size_type = size_t;
   using difference_type = ptrdiff_t;
 
- public:  // Iterators
+ public:  // Iterator declarations
   using iterator = rb_tree_iterator<value_type, reference, pointer>;
   using const_iterator =
       rb_tree_iterator<value_type, const_reference, const_pointer>;
@@ -176,7 +175,6 @@ class rb_tree {
   }
 
  public:  // getter
-  Compare key_comp() const noexcept { return key_compare; }
   const_iterator begin() const noexcept { return leftmost(); }
   const_iterator end() const noexcept { return header; }
   const_iterator cbegin() const noexcept { return leftmost(); }
@@ -209,11 +207,11 @@ class rb_tree {
   pair<iterator, bool> insert_unique(const value_type&);
   iterator insert_unique(iterator, const value_type&);
   template <class InputIterator>
-  void insert_unique(InputIterator first, InputIterator last);
+  void insert_unique(InputIterator, InputIterator);
   iterator insert_equal(iterator, const value_type&);
   iterator insert_equal(const value_type&);
   template <class InputIterator>
-  void insert_equal(InputIterator first, InputIterator last);
+  void insert_equal(InputIterator, InputIterator);
 
  private:  // aux interface for erase
   void erase_aux(link_type) noexcept;
@@ -474,7 +472,7 @@ inline void rb_tree<Key, Value, KeyOfValue, Compare,
                     Alloc>::rb_tree_rotate_right(base_ptr x, base_ptr& root) {
   base_ptr y = x->left;
   x->left = y->right;
-  if (y->right) x->right->parent = x;
+  if (y->right) y->right->parent = x;
   y->parent = x->parent;
   if (x == root)
     root = y;
