@@ -603,19 +603,20 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline rb_tree<Key, Value, KeyOfValue, Compare, Alloc>&
-rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::operator=(const rb_tree& lhs) {
-  if (this != &lhs) {
+rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::operator=(const rb_tree& rhs) {
+  if (this != &rhs) {
     clear();
-    key_compare = lhs.key_compare;
-    if (!lhs.root()) {
+    node_count = 0;
+    key_compare = rhs.key_compare;
+    if (!rhs.root()) {
       root() = nullptr;
       leftmost() = header;
       rightmost() = header;
     } else {
-      root() = copy(lhs.root(), header);
+      root() = copy(rhs.root(), header);
       leftmost() = minimum(root());
       rightmost() = maximum(root());
-      node_count = lhs.node_count;
+      node_count = rhs.node_count;
     }
   }
   return *this;
