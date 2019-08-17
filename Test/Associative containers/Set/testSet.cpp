@@ -196,8 +196,75 @@ TEST_F(SetTest, MOVEASSIGN_WITH_SELF) {
     EXPECT_EQ(temp_ssi.find({4, 5, 6}), temp_ssi.end());
 }
 
+TEST_F(SetTest, SWAP) {
+    set<int> temp_si = {6, 7, 8, 9, 10};
+    si.swap(temp_si);
+    int i = 1;
+    for (auto e : temp_si)
+        EXPECT_EQ(e, i++);
+    for (auto e : si)
+        EXPECT_EQ(e, i++);
+}
+
+TEST_F(SetTest, BEGIN_AND_END) {
+    si = {3, 2, 1, 4, 5};
+    int i = 1;
+    for (auto it = si.begin(); it != si.end(); ++it, ++i)
+        EXPECT_EQ(*it, i);
+    i = 1;
+    for (auto it = si.cbegin(); it != si.cend(); ++it, ++i)
+        EXPECT_EQ(*it, i);
+    i = 5;
+    for (auto it = si.rbegin(); it != si.rend(); ++it, --i)
+        EXPECT_EQ(*it, i);
+    i = 5;
+    for (auto it = si.crbegin(); it != si.crend(); ++it, --i)
+        EXPECT_EQ(*it, i);
+    set<int, greater<int>> sgi{3, 2, 1, 4, 5};
+    int j = 5;
+    for (auto it = sgi.begin(); it != sgi.end(); ++it, --j)
+        EXPECT_EQ(*it, j);
+    j = 5;
+    for (auto it = sgi.cbegin(); it != sgi.cend(); ++it, --j)
+        EXPECT_EQ(*it, j);
+    j = 1;
+    for (auto it = sgi.rbegin(); it != sgi.rend(); ++it, ++j)
+        EXPECT_EQ(*it, j);
+    j = 1;
+    for (auto it = sgi.crbegin(); it != sgi.crend(); ++it, ++j)
+        EXPECT_EQ(*it, j);
+}
+
+TEST_F(SetTest, INSERT) {
+    si.insert(6);
+    EXPECT_EQ(si.size(), 6);
+    int i = 1;
+    for (auto it = si.begin(); it != si.end(); ++it, ++i)
+        EXPECT_EQ(*it, i);
+    si.insert(0);
+    EXPECT_EQ(si.size(), 7);
+    i = 0;
+    for (auto it = si.begin(); it != si.end(); ++it, ++i)
+        EXPECT_EQ(*it, i);
+    auto p1 = si.insert(1);
+    EXPECT_EQ(p1.second, false);
+    EXPECT_EQ(si.size(), 7);
+    set<int> temp_si = {6, 7, 8, 9, 10};
+    si.insert(temp_si.begin(), temp_si.end());
+    EXPECT_EQ(si.size(), 11);
+    ssi.insert({1, 2, 3, 4, 5});
+    EXPECT_EQ(si.size(), 11);
+    auto it1 = si.find(5);
+    // want to insert a error pos
+    auto it2 = si.insert(it1, 11);
+    EXPECT_EQ(*it2, 11);
+    EXPECT_EQ(si.size(), 12);
+    i = 0;
+    for (auto it = si.begin(); it != si.end(); ++it, ++i)
+        EXPECT_EQ(*it, i);
+}
+
 int main(int argc, char *argv[]) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
-    return 0;
 }
