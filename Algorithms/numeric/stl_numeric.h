@@ -57,8 +57,8 @@ OutputIterator __adjacent_difference(InputIterator first, InputIterator last, Ou
 }
 
 //序列内积
-template <class InputIterator1, class IutputIterator2, class T>
-T inner_product(InputIterator1 first1, InputIterator2 last1, IutputIterator2 first2, T init = T()) {
+template <class InputIterator1, class InputIterator2, class T>
+T inner_product(InputIterator1 first1, InputIterator2 last1, InputIterator2 first2, T init = T()) {
     for (; first1 != last1; ++first1, ++first2)
         init += (*first1) * (*first2);
     return init;
