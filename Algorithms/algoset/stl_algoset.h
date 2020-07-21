@@ -36,16 +36,16 @@ OutputIterator set_union(InputIterator1 first1, InputIterator1 last1,
                 if (comp(*first1,*first2) {
             *result = *first1;
             ++first1;
-		}
-		else if (comp(*first2,*first1) {
+        }
+        else if (comp(*first2,*first1) {
             *result = *first2;
             ++first2;
-		}
-		else {
+        }
+        else {
             *result = *first1;
             ++first1, ++first2;
-		}
-		++result;
+        }
+        ++result;
     }
     //此时[first1,last1)与[first2,last2)必存在空白区间
     return copy(first2, last2, copy(first1, last1, result));
@@ -79,14 +79,14 @@ OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1,
     while (first1 != last1 && first2 != last2) {
                 if (comp(*first1, *first2) {
             ++first1;
-		}
-		else if (comp(*first2, *first1) {
+        }
+        else if (comp(*first2, *first1) {
             ++first2;
-		}
-		else {
+        }
+        else {
             *result = *first1;
             ++first1, ++first2, ++result;
-		}
+        }
     }
     return result;
 }
