@@ -1,2 +1,5 @@
 *.DS_Store
 .vscode
+.clang-format
+cppLint.sh
+codeFormat.sh

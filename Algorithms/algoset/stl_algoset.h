@@ -7,18 +7,17 @@
 //不要求S1、S2元素唯一，对于元素x，其若在S1内出现n次，在S2内出现m次，则将在输出中出现max(m,n)次，其中n个来自S1，其余来自S2
 // Stable
 template <class InputIterator1, class InputIterator2, class OutputIterator>
-OutputIterator set_union(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2,
+OutputIterator set_union(InputIterator1 first1, InputIterator1 last1,
+                         InputIterator2 first2, InputIterator2 last2,
                          OutputIterator result) {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2) {
             *result = *first1;
             ++first1;
-        }
-        else if (*first1 > *first2) {
+        } else if (*first1 > *first2) {
             *result = *first2;
             ++first2;
-        }
-        else {
+        } else {
             *result = *first1;
             ++first1, ++first2;
         }
@@ -28,8 +27,10 @@ OutputIterator set_union(InputIterator1 first1, InputIterator1 last1, InputItera
     return copy(first2, last2, copy(first1, last1, result));
 }
 
-template <class InputIterator1, class InputIterator2, class OutputIterator, class Compare>
-OutputIterator set_union(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2,
+template <class InputIterator1, class InputIterator2, class OutputIterator,
+          class Compare>
+OutputIterator set_union(InputIterator1 first1, InputIterator1 last1,
+                         InputIterator2 first2, InputIterator2 last2,
                          OutputIterator result, Compare comp) {
     while (first1 != last1 && first2 != last2) {
                 if (comp(*first1,*first2) {
@@ -54,16 +55,15 @@ OutputIterator set_union(InputIterator1 first1, InputIterator1 last1, InputItera
 //不要求S1、S2元素唯一，对于元素x，其若在S1内出现n次，在S2内出现m次，则将在输出中出现min(m,n)次，其中n个全部来自S1
 // Stable
 template <class InputIterator1, class InputIterator2, class OutputIterator>
-OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
-                                InputIterator2 last2, OutputIterator result) {
+OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1,
+                                InputIterator2 first2, InputIterator2 last2,
+                                OutputIterator result) {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2) {
             ++first1;
-        }
-        else if (*first1 > *first2) {
+        } else if (*first1 > *first2) {
             ++first2;
-        }
-        else {
+        } else {
             *result = *first1;
             ++first1, ++first2, ++result;
         }
@@ -71,9 +71,11 @@ OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, Inp
     return result;
 }
 
-template <class InputIterator1, class InputIterator2, class OutputIterator, class Compare>
-OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
-                                InputIterator2 last2, OutputIterator result, Compare comp) {
+template <class InputIterator1, class InputIterator2, class OutputIterator,
+          class Compare>
+OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1,
+                                InputIterator2 first2, InputIterator2 last2,
+                                OutputIterator result, Compare comp) {
     while (first1 != last1 && first2 != last2) {
                 if (comp(*first1, *first2) {
             ++first1;
@@ -92,14 +94,14 @@ OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, Inp
 //求差集 即S1-S2 出现于S1但并不出现于S2的所有元素集合
 // Stable
 template <class InputIterator1, class InputIterator2, class OutputIterator>
-OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
-                                InputIterator2 last2, OutputIterator result) {
+OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1,
+                                InputIterator2 first2, InputIterator2 last2,
+                                OutputIterator result) {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2) {
             *result = *first1;
             ++first1, ++result;
-        }
-        else if (*first1 > *first2)
+        } else if (*first1 > *first2)
             ++first2;
         else
             ++first1, ++first2;
@@ -108,15 +110,16 @@ OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, Inp
     return copy(first1, last1, result);
 }
 
-template <class InputIterator1, class InputIterator2, class OutputIterator, class Compare>
-OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2,
+template <class InputIterator1, class InputIterator2, class OutputIterator,
+          class Compare>
+OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1,
+                              InputIterator2 first2, InputIterator2 last2,
                               OutputIterator result, Compare comp) {
     while (first1 != last1 && first2 != last2) {
         if (comp(*first1, *first2)) {
             *result = *first1;
             ++first1, ++result;
-        }
-        else if (comp(*first2, *first1))
+        } else if (comp(*first2, *first1))
             ++first2;
         else
             ++first1, ++first2;
@@ -127,36 +130,37 @@ OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1, Input
 //求对称差集，即（S1-S2）U（S2-S1)
 // Stable
 template <class InputIterator1, class InputIterator2, class OutputIterator>
-OutputIterator set_symmetric_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
-                                        InputIterator2 last2, OutputIterator result) {
+OutputIterator set_symmetric_difference(InputIterator1 first1,
+                                        InputIterator1 last1,
+                                        InputIterator2 first2,
+                                        InputIterator2 last2,
+                                        OutputIterator result) {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2) {
             *result = *first1;
             ++first1, ++result;
-        }
-        else if (*first1 > *first2) {
+        } else if (*first1 > *first2) {
             *result = *first2;
             ++first2, ++result;
-        }
-        else
+        } else
             ++first1, ++first2;
     }
         return copy(first2, last2, copy(first1,last1,result);
 }
 
-template <class InputIterator1, class InputIterator2, class OutputIterator, class Compare>
-OutputIterator set_symmetric(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2,
+template <class InputIterator1, class InputIterator2, class OutputIterator,
+          class Compare>
+OutputIterator set_symmetric(InputIterator1 first1, InputIterator1 last1,
+                             InputIterator2 first2, InputIterator2 last2,
                              OutputIterator result, Compare comp) {
     while (first1 != last1 && first2 != last2) {
         if (comp(*first1, *first2)) {
             *result = *first1;
             ++first1, ++result;
-        }
-        else if (comp(*first2, *first1)) {
+        } else if (comp(*first2, *first1)) {
             *result = *first2;
             ++first2, ++result;
-        }
-        else
+        } else
             ++first1, ++first2;
     }
         return copy(first2, last2, copy(first1, last1, result);
