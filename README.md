@@ -40,7 +40,7 @@ MiniSTL
 
  &emsp;[queue(stl_queue.h)](https://github.com/zsmj2017/MiniSTL/blob/master/SequenceContainers/Queue/stl_queue.h):100%   
 
- &emsp;[priority_queue(priority_queue.h)](https://github.com/zsmj2017/MiniSTL/blob/master/SequenceContainers/Priority_Queue/stl_priority_queue.h):100%  
+ &emsp;[priority_queue(stl_priority_queue.h)](https://github.com/zsmj2017/MiniSTL/blob/master/SequenceContainers/PriorityQueue/stl_priority_queue.h):100%  
 
  &emsp;[slist(slist.h)](https://github.com/zsmj2017/MiniSTL/blob/master/SequenceContainers/Slist/slist.h):100%  
 
