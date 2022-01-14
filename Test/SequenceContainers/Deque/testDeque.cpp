@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "stl_deque.h"
+#include "SequenceContainers/Deque/stl_deque.h"
 
 using namespace ::MiniSTL;
 using std::string;
@@ -408,10 +408,4 @@ TEST_F(DequeTest, ASSIGN) {
     ds.assign({"cat", "cat", "cat"});
     for (auto s : ds) EXPECT_EQ(s, "cat");
     EXPECT_EQ(ds.size(), 3);
-}
-
-int main(int argc, char *argv[]) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-    return 0;
 }

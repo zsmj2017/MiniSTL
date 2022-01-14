@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "stl_list.h"
+#include "SequenceContainers/List/stl_list.h"
+
 
 using namespace ::MiniSTL;
 using std::string;
@@ -476,10 +477,4 @@ TEST_F(ListTest, REMOVE) {
     EXPECT_EQ(li.back(), 4);
     ls.remove("hello");
     EXPECT_EQ(ls.size(), 0);
-}
-
-int main(int argc, char *argv[]) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-    return 0;
 }

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "stl_set.h"
+#include "AssociativeContainers/Set/stl_set.h"
 
 using namespace ::MiniSTL;
 using std::string;
@@ -250,9 +250,4 @@ TEST_F(SetTest, INSERT) {
     EXPECT_EQ(si.size(), 12);
     i = 0;
     for (auto it = si.begin(); it != si.end(); ++it, ++i) EXPECT_EQ(*it, i);
-}
-
-int main(int argc, char *argv[]) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
