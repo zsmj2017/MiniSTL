@@ -85,12 +85,12 @@ TEST_F(VectorTest, CTOR_WITH_INITIAL_LIST) {
 }
 
 TEST_F(VectorTest, COPY_CTOR) {
-  EXPECT_NO_THROW(vector<int>(vi));
-  EXPECT_NO_THROW(vector<float>(vf));
-  EXPECT_NO_THROW(vector<double>(vd));
-  EXPECT_NO_THROW(vector<string>(vs));
-  EXPECT_NO_THROW(vector<BAR>(vb));
-  EXPECT_NO_THROW(vector<vector<int>>(vvi));
+  EXPECT_NO_THROW(vector<int>{vi});
+  EXPECT_NO_THROW(vector<float>{vf});
+  EXPECT_NO_THROW(vector<double>{vd});
+  EXPECT_NO_THROW(vector<string>{vs});
+  EXPECT_NO_THROW(vector<BAR>{vb});
+  EXPECT_NO_THROW(vector<vector<int>>{vvi});
 }
 
 TEST_F(VectorTest, MOVE_CTOR) {

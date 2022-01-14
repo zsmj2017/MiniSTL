@@ -40,12 +40,12 @@ TEST_F(StackTest, DEFAULT_CTOR) {
 }
 
 TEST_F(StackTest, COPY_CTOR) {
-  EXPECT_NO_THROW(stack<int>(si));
-  EXPECT_NO_THROW(stack<float>(sf));
-  EXPECT_NO_THROW(stack<double>(sd));
-  EXPECT_NO_THROW(stack<string>(ss));
-  EXPECT_NO_THROW(stack<BAR>(sb));
-  EXPECT_NO_THROW(stack<stack<int>>(ssi));
+  EXPECT_NO_THROW(stack<int>{si});
+  EXPECT_NO_THROW(stack<float>{sf});
+  EXPECT_NO_THROW(stack<double>{sd});
+  EXPECT_NO_THROW(stack<string>{ss});
+  EXPECT_NO_THROW(stack<BAR>{sb});
+  EXPECT_NO_THROW(stack<stack<int>>{ssi});
 }
 
 TEST_F(StackTest, MOVE_CTOR) {

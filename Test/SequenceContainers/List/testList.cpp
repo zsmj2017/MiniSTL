@@ -85,12 +85,12 @@ TEST_F(ListTest, CTOR_WITH_INITIAL_LIST) {
 }
 
 TEST_F(ListTest, COPY_CTOR) {
-  EXPECT_NO_THROW(list<int>(li));
-  EXPECT_NO_THROW(list<float>(lf));
-  EXPECT_NO_THROW(list<double>(ld));
-  EXPECT_NO_THROW(list<string>(ls));
-  EXPECT_NO_THROW(list<BAR>(lb));
-  EXPECT_NO_THROW(list<list<int>>(lli));
+  EXPECT_NO_THROW(list<int>{li});
+  EXPECT_NO_THROW(list<float>{lf});
+  EXPECT_NO_THROW(list<double>{ld});
+  EXPECT_NO_THROW(list<string>{ls});
+  EXPECT_NO_THROW(list<BAR>{lb});
+  EXPECT_NO_THROW(list<list<int>>{lli});
 }
 
 TEST_F(ListTest, MOVE_CTOR) {

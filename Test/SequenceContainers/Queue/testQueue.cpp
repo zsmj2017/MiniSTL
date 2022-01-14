@@ -42,12 +42,12 @@ TEST_F(QueueTest, DEFAULT_CTOR) {
 }
 
 TEST_F(QueueTest, COPY_CTOR) {
-  EXPECT_NO_THROW(queue<int>(qi));
-  EXPECT_NO_THROW(queue<float>(qf));
-  EXPECT_NO_THROW(queue<double>(qd));
-  EXPECT_NO_THROW(queue<string>(qs));
-  EXPECT_NO_THROW(queue<BAR>(qb));
-  EXPECT_NO_THROW(queue<queue<int>>(qqi));
+  EXPECT_NO_THROW(queue<int>{qi});
+  EXPECT_NO_THROW(queue<float>{qf});
+  EXPECT_NO_THROW(queue<double>{qd});
+  EXPECT_NO_THROW(queue<string>{qs});
+  EXPECT_NO_THROW(queue<BAR>{qb});
+  EXPECT_NO_THROW(queue<queue<int>>{qqi});
 }
 
 TEST_F(QueueTest, MOVE_CTOR) {
