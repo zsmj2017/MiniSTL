@@ -10,4 +10,4 @@ _default_alloc::obj *volatile _default_alloc::free_list[NFREELISTS] = {
 
 //定义handler
 typename _malloc_alloc::malloc_handler _malloc_alloc::_malloc_alloc_oom_handler = nullptr;
-} // namespace MiniSTL
+}// namespace MiniSTL
