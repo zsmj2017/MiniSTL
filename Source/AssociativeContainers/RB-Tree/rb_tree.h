@@ -374,16 +374,20 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance_for_erase(
       z->parent->left = x;
     else
       z->parent->right = x;
-    if (leftmost == z)
-      if (!z->right)
+    if (leftmost == z) {
+      if (!z->right) {
         leftmost = z->parent;
-      else
+      } else {
         leftmost = __rb_tree_node_base::minimum(x);
-    if (rightmost == z)
-      if (!z->left)
+      }
+    }
+    if (rightmost == z) {
+      if (!z->left) {
         rightmost = z->parent;
-      else
+      } else {
         rightmost = __rb_tree_node_base::maximum(x);
+      }
+    }
   }
   if (y->color != rb_tree_red) {
     while (x != root && (!x || x->color == rb_tree_black))
@@ -633,11 +637,13 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(
   }
   // 此时y必为待插入点的父节点（也必为叶节点）
   iterator j(y);
-  if (comp)          // y键值大于value键值，插于左侧
-    if (j == begin())//待插入点之父为最左节点
+  if (comp) {          // y键值大于value键值，插于左侧
+    if (j == begin()) {//待插入点之父为最左节点
       return pair<iterator, bool>(insert_aux(x, y, val), true);
-    else
+    } else {
       --j;// 调整j准备完成测试（可能与某键值重复）
+    }
+  }
   if (key_compare(key(j.node), KeyOfValue()(val)))
     // 新键值不与旧有键值重复，放心插入
     return pair<iterator, bool>(insert_aux(x, y, val), true);

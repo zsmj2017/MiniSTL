@@ -85,12 +85,12 @@ TEST_F(DequeTest, CTOR_WITH_INITIAL_LIST) {
 }
 
 TEST_F(DequeTest, COPY_CTOR) {
-  EXPECT_NO_THROW(deque<int>(di));
-  EXPECT_NO_THROW(deque<float>(df));
-  EXPECT_NO_THROW(deque<double>(dd));
-  EXPECT_NO_THROW(deque<string>(ds));
-  EXPECT_NO_THROW(deque<BAR>(db));
-  EXPECT_NO_THROW(deque<deque<int>>(ddi));
+  EXPECT_NO_THROW(deque<int>{di});
+  EXPECT_NO_THROW(deque<float>{df});
+  EXPECT_NO_THROW(deque<double>{dd});
+  EXPECT_NO_THROW(deque<string>{ds});
+  EXPECT_NO_THROW(deque<BAR>{db});
+  EXPECT_NO_THROW(deque<deque<int>>{ddi});
 }
 
 TEST_F(DequeTest, MOVE_CTOR) {
