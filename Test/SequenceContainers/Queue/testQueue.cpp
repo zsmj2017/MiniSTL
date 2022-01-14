@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "stl_deque.h"
-#include "stl_list.h"
-#include "stl_queue.h"
+#include "SequenceContainers/Queue/stl_queue.h"
+#include "SequenceContainers/PriorityQueue/stl_priority_queue.h"
+#include "SequenceContainers/List/stl_list.h"
+
 
 using namespace ::MiniSTL;
 using std::string;
@@ -414,10 +415,4 @@ TEST_F(Priority_Queue_Test, SWAP) {
     temp.swap(pqvl);
     EXPECT_EQ(temp.top(), 5);
     EXPECT_EQ(pqvl.top(), 10);
-}
-
-int main(int argc, char *argv[]) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-    return 0;
 }

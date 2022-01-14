@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "stl_vector.h"
+#include "SequenceContainers/Vector/stl_vector.h"
 
 using namespace ::MiniSTL;
 using std::string;
@@ -111,7 +111,7 @@ TEST_F(VectorTest, DTOR) {
     temp_vi.~vector();
     EXPECT_FALSE(*p == 1);
     */
-    vector<int> *p = new vector<int>(5, 1);
+    auto *p = new vector<int>(5, 1);
     int *p2i = &((*p)[0]);
     EXPECT_EQ(*p2i, 1);
     delete p;
@@ -459,10 +459,4 @@ TEST_F(VectorTest, ASSIGN) {
     for (auto s : vs) EXPECT_EQ(s, "cat");
     EXPECT_EQ(vs.size(), 3);
     EXPECT_EQ(vs.capacity(), 5);
-}
-
-int main(int argc, char *argv[]) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-    return 0;
 }

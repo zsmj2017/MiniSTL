@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "stl_stack.h"
+#include "SequenceContainers/Stack/stl_stack.h"
 
 using namespace ::MiniSTL;
 using std::string;
@@ -238,10 +238,4 @@ TEST_F(StackTest, SWAP) {
     swap(ssi, temp_ssi);
     EXPECT_EQ(ssi.top().top(), 1);
     EXPECT_EQ(temp_ssi.top(), stack<int>());
-}
-
-int main(int argc, char *argv[]) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-    return 0;
 }
