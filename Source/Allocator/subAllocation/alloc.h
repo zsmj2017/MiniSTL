@@ -88,7 +88,7 @@ class _default_alloc {
   // free_list节点
   // 由于union特性，并不需要占用额外的内存
   union obj {
-    union obj *free_list_link;//指向下一节点
+    union obj *free_list_link;//指向下一个节点
     char client_data[1];      //指向资源
   };
 

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <functional>// TODO::for std::mutiplies
+
 //累积算法
 template<class InputIterator, class T>
 T accumulate(InputIterator first, InputIterator last, T init = T()) {
@@ -20,12 +22,12 @@ OutputIterator adjacent_difference(InputIterator first, InputIterator last,
                                    OutputIterator result) {
   if (first == last) return first;
   *result = *first;
-  return __adjacent_difference(first, last, result, value_type(first));
+  return _adjacent_difference(first, last, result, value_type(first));
 }
 
 template<class InputIterator, class OutputIterator, class T>
-OutputIterator __adjacent_difference(InputIterator first, InputIterator last,
-                                     OutputIterator result, T *) {
+OutputIterator adjacent_difference(InputIterator first, InputIterator last,
+                                   OutputIterator result, T *) {
   T value = *result;
   while (++first != last) {
     T temp = *first;
@@ -41,15 +43,15 @@ OutputIterator adjacent_difference(InputIterator first, InputIterator last,
                                    BinaryOperation binary_op) {
   if (first == last) return first;
   *result = *first;
-  return __adjacent_difference(first, last, result, value_type(first),
-                               binary_op);
+  return _adjacent_difference(first, last, result, value_type(first),
+                              binary_op);
 }
 
 template<class InputIterator, class OutputIterator, class T,
          class BinaryOperation>
-OutputIterator __adjacent_difference(InputIterator first, InputIterator last,
-                                     OutputIterator result, T *,
-                                     BinaryOperation binary_op) {
+OutputIterator adjacent_difference(InputIterator first, InputIterator last,
+                                   OutputIterator result, T *,
+                                   BinaryOperation binary_op) {
   T value = *result;
   while (++first != last) {
     T temp = *first;
@@ -83,12 +85,12 @@ OutputIterator partial_sum(InputIterator first, InputIterator last,
                            OutputIterator result) {
   if (first == last) return first;
   *result = *first;
-  return __partial_sum(first, last, result, value_type(first));
+  return _partial_sum(first, last, result, value_type(first));
 }
 
 template<class InputIterator, class OutputIterator, class T>
-OutputIterator __partial_sum(InputIterator first, InputIterator last,
-                             OutputIterator result, T *) {
+OutputIterator partial_sum(InputIterator first, InputIterator last,
+                           OutputIterator result, T *) {
   T value = *first;
   while (++first != last) {
     value += *first;
@@ -102,14 +104,14 @@ OutputIterator partial_sum(InputIterator first, InputIterator last,
                            OutputIterator result, BinaryOperation binary_op) {
   if (first == last) return first;
   *result = *first;
-  return __partial_sum(first, last, result, value_type(first), binary_op);
+  return _partial_sum(first, last, result, value_type(first), binary_op);
 }
 
 template<class InputIterator, class OutputIterator, class T,
          class BinaryOperation>
-OutputIterator __partial_sum(InputIterator first, InputIterator last,
-                             OutputIterator result, T *,
-                             BinaryOperation binary_op) {
+OutputIterator partial_sum(InputIterator first, InputIterator last,
+                           OutputIterator result, T *,
+                           BinaryOperation binary_op) {
   T value = *result;
   while (++first != last) {
     value = binary_op(value, *first);
@@ -121,7 +123,7 @@ OutputIterator __partial_sum(InputIterator first, InputIterator last,
 //对x反复执行n次算数操作
 template<class T, class Integer>
 inline T power(T x, Integer n) {
-  return power(x, n, mutiplies<T>());
+  return power(x, n, std::mutiplies<T>());
 }
 
 template<class T, class Integer, class MonoidOperation>
