@@ -337,13 +337,14 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance_for_erase(
   base_ptr x_parent = nullptr;
   if (!y->left)// z至多存在一个孩子
     x = y->right;
-  else// z至少存在一个孩子
-      if (!y->right)
-    x = y->left;
-  else {
-    y = y->right;
-    while (y->left) y = y->left;
-    x = y->right;
+  else { // z至少存在一个孩子
+    if (!y->right) {
+      x = y->left;
+    } else {
+      y = y->right;
+      while (y->left) y = y->left;
+      x = y->right;
+    }
   }
   if (y != z) {// 若条件成立，此时y为z的后代
     z->left->parent = y;
@@ -478,7 +479,7 @@ inline void rb_tree<Key, Value, KeyOfValue, Compare,
   y->parent = x->parent;
   if (x == root)
     root = y;
-  else if (x == x->parent->left)
+  else if (x == x->parent->right)
     x->parent->right = y;
   else
     x->parent->left = y;
