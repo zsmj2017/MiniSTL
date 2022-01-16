@@ -279,21 +279,19 @@ TEST_F(VectorTest, auto_ref) {
   }
 }
 
-struct Point {
-  int x, y;
-};
-
-struct PointEx : public Point {
-  PointEx() : Point(), builtFromBase(false) {}
-  PointEx(const Point &) : Point(), builtFromBase(true) {}
-
-  bool builtFromBase;
-};
-
 //This test check that vector implementation do not over optimize
 //operation as PointEx copy constructor is trivial
-
 TEST_F(VectorTest, optimizations_check) {
+  struct Point {
+    int x, y;
+  };
+
+  struct PointEx : public Point {
+    PointEx() : Point(), builtFromBase(false) {}
+    PointEx(const Point &) : Point(), builtFromBase(true) {}
+
+    bool builtFromBase;
+  };
   vector<Point> v1(1);
   ASSERT_TRUE(v1.size() == 1);
 
