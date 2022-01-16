@@ -93,6 +93,8 @@ class vector {
  public:// getter
   const_iterator begin() const noexcept { return start; }
   const_iterator end() const noexcept { return finish; }
+  const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(finish); }
+  const_reverse_iterator rend() const noexcept { return const_reverse_iterator(start); }
   const_iterator cbegin() const noexcept { return start; }
   const_iterator cend() const noexcept { return finish; }
   const_reverse_iterator crbegin() const noexcept {
