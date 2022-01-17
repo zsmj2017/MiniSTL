@@ -471,7 +471,7 @@ template<class T, class Alloc>
 inline void deque<T, Alloc>::pop_front_aux() {
   destroy(start.cur);
   node_allocator::deallocate(start.first);
-  start.set_node(finish.node + 1);
+  start.set_node(start.node + 1);
   start.cur = start.first;
 }
 
