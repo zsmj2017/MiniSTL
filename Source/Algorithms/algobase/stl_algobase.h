@@ -38,17 +38,17 @@ OutputIterator fill_n(OutputIterator first, Size n, const T &value) {
   return first;
 }
 
-template<class ForwardIterator1, class ForwardIterator2>
-inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b) {
-  return _iter_swap(a, b, value_type_t<ForwardIterator1>());
-}
-
 // 必须要知道迭代器指向的对象类型，才能够构造对象，因此本处使用了value_type
 template<class ForwardIterator1, class ForwardIterator2, class T>
 inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b, T) {
   T temp = *a;
   *a = *b;
   *b = temp;
+}
+
+template<class ForwardIterator1, class ForwardIterator2>
+inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b) {
+  return iter_swap(a, b, value_type_t<ForwardIterator1>());
 }
 
 template<class InputIterator1, class InputIterator2>

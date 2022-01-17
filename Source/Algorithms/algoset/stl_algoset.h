@@ -33,19 +33,17 @@ OutputIterator set_union(InputIterator1 first1, InputIterator1 last1,
                          InputIterator2 first2, InputIterator2 last2,
                          OutputIterator result, Compare comp) {
   while (first1 != last1 && first2 != last2) {
-                if (comp(*first1,*first2) {
+    if (comp(*first1, *first2)) {
       *result = *first1;
       ++first1;
-        }
-        else if (comp(*first2,*first1) {
+    } else if (comp(*first2, *first1)) {
       *result = *first2;
       ++first2;
-        }
-        else {
+    } else {
       *result = *first1;
       ++first1, ++first2;
-        }
-        ++result;
+    }
+    ++result;
   }
   //此时[first1,last1)与[first2,last2)必存在空白区间
   return copy(first2, last2, copy(first1, last1, result));
@@ -53,7 +51,7 @@ OutputIterator set_union(InputIterator1 first1, InputIterator1 last1,
 
 //要求S1、S2有序
 //不要求S1、S2元素唯一，对于元素x，其若在S1内出现n次，在S2内出现m次，则将在输出中出现min(m,n)次，其中n个全部来自S1
-// Stable
+//Stable
 template<class InputIterator1, class InputIterator2, class OutputIterator>
 OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1,
                                 InputIterator2 first2, InputIterator2 last2,
@@ -77,16 +75,14 @@ OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1,
                                 InputIterator2 first2, InputIterator2 last2,
                                 OutputIterator result, Compare comp) {
   while (first1 != last1 && first2 != last2) {
-                if (comp(*first1, *first2) {
+    if (comp(*first1, *first2)) {
       ++first1;
-        }
-        else if (comp(*first2, *first1) {
+    } else if (comp(*first2, *first1)) {
       ++first2;
-        }
-        else {
+    } else {
       *result = *first1;
       ++first1, ++first2, ++result;
-        }
+    }
   }
   return result;
 }
@@ -142,10 +138,11 @@ OutputIterator set_symmetric_difference(InputIterator1 first1,
     } else if (*first1 > *first2) {
       *result = *first2;
       ++first2, ++result;
-    } else
+    } else {
       ++first1, ++first2;
+    }
   }
-        return copy(first2, last2, copy(first1,last1,result);
+  return copy(first2, last2, copy(first1,last1,result);
 }
 
 template<class InputIterator1, class InputIterator2, class OutputIterator,
@@ -160,8 +157,9 @@ OutputIterator set_symmetric(InputIterator1 first1, InputIterator1 last1,
     } else if (comp(*first2, *first1)) {
       *result = *first2;
       ++first2, ++result;
-    } else
+    } else {
       ++first1, ++first2;
+    }
   }
-        return copy(first2, last2, copy(first1, last1, result);
+  return copy(first2, last2, copy(first1, last1, result);
 }
