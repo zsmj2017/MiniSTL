@@ -158,7 +158,7 @@ class list {
  public:// push && pop
   void push_front(const T &value) { insert(begin(), value); }
   void push_back(const T &value) { insert(end(), value); }
-  void pop_fornt() { erase(begin()); }
+  void pop_front() { erase(begin()); }
   void pop_back() {
     iterator temp = end();
     erase(--temp);

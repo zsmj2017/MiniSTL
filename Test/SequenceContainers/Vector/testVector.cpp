@@ -1,9 +1,6 @@
 #include "SequenceContainers/Vector/stl_vector.h"
 #include <gtest/gtest.h>
-#include <string>
-
 using namespace ::MiniSTL;
-using std::string;
 
 class VectorTest : public testing::Test {
  protected:
