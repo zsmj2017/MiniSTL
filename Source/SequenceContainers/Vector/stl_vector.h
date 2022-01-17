@@ -178,6 +178,8 @@ class vector {
  public:// insert
   iterator insert(iterator);
   iterator insert(iterator, const value_type &);
+  // insert n values at pos
+  void insert(iterator pos, size_type n, const value_type &val);
   template<class InputIterator>
   void insert(iterator pos, InputIterator first, InputIterator last) {
     insert_dispatch(pos, first, last, _is_integer_t<InputIterator>());
@@ -396,46 +398,47 @@ inline typename vector<T, Alloc>::iterator vector<T, Alloc>::erase(
 template<class T, class Alloc>
 void vector<T, Alloc>::fill_insert(iterator position, size_type n,
                                    const value_type &value) {
-  if (n) {
-    if (static_cast<size_type>(end_of_storage - finish) >= n) {// needn't expand
-      value_type value_copy = value;
-      const size_type elems_after = finish - position;
-      iterator old_finish = finish;
-      if (elems_after > n) {
-        MiniSTL::uninitialized_copy(finish - n, finish, finish);
-        finish += n;
-        MiniSTL::copy_backward(position, old_finish - n, old_finish);
-        MiniSTL::fill(position, position + n, value_copy);
-      } else {
-        MiniSTL::uninitialized_fill_n(finish, n - elems_after,
-                                      value_copy);
-        finish += n - elems_after;
-        MiniSTL::uninitialized_copy(position, old_finish, finish);
-        finish += elems_after;
-        MiniSTL::fill(position, old_finish, value_copy);// complement
-      }
-    } else {// expand
-      const size_type old_size = size();
-      const size_type new_size = old_size + MiniSTL::max(old_size, n);
-      iterator new_start = data_allocator::allocate(new_size);
-      iterator new_finish = new_start;
-      try {
-        new_finish =
-            MiniSTL::uninitialized_copy(start, position, new_start);
-        new_finish =
-            MiniSTL::uninitialized_fill_n(new_finish, n, value);
-        new_finish =
-            MiniSTL::uninitialized_copy(position, finish, new_finish);
-      } catch (std::exception &) {
-        destroy(new_start, new_finish);
-        data_allocator::deallocate(new_start, new_size);
-        throw;
-      }
-      destroy_and_deallocate();
-      start = new_start;
-      finish = new_finish;
-      end_of_storage = new_start + new_size;
+  if (n <= 0) {
+    return;
+  }
+  if (static_cast<size_type>(end_of_storage - finish) >= n) {// needn't expand
+    value_type value_copy = value;
+    const size_type elems_after = finish - position;
+    iterator old_finish = finish;
+    if (elems_after > n) {
+      MiniSTL::uninitialized_copy(finish - n, finish, finish);
+      finish += n;
+      MiniSTL::copy_backward(position, old_finish - n, old_finish);
+      MiniSTL::fill(position, position + n, value_copy);
+    } else {
+      MiniSTL::uninitialized_fill_n(finish, n - elems_after,
+                                    value_copy);
+      finish += n - elems_after;
+      MiniSTL::uninitialized_copy(position, old_finish, finish);
+      finish += elems_after;
+      MiniSTL::fill(position, old_finish, value_copy);// complement
     }
+  } else {// expand
+    const size_type old_size = size();
+    const size_type new_size = old_size + MiniSTL::max(old_size, n);
+    iterator new_start = data_allocator::allocate(new_size);
+    iterator new_finish = new_start;
+    try {
+      new_finish =
+          MiniSTL::uninitialized_copy(start, position, new_start);
+      new_finish =
+          MiniSTL::uninitialized_fill_n(new_finish, n, value);
+      new_finish =
+          MiniSTL::uninitialized_copy(position, finish, new_finish);
+    } catch (std::exception &) {
+      destroy(new_start, new_finish);
+      data_allocator::deallocate(new_start, new_size);
+      throw;
+    }
+    destroy_and_deallocate();
+    start = new_start;
+    finish = new_finish;
+    end_of_storage = new_start + new_size;
   }
 }
 
@@ -455,6 +458,12 @@ inline typename vector<T, Alloc>::iterator vector<T, Alloc>::insert(
   } else
     insert_aux(position, value);
   return begin() + n;
+}
+
+template<class T, class Alloc>
+void vector<T, Alloc>::insert(
+    iterator position, size_type n, const value_type &value) {
+  fill_insert(position, n, value);
 }
 
 template<class T, class Alloc>
