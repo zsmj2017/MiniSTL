@@ -15,12 +15,6 @@ inline bool operator==(const hash_multiset<Value, HashFcn, EqualKey, Alloc> &,
 template<class Value, class HashFcn = hash<Value>,
          class EqualKey = equal_to<Value>, class Alloc = simpleAlloc<Value>>
 class hash_multiset {
-  // friend declarations
-  template<class _Value, class _HashFcn, class _EqualKey, class _Alloc>
-  friend bool operator==(
-      const hash_multiset<_Value, _HashFcn, _EqualKey, _Alloc> &,
-      const hash_multiset<_Value, _HashFcn, _EqualKey, _Alloc> &);
-
  private:// data member
   using ht =
       hashtable<Value, Value, HashFcn, identity<Value>, EqualKey, Alloc>;
@@ -38,7 +32,7 @@ class hash_multiset {
   using size_type = typename ht::size_type;
 
  public:// getter
-  hasher hash_funct() const noexcept { return rep.hash_funct(); }
+  hasher hash_funct() const noexcept { return rep.hash_func(); }
   key_equal key_eq() const noexcept { return rep.key_eq(); }
   size_type bucket_count() const { return rep.bucket_count(); }
   size_type max_bucket_count() const { return rep.max_bucket_count(); }

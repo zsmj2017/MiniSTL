@@ -90,8 +90,7 @@ struct hashtable_const_iterator {
   hashtable_const_iterator(const node *n, const _hashtable *tab)
       : cur(n), ht(tab) {}
   hashtable_const_iterator() = default;
-  hashtable_const_iterator(const iterator &it)
-      : cur(it.cur), ht(it.ht) {}// add implicit convert
+  hashtable_const_iterator(const iterator &it) : cur(it.cur), ht(it.ht) {}// add implicit convert
   reference operator*() const noexcept { return cur->val; }
   pointer operator->() const noexcept { return &(operator*()); }
   const_iterator &operator++() noexcept;
@@ -221,7 +220,7 @@ class hashtable {
   ~hashtable() { clear(); }
 
  public:// getter
-  hasher hash_funct() const noexcept { return hash; }
+  hasher hash_func() const noexcept { return hash; }
   key_equal key_eq() const noexcept { return equals; }
   size_type bucket_count() const noexcept { return buckets.size(); }
   size_type max_bucket_count() const noexcept {

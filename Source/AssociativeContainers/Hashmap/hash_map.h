@@ -11,16 +11,9 @@ template<class Key, class Value, class HashFcn, class EqualKey, class Alloc>
 inline bool operator==(const hash_map<Key, Value, HashFcn, EqualKey, Alloc> &,
                        const hash_map<Key, Value, HashFcn, EqualKey, Alloc> &);
 
-template<class Key, class Value, class HashFcn = hash<Value>,
-         class EqualKey = equal_to<Value>, class Alloc = simpleAlloc<Value>>
+template<class Key, class Value, class HashFcn = hash<Key>,
+         class EqualKey = equal_to<Key>, class Alloc = simpleAlloc<Value>>
 class hash_map {
-  // friend declaration
-  template<class _Key, class _Value, class _HashFcn, class _EqualKey,
-           class _Alloc>
-  friend bool operator==(
-      const hash_map<_Key, _Value, _HashFcn, _EqualKey, _Alloc> &,
-      const hash_map<_Key, _Value, _HashFcn, _EqualKey, _Alloc> &);
-
  private:// data member
   using ht = hashtable<pair<const Key, Value>, Key, HashFcn,
                        select1st<pair<const Key, Value>>, EqualKey, Alloc>;
@@ -40,7 +33,7 @@ class hash_map {
   using size_type = typename ht::size_type;
 
  public:// getter
-  hasher hash_funct() const noexcept { return rep.hash_funct(); }
+  hasher hash_funct() const noexcept { return rep.hash_func(); }
   key_equal key_eq() const noexcept { return rep.key_eq(); }
   size_type size() const noexcept { return rep.size(); }
   size_type max_size() const noexcept { return rep.max_size(); }
@@ -103,8 +96,7 @@ class hash_map {
     rep.insert_unique(first, last);
   }
   data_type &operator[](const key_type &key) {
-    return rep.find_or_insert(value_type(key, data_type()))
-        .second;// 见Effective STL Item24
+    return rep.find_or_insert(value_type(key, data_type())).second;// 见Effective STL Item24
   }
 
  public:// erase
