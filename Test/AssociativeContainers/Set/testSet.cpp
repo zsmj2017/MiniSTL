@@ -1,9 +1,7 @@
 #include "AssociativeContainers/Set/stl_set.h"
 #include <gtest/gtest.h>
-#include <string>
 
 using namespace ::MiniSTL;
-using std::string;
 
 class SetTest : public testing::Test {
  protected:
