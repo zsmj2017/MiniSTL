@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "hashtable.h"
+#include "AssociativeContainers/Hashtable/hashtable.h"
+#include "AssociativeContainers/Hashtable/hash_func.h"
 
 namespace MiniSTL {
 

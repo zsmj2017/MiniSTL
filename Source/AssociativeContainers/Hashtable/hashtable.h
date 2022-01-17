@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "stl_algo.h"
-#include "stl_vector.h"
+#include "Algorithms/algo/stl_algo.h"
+#include "SequenceContainers/Vector/stl_vector.h"
 #include <cstddef>
 
 namespace MiniSTL {
@@ -29,7 +29,7 @@ template<class Value, class Key, class HashFcn, class ExtractKey,
          class EqualKey, class Alloc>
 struct hashtable_iterator {
   // alias declarations
-  using __hashtable =
+  using _hashtable =
       MiniSTL::hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
   using iterator =
       hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
@@ -46,10 +46,10 @@ struct hashtable_iterator {
   using reference = Value &;
   using pointer = Value *;
 
-  node *cur;      // 当前指向的节点
-  __hashtable *ht;// 保持与hashtable的连接
+  node *cur;     // 当前指向的节点
+  _hashtable *ht;// 保持与hashtable的连接
 
-  hashtable_iterator(node *n, __hashtable *tab) : cur(n), ht(tab) {}
+  hashtable_iterator(node *n, _hashtable *tab) : cur(n), ht(tab) {}
   hashtable_iterator() = default;
   reference operator*() const noexcept { return cur->val; }
   pointer operator->() const noexcept { return &(operator*()); }
@@ -67,7 +67,7 @@ template<class Value, class Key, class HashFcn, class ExtractKey,
          class EqualKey, class Alloc>
 struct hashtable_const_iterator {
   // alias declarations
-  using __hashtable =
+  using _hashtable =
       MiniSTL::hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
   using iterator =
       hashtable_iterator<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>;
@@ -85,9 +85,9 @@ struct hashtable_const_iterator {
   using pointer = const Value *;
 
   const node *cur;
-  const __hashtable *ht;
+  const _hashtable *ht;
 
-  hashtable_const_iterator(const node *n, const __hashtable *tab)
+  hashtable_const_iterator(const node *n, const _hashtable *tab)
       : cur(n), ht(tab) {}
   hashtable_const_iterator() = default;
   hashtable_const_iterator(const iterator &it)
@@ -105,8 +105,8 @@ struct hashtable_const_iterator {
 };
 
 // data for hashtable
-enum { __stl_num_primes = 28 };// use enum not #define
-static const unsigned long __stl_prime_list[__stl_num_primes] = {
+enum { _stl_num_primes = 28 };// use enum not #define
+static const unsigned long _stl_prime_list[_stl_num_primes] = {
     53ul, 97ul, 193ul, 389ul, 769ul,
     1543ul, 3079ul, 6151ul, 12289ul, 24593ul,
     49157ul, 98317ul, 196613ul, 393241ul, 786433ul,
@@ -115,9 +115,9 @@ static const unsigned long __stl_prime_list[__stl_num_primes] = {
     1610612741ul, 3221225473ul, 4294967291ul};
 
 // 找出大于n的最小质数
-inline unsigned long __stl_next_prime(unsigned long n) noexcept {
-  const unsigned long *first = __stl_prime_list;
-  const unsigned long *last = __stl_prime_list + __stl_num_primes;
+inline unsigned long _stl_next_prime(unsigned long n) noexcept {
+  const unsigned long *first = _stl_prime_list;
+  const unsigned long *last = _stl_prime_list + _stl_num_primes;
   const unsigned long *pos = lower_bound(first, last, n);
   return pos == last ? *(last - 1) : *pos;
 }
@@ -130,12 +130,6 @@ class hashtable {
                                    Alloc>;
   friend struct hashtable_const_iterator<Value, Key, HashFcn, ExtractKey,
                                          EqualKey, Alloc>;
-  template<class _Value, class _Key, class _HashFcn, class _ExtractKey,
-           class _EqualKey, class _Alloc>
-  friend bool operator==(const hashtable<_Value, _Key, _HashFcn, _ExtractKey,
-                                         _EqualKey, _Alloc> &,
-                         const hashtable<_Value, _Key, _HashFcn, _ExtractKey,
-                                         _EqualKey, _Alloc> &);
 
  public:// alias declarations
   using hasher = HashFcn;
@@ -173,6 +167,7 @@ class hashtable {
       return n;
     } catch (std::exception &) {
       node_allocator::deallocate(n);
+      return nullptr;
     }
   }
 
@@ -183,7 +178,7 @@ class hashtable {
 
  private:// interface for bucket
   void initialize_buckets(size_type n) {
-    const size_type n_buckets = __stl_next_prime(n);
+    const size_type n_buckets = _stl_next_prime(n);
     // 保留空间，由于此时vector's size == 0，因此等价于全部置0
     buckets.reserve(n_buckets);
     buckets.insert(buckets.end(), n_buckets, static_cast<node *>(nullptr));
@@ -203,8 +198,8 @@ class hashtable {
     return bkt_num_key(get_key(obj), n);
   }
 
-  void erase_bucket(const size_type n, node *first, node *last);
-  void erase_bucket(const size_type n, node *last);
+  void erase_bucket(size_type n, node *first, node *last);
+  void erase_bucket(size_type n, node *last);
 
  private:// aux interface
   pair<iterator, bool> insert_unique_noreseize(const value_type &);
@@ -230,7 +225,7 @@ class hashtable {
   key_equal key_eq() const noexcept { return equals; }
   size_type bucket_count() const noexcept { return buckets.size(); }
   size_type max_bucket_count() const noexcept {
-    return __stl_prime_list[__stl_num_primes - 1];
+    return _stl_prime_list[_stl_num_primes - 1];
   }
   size_type size() const noexcept { return num_elements; }
   size_type max_size() const noexcept { return size_type(-1); }
@@ -418,7 +413,7 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(
   // size,则试图重建表格（我想是为了保证负载率低于0.5）
   const size_type old_n = buckets.size();
   if (num_elements_hint > old_n) {//确定需要扩容
-    const size_type n = __stl_next_prime(num_elements_hint);
+    const size_type n = _stl_next_prime(num_elements_hint);
     if (n > old_n) {
       vector<node *> temp(n, static_cast<node *>(nullptr));
       try {
@@ -428,12 +423,10 @@ void hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::resize(
           while (first) {
             // 找出节点应置于new_bucket的何处
             size_type new_bucket = bkt_num(first->val, n);
-            buckets[bucket] = first->next;// 将first与原vector分离
-            first->next =
-                temp[new_bucket];// first连接至new buckets
-            temp[new_bucket] =
-                first;              // 将first彻底放入new bucket内部
-            first = buckets[bucket];// 回归old bucket的下一个节点
+            buckets[bucket] = first->next; // 将first与原vector分离
+            first->next = temp[new_bucket];// first连接至new buckets
+            temp[new_bucket] = first;      // 将first彻底放入new bucket内部
+            first = buckets[bucket];       // 回归old bucket的下一个节点
           }
         }
         buckets.swap(temp);// copy && swap
@@ -565,8 +558,7 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::equal_range(
           return pii(iterator(first, this), iterator(cur, this));
       for (size_type m = n + 1; m < buckets.size(); ++m)
         if (buckets[m])
-          return pii(iterator(first, this),
-                     iterator(buckets[m], this));
+          return pii(iterator(first, this), iterator(buckets[m], this));
       return pii(iterator(first, this), end());
     }
   return pii(end(), end());
@@ -591,8 +583,7 @@ hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc>::equal_range(
                      const_iterator(cur, this));
       for (size_type m = n + 1; m < buckets.size(); ++m)
         if (buckets[m])
-          return pii(const_iterator(first, this),
-                     const_iterator(buckets[m], this));
+          return pii(const_iterator(first, this), const_iterator(buckets[m], this));
       return pii(const_iterator(first, this), cend());
     }
   return pii(cend(), cend());

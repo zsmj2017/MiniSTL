@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace MiniSTL {
 
@@ -11,7 +11,7 @@ struct hash {};
 // 显然，hash并不能支持所有类型，针对某些自定义类型，应当自主撰写函数对象模板全特化版本
 
 // 对const char* 提供字符串转换函数
-inline size_t __stl_hash_string(const char *s) {
+inline size_t _stl_hash_string(const char *s) {
   unsigned long h = 0;
   for (; *s; ++s) h = 5 * h + *s;
   return static_cast<size_t>(h);
@@ -20,14 +20,14 @@ inline size_t __stl_hash_string(const char *s) {
 template<>
 struct hash<char *> {
   size_t operator()(const char *s) const noexcept {
-    return __stl_hash_string(s);
+    return _stl_hash_string(s);
   }
 };
 
 template<>
 struct hash<const char *> {
   size_t operator()(const char *s) const noexcept {
-    return __stl_hash_string(s);
+    return _stl_hash_string(s);
   }
 };
 
