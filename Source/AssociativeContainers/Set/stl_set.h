@@ -124,13 +124,13 @@ class set {
  public:// erase
   void erase(iterator pos) {
     using rep_iterator = typename rep_type::iterator;
-    t.erase(reinterpret_cast<rep_iterator>(pos));
+    t.erase(reinterpret_cast<rep_iterator &>(pos));
   }
   size_type erase(const key_type &val) { return t.erase(val); }
   void erase(iterator first, iterator last) {
     using rep_iterator = typename rep_type::iterator;
-    t.erase(reinterpret_cast<rep_iterator>(first),
-            reinterpret_cast<rep_iterator>(last));
+    t.erase(reinterpret_cast<rep_iterator &>(first),
+            reinterpret_cast<rep_iterator &>(last));
   }
   void clear() noexcept { t.clear(); }
 
