@@ -47,6 +47,8 @@ class hash_map {
     return rep.elems_in_bucket(n);
   }
 
+  iterator begin() const noexcept { return rep.cbegin(); }
+  iterator end() const noexcept { return rep.cend(); }
   const_iterator cbgein() const noexcept { return rep.cbegin(); }
   const_iterator cend() const noexcept { return rep.cend(); }
 

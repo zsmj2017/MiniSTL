@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "AssociativeContainers/Hashtable/hashtable.h"
 #include "AssociativeContainers/Hashtable/hash_func.h"
+#include "AssociativeContainers/Hashtable/hashtable.h"
 
 namespace MiniSTL {
 
@@ -49,6 +49,8 @@ class hash_multimap {
     return rep.elems_in_bucket(n);
   }
 
+  iterator begin() const noexcept { return rep.cbegin(); }
+  iterator end() const noexcept { return rep.cend(); }
   const_iterator cbgein() const noexcept { return rep.cbegin(); }
   const_iterator cend() const noexcept { return rep.cend(); }
 

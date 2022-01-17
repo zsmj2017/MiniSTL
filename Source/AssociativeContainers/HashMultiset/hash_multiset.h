@@ -2,7 +2,6 @@
 
 #include "AssociativeContainers/Hashtable/hashtable.h"
 
-
 namespace MiniSTL {
 
 template<class Value, class HashFcn, class EqualKey, class Alloc>
@@ -74,13 +73,15 @@ class hash_multiset {
   size_type size() const noexcept { return rep.size(); }
   size_type max_size() const noexcept { return rep.max_size(); }
   bool empty() const noexcept { return rep.empty(); }
+  iterator begin() const noexcept { return rep.cbegin(); }
+  iterator end() const noexcept { return rep.cend(); }
   const_iterator cbegin() const noexcept { return rep.cbegin(); }
   const_iterator cend() const noexcept { return rep.cend(); }
 
  public:// setter
   void resize(size_type hint) { rep.resize(hint); }
-  iterator begin() const noexcept { return rep.begin(); }
-  iterator end() const noexcept { return rep.end(); }
+  iterator begin() { return rep.begin(); }
+  iterator end() { return rep.end(); }
 
  public:// swap
   void swap(hash_multiset &rhs) noexcept { rep.swap(rhs.rep); }
