@@ -409,3 +409,215 @@ TEST_F(DequeTest, ASSIGN) {
   for (auto s : ds) EXPECT_EQ(s, "cat");
   EXPECT_EQ(ds.size(), 3);
 }
+
+// test cases from https://sourceforge.net/projects/stlport/
+TEST_F(DequeTest, deque1) {
+  deque<int> d;
+  d.push_back(4);
+  d.push_back(9);
+  d.push_back(16);
+  d.push_front(1);
+
+  ASSERT_TRUE(d[0] == 1);
+  ASSERT_TRUE(d[1] == 4);
+  ASSERT_TRUE(d[2] == 9);
+  ASSERT_TRUE(d[3] == 16);
+
+  d.pop_front();
+  d[2] = 25;
+
+  ASSERT_TRUE(d[0] == 4);
+  ASSERT_TRUE(d[1] == 9);
+  ASSERT_TRUE(d[2] == 25);
+
+  //Some compile time tests:
+  deque<int>::iterator dit = d.begin();
+  deque<int>::const_iterator cdit(d.begin());
+  ASSERT_TRUE((dit - cdit) == 0);
+  ASSERT_TRUE((cdit - dit) == 0);
+  ASSERT_TRUE((dit - dit) == 0);
+  ASSERT_TRUE((cdit - cdit) == 0);
+  ASSERT_TRUE(!((dit < cdit) || (dit > cdit) || (dit != cdit) || !(dit <= cdit) || !(dit >= cdit)));
+}
+
+TEST_F(DequeTest, insert) {
+  deque<int> d;
+  d.push_back(0);
+  d.push_back(1);
+  d.push_back(2);
+  ASSERT_TRUE(d.size() == 3);
+
+  deque<int>::iterator dit;
+
+  //Insertion before begin:
+  dit = d.insert(d.begin(), 3);
+  ASSERT_TRUE(dit != d.end());
+  ASSERT_TRUE(*dit == 3);
+  ASSERT_TRUE(d.size() == 4);
+  ASSERT_TRUE(d[0] == 3);
+
+  //Insertion after begin:
+  dit = d.insert(d.begin() + 1, 4);
+  ASSERT_TRUE(dit != d.end());
+  ASSERT_TRUE(*dit == 4);
+  ASSERT_TRUE(d.size() == 5);
+  ASSERT_TRUE(d[1] == 4);
+
+  //Insertion at end:
+  dit = d.insert(d.end(), 5);
+  ASSERT_TRUE(dit != d.end());
+  ASSERT_TRUE(*dit == 5);
+  ASSERT_TRUE(d.size() == 6);
+  ASSERT_TRUE(d[5] == 5);
+
+  //Insertion before last element:
+  dit = d.insert(d.end() - 1, 6);
+  ASSERT_TRUE(dit != d.end());
+  ASSERT_TRUE(*dit == 6);
+  ASSERT_TRUE(d.size() == 7);
+  ASSERT_TRUE(d[5] == 6);
+
+  //Insertion of several elements before begin
+  d.insert(d.begin(), 2, 7);
+  ASSERT_TRUE(d.size() == 9);
+  ASSERT_TRUE(d[0] == 7);
+  ASSERT_TRUE(d[1] == 7);
+
+  //Insertion of several elements after begin
+  //There is more elements to insert than elements before insertion position
+  d.insert(d.begin() + 1, 2, 8);
+  ASSERT_TRUE(d.size() == 11);
+  ASSERT_TRUE(d[1] == 8);
+  ASSERT_TRUE(d[2] == 8);
+
+  //There is less elements to insert than elements before insertion position
+  d.insert(d.begin() + 3, 2, 9);
+  ASSERT_TRUE(d.size() == 13);
+  ASSERT_TRUE(d[3] == 9);
+  ASSERT_TRUE(d[4] == 9);
+
+  //Insertion of several elements at end:
+  d.insert(d.end(), 2, 10);
+  ASSERT_TRUE(d.size() == 15);
+  ASSERT_TRUE(d[14] == 10);
+  ASSERT_TRUE(d[13] == 10);
+
+  //Insertion of several elements before last:
+  //There is more elements to insert than elements after insertion position
+  d.insert(d.end() - 1, 2, 11);
+  ASSERT_TRUE(d.size() == 17);
+  ASSERT_TRUE(d[15] == 11);
+  ASSERT_TRUE(d[14] == 11);
+
+  //There is less elements to insert than elements after insertion position
+  d.insert(d.end() - 3, 2, 12);
+  ASSERT_TRUE(d.size() == 19);
+  ASSERT_TRUE(d[15] == 12);
+  ASSERT_TRUE(d[14] == 12);
+}
+
+// TODO::need impl at()
+#if 0
+TEST_F(DequeTest, at) {
+  deque<int> d;
+  deque<int> const &cd = d;
+
+  d.push_back(10);
+  ASSERT_TRUE(d.at(0) == 10);
+  d.at(0) = 20;
+  ASSERT_TRUE(cd.at(0) == 20);
+
+  for (;;) {
+    try {
+      d.at(1) = 20;
+      ASSERT_TRUE(false);
+    } catch (out_of_range const &) {
+      return;
+    } catch (...) {
+      ASSERT_TRUE(false);
+    }
+  }
+}
+#endif
+
+TEST_F(DequeTest, auto_ref) {
+  int i;
+  deque<int> ref;
+  for (i = 0; i < 5; ++i) {
+    ref.push_back(i);
+  }
+
+  deque<deque<int>> d_d_int(1, ref);
+  d_d_int.push_back(d_d_int[0]);
+  d_d_int.push_back(ref);
+  d_d_int.push_back(d_d_int[0]);
+  d_d_int.push_back(d_d_int[0]);
+  d_d_int.push_back(ref);
+
+  for (i = 0; i < 5; ++i) {
+    ASSERT_TRUE(d_d_int[i] == ref);
+  }
+}
+
+//This test check that deque implementation do not over optimize
+//operation as PointEx copy constructor is trivial
+TEST_F(DequeTest, optimizations_check) {
+  struct Point {
+    int x, y;
+  };
+
+  struct PointEx : public Point {
+    PointEx() : Point(), builtFromBase(false) {}
+    PointEx(const Point &) : builtFromBase(true) {}
+
+    bool builtFromBase;
+  };
+  deque<Point> d1(1);
+  ASSERT_TRUE(d1.size() == 1);
+
+  deque<PointEx> d2(d1.begin(), d1.end());
+  ASSERT_TRUE(d2.size() == 1);
+  ASSERT_TRUE(d2[0].builtFromBase == true);
+
+  d2.insert(d2.end(), d1.begin(), d1.end());
+  ASSERT_TRUE(d2.size() == 2);
+  ASSERT_TRUE(d2[1].builtFromBase == true);
+}
+
+TEST_F(DequeTest, erase) {
+  deque<int> dint;
+  dint.push_back(3);
+  dint.push_front(2);
+  dint.push_back(4);
+  dint.push_front(1);
+  dint.push_back(5);
+  dint.push_front(0);
+  dint.push_back(6);
+
+  deque<int>::iterator it(dint.begin() + 1);
+  ASSERT_TRUE(*it == 1);
+
+  dint.erase(dint.begin());
+  ASSERT_TRUE(*it == 1);
+
+  it = dint.end() - 2;
+  ASSERT_TRUE(*it == 5);
+
+  dint.erase(dint.end() - 1);
+  ASSERT_TRUE(*it == 5);
+
+  dint.push_back(6);
+  dint.push_front(0);
+
+  it = dint.begin() + 2;
+  ASSERT_TRUE(*it == 2);
+
+  dint.erase(dint.begin(), dint.begin() + 2);
+  ASSERT_TRUE(*it == 2);
+
+  it = dint.end() - 3;
+  ASSERT_TRUE(*it == 4);
+
+  dint.erase(dint.end() - 2, dint.end());
+  ASSERT_TRUE(*it == 4);
+}
