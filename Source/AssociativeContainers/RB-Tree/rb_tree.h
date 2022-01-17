@@ -193,6 +193,7 @@ class rb_tree {
   }
   bool empty() const noexcept { return node_count == 0; }
   size_type size() const noexcept { return node_count; }
+  Compare key_comp() const noexcept { return Compare(key_compare); }
 
  public:// setter
   iterator begin() noexcept { return leftmost(); }
@@ -337,7 +338,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rb_tree_rebalance_for_erase(
   base_ptr x_parent = nullptr;
   if (!y->left)// z至多存在一个孩子
     x = y->right;
-  else { // z至少存在一个孩子
+  else {// z至少存在一个孩子
     if (!y->right) {
       x = y->left;
     } else {
