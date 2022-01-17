@@ -14,9 +14,9 @@ template<class Key, class T, class Compare, class Alloc>
 inline bool operator==(const map<Key, T, Compare, Alloc> &lhs,
                        const map<Key, T, Compare, Alloc> &rhs);
 
-template<class Key, class T, class Compare, class Alloc>
-inline bool operator==(const map<Key, T, Compare, Alloc> &lhs,
-                       const map<Key, T, Compare, Alloc> &rhs);
+template<class Key, class Tp, class Compare, class Alloc>
+inline bool operator<(const map<Key, Tp, Compare, Alloc> &lhs,
+                      const map<Key, Tp, Compare, Alloc> &rhs);
 
 template<class Key, class T, class Compare = less<Key>,
          class Alloc = simpleAlloc<T>>
@@ -61,9 +61,8 @@ class map {
   using const_reference = typename rep_type::const_reference;
   using iterator = typename rep_type::iterator;
   using const_iterator = typename rep_type::const_iterator;
-  // TODO::reverse
-  // using reverse_iterator = typename rep_type::reverse_iterator;
-  // using const_reverse_iterator = typename rep_type::const_reverse_iterator;
+  using reverse_iterator = typename rep_type::reverse_iterator;
+  using const_reverse_iterator = typename rep_type::const_reverse_iterator;
   using size_type = typename rep_type::size_type;
   using difference_type = typename rep_type::difference_type;
 
@@ -92,11 +91,14 @@ class map {
   value_compare value_comp() const noexcept {
     return value_compare(t.key_comp());
   }
+  const_iterator begin() const noexcept { return t.begin(); }
+  const_iterator end() const noexcept { return t.end(); }
   const_iterator cbegin() const noexcept { return t.cbegin(); }
   const_iterator cend() const noexcept { return t.cend(); }
-  // TODO::reverse
-  // const_reverse_iterator crbegin() const noexcept { return t.rbegin(); }
-  // const_reverse_iterator crend() const noexcept { return t.rend(); }
+  const_reverse_iterator rbegin() const noexcept { return t.rbegin(); }
+  const_reverse_iterator rend() const noexcept { return t.rend(); }
+  const_reverse_iterator crbegin() const noexcept { return t.rbegin(); }
+  const_reverse_iterator crend() const noexcept { return t.rend(); }
   bool empty() const noexcept { return t.empty(); }
   size_type size() const noexcept { return t.size(); }
   size_type max_size() const noexcept { return t.max_size(); }
@@ -104,9 +106,8 @@ class map {
  public:// setter
   iterator begin() noexcept { return t.begin(); }
   iterator end() noexcept { return t.end(); }
-  // TODO::reverse
-  // reverse_iterator rbegin() noexcept { return t.rbegin(); }
-  // reverse_iterator rend() noexcept { return t.rend(); }
+  reverse_iterator rbegin() noexcept { return t.rbegin(); }
+  reverse_iterator rend() noexcept { return t.rend(); }
 
   // map的operator[]具备插入功能
   data_type &operator[](const key_type &k) {

@@ -58,9 +58,8 @@ class multimap {
   using const_reference = typename rep_type::const_reference;
   using iterator = typename rep_type::iterator;
   using const_iterator = typename rep_type::const_iterator;
-  // TODO:
-  // using reverse_iterator = typename rep_type::reverse_iterator;
-  // using const_reverse_iterator = typename rep_type::const_reverse_iterator;
+  using reverse_iterator = typename rep_type::reverse_iterator;
+  using const_reverse_iterator = typename rep_type::const_reverse_iterator;
   using size_type = typename rep_type::size_type;
   using difference_type = typename rep_type::difference_type;
 
@@ -90,11 +89,14 @@ class multimap {
   value_compare value_comp() const noexcept {
     return value_compare(t.key_comp());
   }
-  const_iterator cbegin() const { return t.cbegin(); }
-  const_iterator cend() const { return t.cend(); }
-  // TODO:
-  // const_reverse_iterator crbegin() const noexcept { return t.rbegin(); }
-  // const_reverse_iterator crend() const noexceot { return t.rend(); }
+  const_iterator begin() const noexcept { return t.begin(); }
+  const_iterator end() const noexcept { return t.end(); }
+  const_iterator cbegin() const noexcept { return t.cbegin(); }
+  const_iterator cend() const noexcept { return t.cend(); }
+  const_reverse_iterator rbegin() const noexcept { return t.rbegin(); }
+  const_reverse_iterator rend() const noexcept { return t.rend(); }
+  const_reverse_iterator crbegin() const noexcept { return t.rbegin(); }
+  const_reverse_iterator crend() const noexcept { return t.rend(); }
   bool empty() const noexcept { return t.empty(); }
   size_type size() const noexcept { return t.size(); }
   size_type max_size() const { return t.max_size(); }
@@ -102,9 +104,8 @@ class multimap {
  public:// setter
   iterator begin() { return t.begin(); }
   iterator end() { return t.end(); }
-  // TODO:
-  // reverse_iterator rbegin() { return t.rbegin(); }
-  // reverse_iterator rend() { return t.rend(); }
+  reverse_iterator rbegin() { return t.rbegin(); }
+  reverse_iterator rend() { return t.rend(); }
 
  public:// swap
   void swap(multimap<Key, T, Compare, Alloc> &x) noexcept { t.swap(x.t); }
