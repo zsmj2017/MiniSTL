@@ -336,15 +336,6 @@ BidirectionalIterator partition(BidirectionalIterator first,
   }
 }
 
-// remove:本身并不做remove操作，只是将元素后移
-template<class ForwardIterator, class T>
-ForwardIterator remove(ForwardIterator first, ForwardIterator last, T value) {
-  first = find(first, last, value);//循序找出第一个相等元素
-  ForwardIterator next = first;
-  return first == last ? first
-                       : remove_copy(++next, last, value);//利用remove_copy (TODO::存在优化空间）
-}
-
 // remove_copy:将结果拷贝到result
 template<class InputIterator, class OutputIterator, class T>
 OutputIterator remove_copy(InputIterator first, InputIterator last,
@@ -357,13 +348,13 @@ OutputIterator remove_copy(InputIterator first, InputIterator last,
   return result;
 }
 
-// remove_if:在remove的基础上加入了谓词
-template<class ForwardIterator, class Predicate>
-ForwardIterator remove_if(ForwardIterator first, ForwardIterator last,
-                          Predicate pred) {
-  first = find_if(first, last, pred);
+// remove:本身并不做remove操作，只是将元素后移
+template<class ForwardIterator, class T>
+ForwardIterator remove(ForwardIterator first, ForwardIterator last, T value) {
+  first = find(first, last, value);//循序找出第一个相等元素
   ForwardIterator next = first;
-  return first == last ? first : remove_copy_if(++next, last, pred);
+  return first == last ? first
+                       : remove_copy(++next, last, first, value);//利用remove_copy (TODO::存在优化空间）
 }
 
 // remove_copy_if:在remove_copy的基础上加入了谓词
@@ -376,6 +367,15 @@ OutputIterator remove_copy_if(InputIterator first, InputIterator last,
     }
   }
   return result;
+}
+
+// remove_if:在remove的基础上加入了谓词
+template<class ForwardIterator, class Predicate>
+ForwardIterator remove_if(ForwardIterator first, ForwardIterator last,
+                          Predicate pred) {
+  first = find_if(first, last, pred);
+  ForwardIterator next = first;
+  return first == last ? first : remove_copy_if(++next, last, first, pred);
 }
 
 // replace:将[first,last)区间内所有old_value替换为new_value
