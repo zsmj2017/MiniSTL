@@ -82,11 +82,7 @@ inline ForwardIterator1 find_end(ForwardIterator1 first1,
                                  ForwardIterator1 last1,
                                  ForwardIterator2 first2,
                                  ForwardIterator2 last2) {
-  using category1 =
-      typename iterator_traits<ForwardIterator1>::iterator_category;
-  using category2 =
-      typename iterator_traits<ForwardIterator2>::iterator_category;
-  return _find_end(first1, last1, first2, last2, category1(), category2());
+  return _find_end(first1, last1, first2, last2, iterator_category_t<ForwardIterator1>(), iterator_category_t<ForwardIterator2>());
 }
 
 template<class ForwardIterator1, class ForwardIterator2>
@@ -427,7 +423,7 @@ OutputIterator remove_copy_if(InputIterator first, InputIterator last,
 // reverse:将指定区间颠倒重排，迭代器的性质会对效率产生影响
 template<class BidirectionalIterator>
 inline void reverse(BidirectionalIterator first, BidirectionalIterator last) {
-  _reverse(first, last, iterator_category(last));
+  _reverse(first, last, iterator_category_t<BidirectionalIterator>());
 }
 
 template<class BidirectionalIterator>
@@ -557,8 +553,8 @@ template<class ForwardIterator1, class ForwardIterator2>
 inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
                                ForwardIterator2 first2,
                                ForwardIterator2 last2) {
-  return _search(first1, last1, first2, last2, distance_type(first1),
-                 dustance_type(first2));
+  return _search(first1, last1, first2, last2, difference_type_t<ForwardIterator1>(),
+                 difference_type_t<ForwardIterator2>());
 }
 
 template<class ForwardIterator1, class ForwardIterator2, class Distance1,
@@ -706,7 +702,7 @@ OutputIterator unique_copy(InputIterator first, InputIterator last,
   if (first == last) {
     return result;
   }
-  return _unique_copy(first, last, result, iterator_category(result));
+  return _unique_copy(first, last, result, iterator_category_t<OutputIterator>());
 }
 
 // forward
@@ -802,13 +798,13 @@ RandomAccessIterator _lower_bound(RandomAccessIterator first,
 template<class ForwardIterator, class T>
 inline ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last,
                                    const T &value) {
-  return _upper_bound(first, last, value, distance_type(first),
-                      iterator_category(first));
+  return _upper_bound(first, last, value, difference_type_t<ForwardIterator>(),
+                      iterator_category_t<ForwardIterator>());
 }
 
 template<class ForwardIterator, class T, class Distance>
 ForwardIterator _upper_bound(ForwardIterator first, ForwardIterator last,
-                             const T &value, Distance *,
+                             const T &value, Distance,
                              forward_iterator_tag) {
   Distance len = 0;
   distance(first, last, len);//求取长度
@@ -833,7 +829,7 @@ ForwardIterator _upper_bound(ForwardIterator first, ForwardIterator last,
 template<class RandomAccessIterator, class T, class Distance>
 RandomAccessIterator _upper_bound(RandomAccessIterator first,
                                   RandomAccessIterator last, const T &value,
-                                  Distance *, random_access_iterator_tag) {
+                                  Distance, random_access_iterator_tag) {
   Distance len = last - first;
   Distance half;
   RandomAccessIterator middle;
@@ -932,7 +928,7 @@ bool pre_permutation(BidirectionIterator first, BidirectionIterator last) {
 template<class RandomAccessIterator>
 inline void random_shuffle(RandomAccessIterator first,
                            RandomAccessIterator last) {
-  _random_shuffle(first, last, distance_type(first));
+  _random_shuffle(first, last, difference_type_t<RandomAccessIterator>());
 }
 
 template<class RandomAccessIterator, class Distance>
@@ -975,7 +971,7 @@ inline void partial_sort(RandomAccessIterator first,
   make_heap(first, middle);//in heap_algorithm.h
   for (RandomAccessIterator i = middle; i != last; ++i) {
     if (*i < *first) {
-      _pop_heap(first, middle, i, T(*i), distance_type(first));
+      _pop_heap(first, middle, i, T(*i), difference_type_t<RandomAccessIterator>());
     }
   }
   sort_heap(first, middle);
@@ -1171,8 +1167,8 @@ template<class ForwardIterator, class T>
 inline pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first,
                                                           ForwardIterator last,
                                                           const T &value) {
-  return _equal_range(first, last, value, distance_type(first),
-                      iterator_category(first));
+  return _equal_range(first, last, value, difference_type_t<ForwardIterator>(),
+                      iterator_category_t<ForwardIterator>());
 }
 
 template<class RandomAccessIterator, class T, class Distance>
