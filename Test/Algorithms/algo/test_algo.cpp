@@ -4,7 +4,6 @@
 #include "SequenceContainers/List/stl_list.h"
 #include "SequenceContainers/Slist/slist.h"
 #include "SequenceContainers/Vector/stl_vector.h"
-#include <cstring>
 #include <gtest/gtest.h>
 
 using namespace ::MiniSTL;
@@ -13,8 +12,6 @@ class AlgoTest : public testing::Test {
  protected:
   void SetUp() override {
   }
-  static int equal_length(const char *v1_, const char *v2_);
-  static int mult(int initial_, int element_);
 };
 
 TEST_F(AlgoTest, min_max) {
