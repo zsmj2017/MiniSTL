@@ -137,7 +137,7 @@ class back_insert_iterator {
   using reference = void;
 
  public:
-  explicit back_insert_iterator(Container &value) : container(value) {}
+  explicit back_insert_iterator(Container &value) : container(&value) {}
   back_insert_iterator &operator=(
       const typename Container::value_type &value) {
     container->push_back(value);//本质上是调用了push_back
@@ -170,7 +170,7 @@ class front_insert_iterator {
   using reference = void;
 
  public:
-  explicit front_insert_iterator(Container &value) : container(value) {}
+  explicit front_insert_iterator(Container &value) : container(&value) {}
   front_insert_iterator &operator=(
       const typename Container::value_type &value) {
     container->push_front(value);
@@ -203,7 +203,7 @@ class insert_iterator {
 
  public:
   insert_iterator(Container &value, typename Container::iterator i)
-      : container(value), iter(i) {}
+      : container(&value), iter(i) {}
   insert_iterator &operator=(const typename Container::value_type &value) {
     container->insert(iter, value);//调用insert
     ++iter;                        //保证insert_iterator永远与目标贴合
