@@ -69,7 +69,7 @@ InputIterator find(InputIterator first, InputIterator last, T value) {
 // find_if:将指向“令pred的计算结果为true”的第一个元素的迭代器返回
 template<class InputIterator, class Predicate>
 InputIterator find_if(InputIterator first, InputIterator last, Predicate pred) {
-  while (first != last && pred(*first)) {
+  while (first != last && !pred(*first)) {
     ++first;
   }
   return first;
@@ -343,6 +343,7 @@ OutputIterator remove_copy(InputIterator first, InputIterator last,
   for (; first != last; ++first) {
     if (*first != value) {
       *result++ = *first;
+      ++result;
     }
   }
   return result;
@@ -364,6 +365,7 @@ OutputIterator remove_copy_if(InputIterator first, InputIterator last,
   for (; first != last; ++first) {
     if (!pred(*first)) {
       *result++ = *first;
+      ++result;
     }
   }
   return result;
@@ -402,8 +404,8 @@ OutputIterator replace_copy(InputIterator first, InputIterator last,
 
 // replace_if:所有被pred判定为true的元素将被取代为new_value
 template<class ForwardIterator, class Predicate, class T>
-ForwardIterator replace_if(ForwardIterator first, ForwardIterator last,
-                           Predicate pred, const T &new_value) {
+void replace_if(ForwardIterator first, ForwardIterator last,
+                Predicate pred, const T &new_value) {
   for (; first != last; ++first) {
     if (pred(*first)) {
       *first = new_value;

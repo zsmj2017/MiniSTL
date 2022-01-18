@@ -203,7 +203,7 @@ class binder1st
             const typename Operation::first_argument_type &y)
       : op(x), value(y) {}
   typename Operation::result_type operator()(
-      const typename Operation::second_argument_type &x) const {
+      typename Operation::second_argument_type &x) const {
     return op(value, x);// 调用表达式，将value作为第一参数
   }
 };
@@ -226,7 +226,7 @@ class binder2nd : public unary_function<typename Operation::first_argument_type,
             const typename Operation::second_argument_type &y)
       : op(x), value(y) {}
   typename Operation::result_type operator()(
-      const typename Operation::first_argument_type &x) const {
+      typename Operation::first_argument_type &x) const {
     return op(x, value);
   }
 };
@@ -290,7 +290,6 @@ class pointer_to_unary_function : public unary_function<Arg, Result> {
   Result (*ptr)(Arg);
 
  public:
-  pointer_to_unary_function() {}
   explicit pointer_to_unary_function(Result (*x)(Arg)) : ptr(x) {}
   Result operator()(Arg x) const { return ptr(x); }
 };
@@ -306,7 +305,6 @@ class pointer_to_binary_function : public binary_function<Arg1, Arg2, Result> {
   Result (*ptr)(Arg1, Arg2);
 
  public:
-  pointer_to_binary_function() {}
   explicit pointer_to_binary_function(Result (*x)(Arg1, Arg2)) : ptr(x) {}
   Result operator()(Arg1 x, Arg2 y) const { return ptr(x, y); }
 };
