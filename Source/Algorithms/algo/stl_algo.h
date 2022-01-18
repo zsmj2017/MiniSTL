@@ -635,7 +635,7 @@ ForwardIterator search_n(ForwardIterator first, ForwardIterator last,
       Integer n = count - 1;// value应当再出现n次
       ForwardIterator i = first;
       ++i;
-      while (i != last && n != 0 && *i == value) {//接下来也是value
+      while (i != last && n != 0 && binary_pred(*i, value)) {// 接下来依然符合条件
         ++i;
         --n;
       }
@@ -995,7 +995,7 @@ void _unguarded_linear_insert(RandomAccessIterator last, T value) {
 
 template<class RandomAccessIterator, class T>
 inline void _linear_insert(RandomAccessIterator first,
-                           RandomAccessIterator last, T*) {
+                           RandomAccessIterator last, T *) {
   T value = *last;                       //记录尾元素
   if (value < *first) {                  //尾元素小于头元素（头必为最小元素）
     copy_backward(first, last, last + 1);//整个区间右移一位
@@ -1100,7 +1100,7 @@ void _introsort_loop(RandomAccessIterator first, RandomAccessIterator last,
 
 template<class RandomAccessIterator, class T>
 void _unguarded_insertion_sort_aux(RandomAccessIterator first,
-                                   RandomAccessIterator last, T*) {
+                                   RandomAccessIterator last, T *) {
   for (RandomAccessIterator i = first; i != last; ++i)
     _unguarded_linear_insert(i, T(*i));
 }
