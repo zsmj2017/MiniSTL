@@ -8,17 +8,7 @@ class AdvanceTest : public testing::Test {
  protected:
   void SetUp() override {
   }
-  static int equal_length(const char *v1_, const char *v2_);
-  static int mult(int initial_, int element_);
 };
-
-int AdvanceTest::mult(int initial_, int element_) {
-  return initial_ * element_;
-}
-
-int AdvanceTest::equal_length(const char *v1_, const char *v2_) {
-  return std::strlen(v1_) == std::strlen(v2_);
-}
 
 TEST_F(AdvanceTest, adv) {
   typedef vector<int> IntVector;
