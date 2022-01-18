@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-#include <functional>// TODO::for std::mutiplies
+#include "Function/stl_function.h"
+
+namespace MiniSTL {
 
 //累积算法
 template<class InputIterator, class T>
@@ -12,7 +14,7 @@ T accumulate(InputIterator first, InputIterator last, T init = T()) {
 template<class InputIterator, class T, class BinaryOperation>
 T accumulate(InputIterator first, InputIterator last, T init,
              BinaryOperation binary_op) {//二元操作符,不必满足交换律、结合律
-  for (; first != last; ++first) binary_op(init, *first);
+  for (; first != last; ++first) init = binary_op(init, *first);
   return init;
 }
 
@@ -123,7 +125,7 @@ OutputIterator partial_sum(InputIterator first, InputIterator last,
 //对x反复执行n次算数操作
 template<class T, class Integer>
 inline T power(T x, Integer n) {
-  return power(x, n, std::mutiplies<T>());
+  return power(x, n, multiplies<T>());
 }
 
 template<class T, class Integer, class MonoidOperation>
@@ -153,3 +155,4 @@ template<class ForwardIterator, class T>
 void itoa(ForwardIterator first, ForwardIterator last, T value) {
   while (first != last) *first++ = value++;
 }
+}// namespace MiniSTL
