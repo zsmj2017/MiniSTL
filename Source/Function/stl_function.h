@@ -107,6 +107,18 @@ struct logical_not : public unary_function<T, bool> {
   bool operator()(const T &x) const { return !x; }
 };
 
+// 奇偶判定
+template<class T>
+struct odd : public unary_function<T, bool> {
+  bool operator()(T n) const { return (n % 2) == 1; }
+};
+
+// 非负判定
+template<class T>
+struct positive : public unary_function<T, bool> {
+  bool operator()(T n) const { return n >= 0; }
+};
+
 // 证同，选择，投射
 // 只将参数原封不动地返回，之所以有这般设计是为了增加间接性
 template<class T>
@@ -312,7 +324,7 @@ class mem_fun_t : public unary_function<T *, S> {
   S operator()(T *p) const { return (p->*f)(); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   ();
 };
 
@@ -323,7 +335,7 @@ class const_mem_fun_t : public unary_function<const T *, S> {
   S operator()(const T *p) const { return (p->*f)(); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   () const;
 };
 
@@ -334,7 +346,7 @@ class mem_fun_ref_t : public unary_function<T, S> {
   S operator()(T &r) const { return (r.*f)(); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   ();
 };
 
@@ -345,7 +357,7 @@ class const_mem_fun_ref_t : public unary_function<T, S> {
   S operator()(const T &r) const { return (r.*f)(); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   () const;
 };
 
@@ -356,7 +368,7 @@ class mem_fun1_t : public binary_function<T *, Arg, S> {
   S operator()(T *p, Arg x) const { return (p->*f)(x); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   (Arg);
 };
 
@@ -367,7 +379,7 @@ class const_mem_fun1_t : public binary_function<const T *, Arg, S> {
   S operator()(const T *p, Arg x) const { return (p->*f)(x); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   (Arg) const;
 };
 
@@ -378,7 +390,7 @@ class mem_fun1_ref_t : public binary_function<T, Arg, S> {
   S operator()(T &r, Arg x) const { return (r.*f)(x); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   (Arg);
 };
 
@@ -389,7 +401,7 @@ class const_mem_fun1_ref_t : public binary_function<T, Arg, S> {
   S operator()(const T &r, Arg x) const { return (r.*f)(x); }
 
  private:
-  S (T::*f)
+  S(T::*f)
   (Arg) const;
 };
 
