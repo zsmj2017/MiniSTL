@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Function/stl_function.h"
+#include "Iterator/stl_iterator.h"
 
 namespace MiniSTL {
 
@@ -18,22 +19,36 @@ T accumulate(InputIterator first, InputIterator last, T init,
   return init;
 }
 
+template<class InputIterator, class OutputIterator, class T>
+OutputIterator _adjacent_difference(InputIterator first, InputIterator last,
+                                    OutputIterator result, T *) {
+  T value = *result;
+  while (++first != last) {
+    T temp = *first;
+    *++result = temp - value;
+    value = temp;
+  }
+  return ++result;
+}
+
 //保留#1号元素，#n=#n-#(n-1),当result==first时为就地质变算法
 template<class InputIterator, class OutputIterator>
 OutputIterator adjacent_difference(InputIterator first, InputIterator last,
                                    OutputIterator result) {
   if (first == last) return first;
   *result = *first;
-  return _adjacent_difference(first, last, result, value_type(first));
+  return _adjacent_difference(first, last, result, pointer_t<InputIterator>());
 }
 
-template<class InputIterator, class OutputIterator, class T>
-OutputIterator adjacent_difference(InputIterator first, InputIterator last,
-                                   OutputIterator result, T *) {
+template<class InputIterator, class OutputIterator, class T,
+         class BinaryOperation>
+OutputIterator _adjacent_difference(InputIterator first, InputIterator last,
+                                    OutputIterator result, T *,
+                                    BinaryOperation binary_op) {
   T value = *result;
   while (++first != last) {
     T temp = *first;
-    *++result = temp - value;
+    *++result = binary_op(temp, value);
     value = temp;
   }
   return ++result;
@@ -45,22 +60,8 @@ OutputIterator adjacent_difference(InputIterator first, InputIterator last,
                                    BinaryOperation binary_op) {
   if (first == last) return first;
   *result = *first;
-  return _adjacent_difference(first, last, result, value_type(first),
+  return _adjacent_difference(first, last, result, pointer_t<InputIterator>(),
                               binary_op);
-}
-
-template<class InputIterator, class OutputIterator, class T,
-         class BinaryOperation>
-OutputIterator adjacent_difference(InputIterator first, InputIterator last,
-                                   OutputIterator result, T *,
-                                   BinaryOperation binary_op) {
-  T value = *result;
-  while (++first != last) {
-    T temp = *first;
-    *++result = binary_op(temp, value);
-    value = temp;
-  }
-  return ++result;
 }
 
 //序列内积
@@ -87,7 +88,7 @@ OutputIterator partial_sum(InputIterator first, InputIterator last,
                            OutputIterator result) {
   if (first == last) return first;
   *result = *first;
-  return _partial_sum(first, last, result, value_type(first));
+  return _partial_sum(first, last, result, pointer_t<InputIterator>());
 }
 
 template<class InputIterator, class OutputIterator, class T>
@@ -106,7 +107,7 @@ OutputIterator partial_sum(InputIterator first, InputIterator last,
                            OutputIterator result, BinaryOperation binary_op) {
   if (first == last) return first;
   *result = *first;
-  return _partial_sum(first, last, result, value_type(first), binary_op);
+  return _partial_sum(first, last, result, pointer_t<InputIterator>(), binary_op);
 }
 
 template<class InputIterator, class OutputIterator, class T,
