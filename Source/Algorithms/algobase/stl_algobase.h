@@ -194,15 +194,6 @@ inline OutputIterator _copy(InputIterator first, InputIterator last,
   return result;
 }
 
-// RandomIterator
-template<class InputIterator, class OutputIterator>
-inline OutputIterator _copy(InputIterator first, InputIterator last,
-                            OutputIterator result,
-                            random_access_iterator_tag) {
-  return _copy_d(first, last, result,
-                 difference_type_t<InputIterator>());// 再细分函数以便复用
-}
-
 template<class InputIterator, class OutputIterator, class Distance>
 inline OutputIterator _copy_d(InputIterator first, InputIterator last,
                               OutputIterator result, Distance) {
@@ -210,6 +201,15 @@ inline OutputIterator _copy_d(InputIterator first, InputIterator last,
        --n, ++first, ++result)// 以n决定循环次数，速度较快
     *result = *first;
   return result;
+}
+
+// RandomIterator
+template<class InputIterator, class OutputIterator>
+inline OutputIterator _copy(InputIterator first, InputIterator last,
+                            OutputIterator result,
+                            random_access_iterator_tag) {
+  return _copy_d(first, last, result,
+                 difference_type_t<InputIterator>());// 再细分函数以便复用
 }
 
 // 具备trivial copy assignment operator，可执行memmove

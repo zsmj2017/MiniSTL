@@ -74,8 +74,8 @@ using reference_t = typename iterator_traits<Iterator>::reference;
 //以下为整组distance函数
 template<class InputIterator>
 inline difference_type_t<InputIterator> _distance(InputIterator first,
-                                                   InputIterator last,
-                                                   input_iterator_tag) {
+                                                  InputIterator last,
+                                                  input_iterator_tag) {
   difference_type_t<InputIterator> n = 0;
   while (first != last) ++first, ++n;
   return n;
@@ -83,8 +83,8 @@ inline difference_type_t<InputIterator> _distance(InputIterator first,
 
 template<class InputIterator>
 inline difference_type_t<InputIterator> _distance(InputIterator first,
-                                                   InputIterator last,
-                                                   random_access_iterator_tag) {
+                                                  InputIterator last,
+                                                  random_access_iterator_tag) {
   return last - first;
 }
 
@@ -102,7 +102,7 @@ inline void _advance(InputIterator &i, Distance n, input_iterator_tag) {
 
 template<class InputIterator, class Distance>
 inline void _advance(InputIterator &i, Distance n,
-                      bidirectional_iterator_tag) {
+                     bidirectional_iterator_tag) {
   if (n >= 0)
     while (n--) ++i;
   else
@@ -111,7 +111,7 @@ inline void _advance(InputIterator &i, Distance n,
 
 template<class InputIterator, class Distance>
 inline void _advance(InputIterator &i, Distance n,
-                      random_access_iterator_tag) {
+                     random_access_iterator_tag) {
   i += n;
 }
 
@@ -145,8 +145,8 @@ class back_insert_iterator {
   }
 
   //以下三个接口对back_insert_iterator无用，关闭功能(为什么不直接设为private？）
-  back_insert_iterator operator*() { return *this; }
-  back_insert_iterator operator++() { return *this; }
+  back_insert_iterator &operator*() { return *this; }
+  back_insert_iterator &operator++() { return *this; }
   back_insert_iterator operator++(int) { return *this; }
 };
 
@@ -177,9 +177,9 @@ class front_insert_iterator {
     return *this;
   }
 
-  //以下三个接口对back_insert_iterator无用，关闭功能(为什么不直接设为private？）
-  front_insert_iterator operator*() { return *this; }
-  front_insert_iterator operator++() { return *this; }
+  //以下三个接口对back_insert_iterator无用，关闭功能
+  front_insert_iterator &operator*() { return *this; }
+  front_insert_iterator &operator++() { return *this; }
   front_insert_iterator operator++(int) { return *this; }
 };
 
@@ -205,15 +205,15 @@ class insert_iterator {
   insert_iterator(Container &value, typename Container::iterator i)
       : container(&value), iter(i) {}
   insert_iterator &operator=(const typename Container::value_type &value) {
-    container->insert(iter, value);//调用insert
-    ++iter;                        //保证insert_iterator永远与目标贴合
+    iter = container->insert(iter, value);//调用insert
+    ++iter;                               //保证insert_iterator永远与目标贴合
     return *this;
   }
 
-  //以下三个接口对back_insert_iterator无用，关闭功能(为什么不直接设为private？）
-  insert_iterator operator*() { return *this; }
-  insert_iterator operator++() { return *this; }
-  insert_iterator operator++(int) { return *this; }
+  //以下三个接口对back_insert_iterator无用，关闭功能
+  insert_iterator &operator*() { return *this; }
+  insert_iterator &operator++() { return *this; }
+  insert_iterator &operator++(int) { return *this; }
 };
 
 template<class Container, class Iterator>
