@@ -82,6 +82,17 @@ T inner_product(InputIterator1 first1, InputIterator1 last1,
   return init;
 }
 
+template<class InputIterator, class OutputIterator, class T>
+OutputIterator _partial_sum(InputIterator first, InputIterator last,
+                            OutputIterator result, T *) {
+  T value = *first;
+  while (++first != last) {
+    value += *first;
+    *++result = value;
+  }
+  return ++result;
+}
+
 //第n个元素是前n个旧元素的累积相加，与adjacent_difference互为逆运算
 template<class InputIterator, class OutputIterator>
 OutputIterator partial_sum(InputIterator first, InputIterator last,
@@ -91,12 +102,14 @@ OutputIterator partial_sum(InputIterator first, InputIterator last,
   return _partial_sum(first, last, result, pointer_t<InputIterator>());
 }
 
-template<class InputIterator, class OutputIterator, class T>
-OutputIterator partial_sum(InputIterator first, InputIterator last,
-                           OutputIterator result, T *) {
-  T value = *first;
+template<class InputIterator, class OutputIterator, class T,
+         class BinaryOperation>
+OutputIterator _partial_sum(InputIterator first, InputIterator last,
+                            OutputIterator result, T *,
+                            BinaryOperation binary_op) {
+  T value = *result;
   while (++first != last) {
-    value += *first;
+    value = binary_op(value, *first);
     *++result = value;
   }
   return ++result;
@@ -108,19 +121,6 @@ OutputIterator partial_sum(InputIterator first, InputIterator last,
   if (first == last) return first;
   *result = *first;
   return _partial_sum(first, last, result, pointer_t<InputIterator>(), binary_op);
-}
-
-template<class InputIterator, class OutputIterator, class T,
-         class BinaryOperation>
-OutputIterator partial_sum(InputIterator first, InputIterator last,
-                           OutputIterator result, T *,
-                           BinaryOperation binary_op) {
-  T value = *result;
-  while (++first != last) {
-    value = binary_op(value, *first);
-    *++result = value;
-  }
-  return ++result;
 }
 
 //对x反复执行n次算数操作

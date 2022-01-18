@@ -979,7 +979,7 @@ inline void partial_sort(RandomAccessIterator first,
   sort_heap(first, middle);
 }
 
-// TODO::partial_sort_copy, 其行为类似于partial_sort
+// TODO::need partial_sort_copy, 其行为类似于partial_sort
 
 template<class RandomAccessIterator, class T>
 void _unguarded_linear_insert(RandomAccessIterator last, T value) {
@@ -995,7 +995,7 @@ void _unguarded_linear_insert(RandomAccessIterator last, T value) {
 
 template<class RandomAccessIterator, class T>
 inline void _linear_insert(RandomAccessIterator first,
-                           RandomAccessIterator last, T) {
+                           RandomAccessIterator last, T*) {
   T value = *last;                       //记录尾元素
   if (value < *first) {                  //尾元素小于头元素（头必为最小元素）
     copy_backward(first, last, last + 1);//整个区间右移一位
@@ -1012,7 +1012,7 @@ void _insertion_sort(RandomAccessIterator first, RandomAccessIterator last) {
     return;
   }
   for (RandomAccessIterator i = first + 1; i != last; ++i) {
-    _linear_insert(first, i, value_type_t<RandomAccessIterator>());//[first,i)形成一个有序子区间
+    _linear_insert(first, i, pointer_t<RandomAccessIterator>());//[first,i)形成一个有序子区间
   }
 }
 
@@ -1082,7 +1082,7 @@ inline Size _lg(Size n) {
 //结束排序后，[first,last)内有多个“元素个数少于16”的子序列，每个子序列有一定程序的排序，但尚未完全排序
 template<class RandomAccessIterator, class T, class Size>
 void _introsort_loop(RandomAccessIterator first, RandomAccessIterator last,
-                     T, Size depth_limit) {
+                     T *, Size depth_limit) {
   //_STL_threshold是一个定义为16的全局常数
   while (last - first > /*_stl_threshold*/ 16) {
     if (depth_limit == 0) {           //已经产生了分割恶化
@@ -1093,14 +1093,14 @@ void _introsort_loop(RandomAccessIterator first, RandomAccessIterator last,
     RandomAccessIterator cut = _unguarded_partition(
         first, last,
         _median(*first, *(first + (last - first) / 2), *(last - 1)));
-    _introsort_loop(cut, last, value_type_t<RandomAccessIterator>(), depth_limit);
+    _introsort_loop(cut, last, pointer_t<RandomAccessIterator>(), depth_limit);
     last = cut;//回归while，执行左侧排序
   }
 }
 
 template<class RandomAccessIterator, class T>
 void _unguarded_insertion_sort_aux(RandomAccessIterator first,
-                                   RandomAccessIterator last, T) {
+                                   RandomAccessIterator last, T*) {
   for (RandomAccessIterator i = first; i != last; ++i)
     _unguarded_linear_insert(i, T(*i));
 }
@@ -1108,7 +1108,7 @@ void _unguarded_insertion_sort_aux(RandomAccessIterator first,
 template<class RandomAccessIterator>
 inline void _unguarded_insertion_sort(RandomAccessIterator first,
                                       RandomAccessIterator last) {
-  _unguarded_insertion_sort_aux(first, last, value_type_t<RandomAccessIterator>());
+  _unguarded_insertion_sort_aux(first, last, pointer_t<RandomAccessIterator>());
 }
 
 //_finial_insertion_sort:最终版本插入排序
@@ -1127,7 +1127,7 @@ void _final_insertion_sort(RandomAccessIterator first,
 template<class RandomAccessIterator>
 inline void sort(RandomAccessIterator first, RandomAccessIterator last) {
   if (first != last) {
-    _introsort_loop(first, last, value_type_t<RandomAccessIterator>(),
+    _introsort_loop(first, last, pointer_t<RandomAccessIterator>(),
                     _lg(last - first) * 2);
     _final_insertion_sort(first, last);
   }
