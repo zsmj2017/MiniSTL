@@ -15,13 +15,13 @@ inline slist_node_base *slist_make_link(slist_node_base *prev_node,
 }
 
 // find previous
-slist_node_base *slist_previous(slist_node_base *head,
+inline slist_node_base *slist_previous(slist_node_base *head,
                                 const slist_node_base *node) {
   while (head && head->next != node) head = head->next;
   return head;
 }
 
-const slist_node_base *slist_previous(const slist_node_base *head,
+inline const slist_node_base *slist_previous(const slist_node_base *head,
                                       const slist_node_base *node) {
   while (head && head->next != node) head = head->next;
   return head;
@@ -49,7 +49,7 @@ inline void slist_splice_after(slist_node_base *pos, slist_node_base *head) {
   }
 }
 
-slist_node_base *slist_reverse(slist_node_base *node) {
+inline slist_node_base *slist_reverse(slist_node_base *node) {
   slist_node_base *res = node;
   node = node->next;
   res->next = nullptr;
@@ -63,7 +63,7 @@ slist_node_base *slist_reverse(slist_node_base *node) {
 }
 
 // size
-size_t slist_size(slist_node_base *node) {
+inline size_t slist_size(slist_node_base *node) {
   size_t res = 0;
   for (; node != nullptr; node = node->next) ++res;
   return res;
