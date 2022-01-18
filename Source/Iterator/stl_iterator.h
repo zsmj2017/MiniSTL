@@ -73,7 +73,7 @@ using reference_t = typename iterator_traits<Iterator>::reference;
 
 //以下为整组distance函数
 template<class InputIterator>
-inline difference_type_t<InputIterator> __distance(InputIterator first,
+inline difference_type_t<InputIterator> _distance(InputIterator first,
                                                    InputIterator last,
                                                    input_iterator_tag) {
   difference_type_t<InputIterator> n = 0;
@@ -82,7 +82,7 @@ inline difference_type_t<InputIterator> __distance(InputIterator first,
 }
 
 template<class InputIterator>
-inline difference_type_t<InputIterator> __distance(InputIterator first,
+inline difference_type_t<InputIterator> _distance(InputIterator first,
                                                    InputIterator last,
                                                    random_access_iterator_tag) {
   return last - first;
@@ -91,17 +91,17 @@ inline difference_type_t<InputIterator> __distance(InputIterator first,
 template<class InputIterator>
 inline difference_type_t<InputIterator> distance(InputIterator first,
                                                  InputIterator last) {
-  return __distance(first, last, iterator_category_t<InputIterator>());
+  return _distance(first, last, iterator_category_t<InputIterator>());
 }
 
 //以下为整组advance函数
 template<class InputIterator, class Distance>
-inline void __advance(InputIterator &i, Distance n, input_iterator_tag) {
+inline void _advance(InputIterator &i, Distance n, input_iterator_tag) {
   while (n--) ++i;
 }
 
 template<class InputIterator, class Distance>
-inline void __advance(InputIterator &i, Distance n,
+inline void _advance(InputIterator &i, Distance n,
                       bidirectional_iterator_tag) {
   if (n >= 0)
     while (n--) ++i;
@@ -110,14 +110,14 @@ inline void __advance(InputIterator &i, Distance n,
 }
 
 template<class InputIterator, class Distance>
-inline void __advance(InputIterator &i, Distance n,
+inline void _advance(InputIterator &i, Distance n,
                       random_access_iterator_tag) {
   i += n;
 }
 
 template<class InputIterator, class Distance>
 inline void advance(InputIterator &i, Distance n) {
-  __advance(i, n, iterator_category_t<InputIterator>());
+  _advance(i, n, iterator_category_t<InputIterator>());
 }
 
 //以下为三种迭代器适配器
