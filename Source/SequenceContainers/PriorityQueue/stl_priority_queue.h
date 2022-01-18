@@ -1,6 +1,6 @@
 #pragma once
 #include "Algorithms/heap/heap_algorithm.h"
-#include "Function/stl_function/stl_function.h"
+#include "Function/stl_function.h"
 #include "SequenceContainers/Vector/stl_vector.h"
 
 namespace MiniSTL {
