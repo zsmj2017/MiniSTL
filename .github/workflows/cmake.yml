@@ -15,26 +15,26 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Install system packages
-      run: brew install wget
-      
-    - name: Install googletest manually
-      run: |
+      - name: Install system packages
+        run: brew install wget
+
+      - name: Install googletest manually
+        run: |
           wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz
           tar xf release-1.10.0.tar.gz
           (cd googletest-release-1.10.0 &&
           cmake -DBUILD_SHARED_LIBS=ON . &&
           sudo make install)
-          
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS="-Werror"
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_MINISTL_TEST=ON -DCMAKE_CXX_FLAGS="-Werror"
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build/Test
-      run: ./Test
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build/Test
+        run: ./Test
       

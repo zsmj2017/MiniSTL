@@ -9,8 +9,6 @@ message(STATUS "C++11 support has been enabled by default.")
 
 add_subdirectory(Source)
 
-set(ENABLE_MINISTL_TEST ON)
-
 if (ENABLE_MINISTL_TEST)
     find_package(GTest REQUIRED)
     add_subdirectory("Test")
