@@ -90,7 +90,30 @@ MiniSTL
 
 ## 编译环境
 
-本仓库代码编译环境为macOS Big Sur 11.1，Apple clang version 12.0.0。
+OS:macOS Monterey 12.1
+
+CXX_Compiler:Apple clang version 13.0.0
+
+Cmake:3.21.4
+
+## 编译流程
+
+1. git clone this repo
+2. ```shell
+   cd $work_path/MiniSTL && mkdir build && cd build;
+   cmake .. && make;
+   ```
+3. `libSTL.a` is in `$work_path/MiniSTL/build/Source`
+
+## 运行单测
+
+0. **run unit_test need install gtest**
+1. git clone this repo
+2. ```shell
+   cd $work_path/MiniSTL && mkdir build && cd build;
+   cmake .. -DENABLE_MINISTL_TEST=ON && make;
+   ```
+3. run exec file `TEST` in `$work_path/MiniSTL/build/Test` 
 
 ## LICENSE
 
