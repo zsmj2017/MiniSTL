@@ -8,9 +8,6 @@ class CopyTest : public testing::Test {
  protected:
   void SetUp() override {
   }
-  static bool char_str_less(const char *a_, const char *b_) {
-    return strcmp(a_, b_) < 0;
-  }
 };
 
 TEST_F(CopyTest, copy_array) {
