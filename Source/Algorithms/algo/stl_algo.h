@@ -458,64 +458,83 @@ void reverse_copy(BidirectionalIterator first, BidirectionalIterator last,
   return result;
 }
 
-// rotate:将区间[first,middle)与[middle,last)置换，二者的长度可不相等
+//rotate:将区间[first,middle)与[middle,last)置换，二者的长度可不相等
 //根据迭代器性质演变出不同的算法
 template<class ForwardIterator>
-inline void rotate(ForwardIterator first, ForwardIterator middle,
-                   ForwardIterator last) {
-  if (first == middle || middle == last) {
-    return;
+inline ForwardIterator rotate(ForwardIterator first, ForwardIterator middle,
+                              ForwardIterator last) {
+  if (first == middle) {
+    return last;
   }
-  _rotate(first, middle, last, difference_type_t<ForwardIterator>(),
-          iterator_category_t<ForwardIterator>());
+  if (last == middle) {
+    return first;
+  }
+  return _rotate(first, middle, last, difference_type_t<ForwardIterator>(),
+                 iterator_category_t<ForwardIterator>(), pointer_t<ForwardIterator>());
 }
 
 // rotate-forward
-template<class ForwardIterator, class Distance>
-void _rotate(ForwardIterator first, ForwardIterator middle,
-             ForwardIterator last, Distance, forward_iterator_tag) {
-  for (ForwardIterator i = middle;;) {
-    iter_swap(first, i);//一一交换前端与后端元素
-    ++first;
-    ++i;
-    //判断前后端谁先结束
+template<class ForwardIterator, class Distance, class T>
+ForwardIterator _rotate(ForwardIterator first, ForwardIterator middle,
+                        ForwardIterator last, Distance, forward_iterator_tag, T *) {
+  ForwardIterator first2 = middle;
+  do {// 尝试交换两个区间的头部元素
+    swap(*first++, *first2++);
+    if (first == middle) {// 若前半部分较短，更新中点
+      middle = first2;
+    }
+  } while (first2 != last);
+
+  ForwardIterator new_middle = first;
+  // 尝试翻转剩下的区间
+  first2 = middle;
+  while (first2 != last) {
+    swap(*first++, *first2++);
     if (first == middle) {
-      if (i == last) {//如果前端结束的同时后端也结束
-        return;
-      }
-      middle = i;          //更新区间
-    } else if (i == last) {//后端先结束
-      i = middle;          //更新区间
+      middle = first2;
+    } else if (first2 == last) {
+      first2 = middle;
     }
   }
+
+  return new_middle;
 }
 
 // rotate-bidrectional
-template<class BidrectionalIterator, class Distance>
-void _rotate(BidrectionalIterator first, BidrectionalIterator middle,
-             BidrectionalIterator last, Distance, bidirectional_iterator_tag) {
+template<class BidrectionalIterator, class Distance, class T>
+BidrectionalIterator _rotate(BidrectionalIterator first, BidrectionalIterator middle,
+                             BidrectionalIterator last, Distance, bidirectional_iterator_tag, T *) {
   reverse(first, middle);
   reverse(middle, last);
-  reverse(first, last);
+
+  while (first != middle && middle != last) {
+    swap(*first++, *--last);
+  }
+
+  if (first == middle) {
+    reverse(middle, last);
+    return last;
+  } else {
+    reverse(first, middle);
+    return first;
+  }
 }
 
-// rotate-randomaccess
-template<class RandomAccessIterator, class Distance>
-void _rotate(RandomAccessIterator first, RandomAccessIterator middle,
-             RandomAccessIterator last, Distance,
-             random_access_iterator_tag) {
-  //取全长于前端的最大公因子
-  Distance n = _gcd(last - first, middle - first);
-  while (n--) {
-    _rotate_cycle(first, last, first + n, middle - first,
-                  value_type_t<RandomAccessIterator>());
+// swap_ranges:将区间S1[first,last)内的元素与以first2为起点，长度与S1相同的区间作交换,返回指向S2中最后一个交换的元素的下一位置
+//若S2实际长度较小或S1、S2重叠，执行结果未可预期
+template<class ForwardIterato1, class ForwardIterator2>
+ForwardIterator2 swap_ranges(ForwardIterato1 first1, ForwardIterato1 last1,
+                             ForwardIterator2 first2) {
+  for (; first1 != last1; ++first1, ++first2) {
+    iter_swap(first1, first2);
   }
+  return first2;
 }
 
 // gcd:求取最大公约数（TODO::效率不如减损术，存在优化空间）
 template<class EuclideanRingElement>
-EuclideanRingElement _gcd(EuclideanRingElement m, EuclideanRingElement n) {
-  while (n != 0) {
+EuclideanRingElement gcd(EuclideanRingElement m, EuclideanRingElement n) {
+  while (n) {
     EuclideanRingElement t = m % n;
     m = n;
     n = t;
@@ -523,22 +542,56 @@ EuclideanRingElement _gcd(EuclideanRingElement m, EuclideanRingElement n) {
   return m;
 }
 
+// rotate-randomaccess
 template<class RandomAccessIterator, class Distance, class T>
-void _rotate(RandomAccessIterator first, RandomAccessIterator last,
-             RandomAccessIterator initial, Distance shift, T *) {
-  T value = *initial;
-  RandomAccessIterator ptr1 = initial;
-  RandomAccessIterator ptr2 = ptr1 + shift;
-  while (ptr2 != initial) {
-    *ptr1 = *ptr2;
-    ptr1 = ptr2;
-    if (last - ptr2 > shift) {
-      ptr2 += shift;
-    } else {
-      ptr2 = first + (shift - (last - ptr2));
-    }
+RandomAccessIterator _rotate(RandomAccessIterator first, RandomAccessIterator middle,
+                             RandomAccessIterator last, Distance,
+                             random_access_iterator_tag, T *) {
+  Distance n = last - first;
+  Distance k = middle - first;
+  Distance l = n - k;
+  RandomAccessIterator result = first + (last - middle);
+
+  if (k == 0) {
+    return last;
+  } else if (k == l) {
+    swap_ranges(first, middle, middle);
+    return result;
   }
-  *ptr1 = value;
+
+  Distance d = gcd(n, k);
+
+  for (Distance i = 0; i < d; i++) {
+    T tmp = *first;
+    RandomAccessIterator p = first;
+
+    if (k < l) {
+      for (Distance j = 0; j < l / d; j++) {
+        if (p > first + l) {
+          *p = *(p - l);
+          p -= l;
+        }
+
+        *p = *(p + k);
+        p += k;
+      }
+    } else {
+      for (Distance j = 0; j < k / d - 1; j++) {
+        if (p < last - k) {
+          *p = *(p + k);
+          p += k;
+        }
+
+        *p = *(p - l);
+        p -= l;
+      }
+    }
+
+    *p = tmp;
+    ++first;
+  }
+
+  return result;
 }
 
 // rotate_copy:并不需要执行rotate，只需要copy的时候注意次序即可
@@ -653,17 +706,6 @@ ForwardIterator search_n(ForwardIterator first, ForwardIterator last,
   }
 }
 
-// swap_ranges:将区间S1[first,last)内的元素与以first2为起点，长度与S1相同的区间作交换,返回指向S2中最后一个交换的元素的下一位置
-//若S2实际长度较小或S1、S2重叠，执行结果未可预期
-template<class ForwardIterato1, class ForwardIterator2>
-ForwardIterator2 swap_ranges(ForwardIterato1 first1, ForwardIterato1 last1,
-                             ForwardIterator2 first2) {
-  for (; first1 != last1; ++first1, ++first2) {
-    iter_swap(first1, first2);
-  }
-  return first2;
-}
-
 // transform:
 //第一版本：以仿函数op作用于[first,last),并以其结果产生一个新序列
 //第二版本：以仿函数binary_op作用于一双元素之上，其中一个来自[first1,last)，另一个来自[first2,...)
@@ -707,8 +749,8 @@ OutputIterator unique_copy(InputIterator first, InputIterator last,
 
 // forward
 template<class InputIterator, class ForwardIterator>
-ForwardIterator unique_copy(InputIterator first, InputIterator last,
-                            ForwardIterator result, forward_iterator_tag) {
+ForwardIterator _unique_copy(InputIterator first, InputIterator last,
+                             ForwardIterator result, forward_iterator_tag) {
   *result = *first;//记录第一个元素
   while (++first != last) {
     if (*result != *first) {//不同则记录
@@ -722,12 +764,12 @@ ForwardIterator unique_copy(InputIterator first, InputIterator last,
 template<class InputIterator, class OutputIterator>
 OutputIterator unique_copy(InputIterator first, InputIterator last,
                            OutputIterator result, output_iterator_tag) {
-  return _unique_copy(first, last, result, value_type(first));
+  return _unique_copy(first, last, result, pointer_t<InputIterator>());
 }
 
 template<class InputIterator, class OutputIterator, class T>
-OutputIterator unique_copy(InputIterator first, InputIterator last,
-                           OutputIterator result, T *) {
+OutputIterator _unique_copy(InputIterator first, InputIterator last,
+                            OutputIterator result, T *) {
   T value = *first;
   *result = value;
   while (++first != last) {
@@ -1228,74 +1270,70 @@ inline pair<ForwardIterator, ForwardIterator> _equal_range(
   return pair<ForwardIterator, ForwardIterator>(first, first);
 }
 
-// inplace_merge:stable，在存在缓冲区的情况下性能较优
-template<class BidirectionalIterator>
-inline void inplace_merge(BidirectionalIterator first,
-                          BidirectionalIterator middle,
-                          BidirectionalIterator last) {
-  if (first == middle || middle == last) {
+template<class BidirectionalIter, class Distance>
+void _merge_without_buffer(BidirectionalIter first,
+                           BidirectionalIter middle,
+                           BidirectionalIter last,
+                           Distance len1, Distance len2) {
+  if (len1 == 0 || len2 == 0) {// 递归基
     return;
   }
-  _inplace_merge_aux(first, middle, last, value_type(first),
-                     distance_type(first));
-}
-
-template<class BidirectionalIterator, class T, class Distance>
-inline void _inplace_merge_aux(BidirectionalIterator first,
-                               BidirectionalIterator middle,
-                               BidirectionalIterator last, T *, Distance *) {
-  Distance len1 = 0;
-  distance(first, middle, len1);
-  Distance len2 = 0;
-  distance(middle, last, len2);
-
-  temporary_buffer<BidirectionalIterator, T> buf(first, last);//临时缓冲区
-  if (buf.begin() == 0) {
-    _merge_without_buffer(first, middle, last, len1, len2);
-  } else {
-    _merge_adaptive(first, middle, last, len1, len2, buf.begin(),
-                    Distance(buf.size()));
-  }
-}
-
-template<class BidirectionalIterator, class Distance, class Pointer>
-void _merge_adaptive(BidirectionalIterator first, BidirectionalIterator middle,
-                     BidirectionalIterator last, Distance len1, Distance len2,
-                     Pointer buffer, Distance buffer_size) {
-  if (len1 <= len2 && len1 <= buffer.size()) {
-    //缓冲区足以安置序列一
-    Pointer end_buffer = copy(first, middle, buffer);
-    merge(buffer, end_buffer, middle, last, first);
-  } else if (len2 <= buffer_size) {
-    //缓冲区足以安置序列二
-    Pointer end_buffer = copy(first, middle, buffer);
-    _merge_backward(first, middle, buffer, end_buffer, last);
-  } else {
-    //缓冲区不足以安置任何一个序列
-    BidirectionalIterator first_cut = first;
-    BidirectionalIterator second_cut = middle;
-    Distance len11 = 0;
-    Distance len22 = 0;
-    if (len1 > len2) {//哪个序列长就分割哪个
-      len11 = len1 / 2;
-      advance(first_cut, len11);
-      second_cut = lower_bound(middle, last, *first_cut);
-      distance(middle, second_cut, len22);
-    } else {
-      len22 = len2 / 2;
-      advance(second_cut, len22);
-      first_cut = upper_bound(first, middle, *second_cut);
-      distance(first, first_cut, len11);
+  if (len1 + len2 == 2) {
+    if (*middle < *first) {
+      iter_swap(first, middle);
     }
-    BidirectionalIterator new_middle =
-        _rotate_adaptive(first_cut, middle, second_cut, len1 - len11,
-                         len22, buffer, buffer, buffer_size);
-    //针对左端递归
-    _merge_adaptive(first, first_cut, new_middle, len11, len22, buffer,
-                    buffer_size);
-    //针对右端递归
-    _merge_adaptive(new_middle, second_cut, last, len1 - len11,
-                    len2 - len22, buffer, buffer_size);
+    return;
+  }
+  BidirectionalIter first_cut = first;
+  BidirectionalIter second_cut = middle;
+  Distance len11 = 0;
+  Distance len22 = 0;
+  if (len1 > len2) {
+    len11 = len1 / 2;
+    advance(first_cut, len11);
+    second_cut = lower_bound(middle, last, *first_cut);
+    len22 += distance(middle, second_cut);
+  } else {
+    len22 = len2 / 2;
+    advance(second_cut, len22);
+    first_cut = upper_bound(first, middle, *second_cut);
+    len11 += distance(first, first_cut);
+  }
+  BidirectionalIter new_middle = rotate(first_cut, middle, second_cut);
+  _merge_without_buffer(first, first_cut, new_middle, len11, len22);
+  _merge_without_buffer(new_middle, second_cut, last, len1 - len11,
+                        len2 - len22);
+}
+
+template<class BidirectionalIter1, class BidirectionalIter2,
+         class BidirectionalIter3>
+BidirectionalIter3 _merge_backward(BidirectionalIter1 first1,
+                                   BidirectionalIter1 last1,
+                                   BidirectionalIter2 first2,
+                                   BidirectionalIter2 last2,
+                                   BidirectionalIter3 result) {
+  if (first1 == last1) {
+    return copy_backward(first2, last2, result);
+  }
+  if (first2 == last2) {
+    return copy_backward(first1, last1, result);
+  }
+  --last1;
+  --last2;
+  while (true) {
+    if (*last2 < *last1) {
+      *--result = *last1;
+      if (first1 == last1) {
+        return copy_backward(first2, ++last2, result);
+      }
+      --last1;
+    } else {
+      *--result = *last2;
+      if (first2 == last2) {
+        return copy_backward(first1, ++last1, result);
+      }
+      --last2;
+    }
   }
 }
 
@@ -1325,13 +1363,82 @@ BidirectionalIterator1 _rotate_adaptive(BidirectionalIterator1 first,
   }
 }
 
+template<class BidirectionalIterator, class Distance, class Pointer>
+void _merge_adaptive(BidirectionalIterator first, BidirectionalIterator middle,
+                     BidirectionalIterator last, Distance len1, Distance len2,
+                     Pointer buffer, Distance buffer_size) {
+  if (len1 <= len2 && len1 <= buffer_size) {
+    //缓冲区足以安置序列一
+    Pointer end_buffer = copy(first, middle, buffer);
+    merge(buffer, end_buffer, middle, last, first);
+  } else if (len2 <= buffer_size) {
+    //缓冲区足以安置序列二
+    Pointer end_buffer = copy(first, middle, buffer);
+    _merge_backward(first, middle, buffer, end_buffer, last);
+  } else {
+    //缓冲区不足以安置任何一个序列
+    BidirectionalIterator first_cut = first;
+    BidirectionalIterator second_cut = middle;
+    Distance len11 = 0;
+    Distance len22 = 0;
+    if (len1 > len2) {//哪个序列长就分割哪个
+      len11 = len1 / 2;
+      advance(first_cut, len11);
+      second_cut = lower_bound(middle, last, *first_cut);
+      len22 = distance(middle, second_cut);
+    } else {
+      len22 = len2 / 2;
+      advance(second_cut, len22);
+      first_cut = upper_bound(first, middle, *second_cut);
+      len11 = distance(first, first_cut);
+    }
+    BidirectionalIterator new_middle =
+        _rotate_adaptive(first_cut, middle, second_cut, len1 - len11,
+                         len22, buffer, buffer_size);
+    //针对左端递归
+    _merge_adaptive(first, first_cut, new_middle, len11, len22, buffer,
+                    buffer_size);
+    //针对右端递归
+    _merge_adaptive(new_middle, second_cut, last, len1 - len11,
+                    len2 - len22, buffer, buffer_size);
+  }
+}
+
+template<class BidirectionalIterator, class T, class Distance>
+inline void _inplace_merge_aux(BidirectionalIterator first,
+                               BidirectionalIterator middle,
+                               BidirectionalIterator last, T *, Distance) {
+  Distance len1 = distance(first, middle);
+  Distance len2 = distance(middle, last);
+
+  temporary_buffer<BidirectionalIterator, T> buf(first, last);//临时缓冲区
+  if (buf.begin() == 0) {
+    _merge_without_buffer(first, middle, last, len1, len2);
+  } else {
+    _merge_adaptive(first, middle, last, len1, len2, buf.begin(),
+                    Distance(buf.size()));
+  }
+}
+
+// inplace_merge:stable，在存在缓冲区的情况下性能较优
+template<class BidirectionalIterator>
+inline void inplace_merge(BidirectionalIterator first,
+                          BidirectionalIterator middle,
+                          BidirectionalIterator last) {
+  if (first == middle || middle == last) {
+    return;
+  }
+  _inplace_merge_aux(first, middle, last, pointer_t<BidirectionalIterator>(),
+                     difference_type_t<BidirectionalIterator>());
+}
+
 //nth_element:重新排序[first,last)，使得nth指向的元素与完全排列后同一位置的元素同值
 //nth_element还保证[nth,last）内的元素必然不大于nth，但对于[first,nth)与[nth,last)中的序列则毫无保证
 //由此看来，nth_element更类似于partition而非partial_sort(后者采用heap_sort)
 template<class RandomAccessIterator>
 inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth,
                         RandomAccessIterator last) {
-  _nth_element(first, nth, last, value_type(first));
+  _nth_element(first, nth, last, pointer_t<RandomAccessIterator>());
 }
 
 template<class RandomAccessIterator, class T>
