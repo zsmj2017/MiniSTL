@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include "Algorithms/algobase/stl_algobase.h"
 #include "Allocator/subAllocation/construct.h"
-#include "stl_iterator.h"
-#include "typeTraits.h"
+#include "Iterator/stl_iterator.h"
+#include "Iterator/typeTraits.h"
 #include <cstring>// memove
 
 namespace MiniSTL {

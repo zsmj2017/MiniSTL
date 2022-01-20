@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "typeTraits.h"
+#include "Iterator/typeTraits.h"
 #include <new>// placement new
 
 namespace MiniSTL {
