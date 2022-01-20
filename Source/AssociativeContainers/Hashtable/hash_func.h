@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <cstddef>
+#include <string>
 
 namespace MiniSTL {
 
@@ -28,6 +29,14 @@ template<>
 struct hash<const char *> {
   size_t operator()(const char *s) const noexcept {
     return _stl_hash_string(s);
+  }
+};
+
+// add hash() for std::string
+template<>
+struct hash<std::string> {
+  size_t operator()(const std::string &str) const noexcept {
+    return _stl_hash_string(str.c_str());
   }
 };
 
