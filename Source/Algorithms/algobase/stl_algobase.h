@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Function/stl_function.h"
-#include "stl_iterator.h"
-#include "typeTraits.h"
+#include "Iterator/stl_iterator.h"
+#include "Utils/type_traits.h"
 #include <cstddef>
 #include <cstring>
 
