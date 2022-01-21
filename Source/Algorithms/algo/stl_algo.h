@@ -927,11 +927,11 @@ bool next_permutation(BidirectionIterator first, BidirectionIterator last) {
   }
 }
 
-// pre_permutation:字典序下的上一个排列
+// prev_permutation:字典序下的上一个排列
 //算法精要：从后向前，找出一组相邻元素，记第一元素为*i,第二元素为*ii,此二者满足*i>*ii
 //再次从后向前，找出第一个小于*i的元素,记为*j，将i与j对调，再将ii之后的元素颠倒重排即可
 template<class BidirectionIterator>
-bool pre_permutation(BidirectionIterator first, BidirectionIterator last) {
+bool prev_permutation(BidirectionIterator first, BidirectionIterator last) {
   if (first == last) {
     return false;
   }
