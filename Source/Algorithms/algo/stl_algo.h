@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Algorithms/heap/heap_algorithm.h"// for partial_sort()
 #include "Iterator/stl_iterator.h"
 #include "Utils/stl_tempbuf.h"
 
@@ -995,6 +996,19 @@ void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
   }
 }
 
+template<class RandomAccessIterator, class T>
+inline void _partial_sort(RandomAccessIterator first,
+                          RandomAccessIterator middle, RandomAccessIterator last,
+                          T *) {
+  make_heap(first, middle);
+  for (RandomAccessIterator i = middle; i != last; ++i) {
+    if (*i < *first) {
+      pop_heap_aux(first, middle, i, T(*i), less<T>());
+    }
+  }
+  sort_heap(first, middle);
+}
+
 //partial_sort:接收迭代器first,middle,last，使序列中的middle-first个元素以递增序置于[first,middle)中
 //算法精要：将[first,middle)做成最大堆，然后将[middle，last)中的元素与max-heap中的元素比较
 //若小于最大值，交换位置，并重新维持max-heap （在算法中的直接体现为pop_heap)
@@ -1003,20 +1017,7 @@ template<class RandomAccessIterator>
 inline void partial_sort(RandomAccessIterator first,
                          RandomAccessIterator middle,
                          RandomAccessIterator last) {
-  partial_sort(first, middle, last);
-}
-
-template<class RandomAccessIterator, class T>
-inline void partial_sort(RandomAccessIterator first,
-                         RandomAccessIterator middle, RandomAccessIterator last,
-                         T *) {
-  make_heap(first, middle);//in heap_algorithm.h
-  for (RandomAccessIterator i = middle; i != last; ++i) {
-    if (*i < *first) {
-      _pop_heap(first, middle, i, T(*i), difference_type_t<RandomAccessIterator>());
-    }
-  }
-  sort_heap(first, middle);
+  _partial_sort(first, middle, last, pointer_t<RandomAccessIterator>());
 }
 
 // TODO::need partial_sort_copy, 其行为类似于partial_sort

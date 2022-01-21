@@ -39,15 +39,6 @@ inline void pop_heap(RandomAccessIterator first, RandomAccessIterator last,
   pop_heap_aux(first, last - 1, last - 1, T(*(last - 1)), comp);
 }
 
-template<class RandomAccessIterator, class T, class Compare>
-inline void pop_heap_aux(RandomAccessIterator first, RandomAccessIterator last,
-                         RandomAccessIterator result, T value,
-                         const Compare &comp = Compare()) {
-  using Distance = difference_type_t<RandomAccessIterator>;
-  *result = *first;// 将尾端设置为取出值,而原本的尾端值变为了value
-  adjust_heap(first, Distance(0), Distance(last - first), value, comp);
-}
-
 template<class RandomAccessIterator, class Distance, class T, class Compare>
 void adjust_heap(RandomAccessIterator first, Distance holeIndex, Distance len,
                  T value, const Compare &comp = Compare()) {
@@ -68,6 +59,15 @@ void adjust_heap(RandomAccessIterator first, Distance holeIndex, Distance len,
   }
   // 将原有的末端元素填入（更新那个洞
   push_heap_aux(first, holeIndex, topIndex, value, comp);
+}
+
+template<class RandomAccessIterator, class T, class Compare>
+inline void pop_heap_aux(RandomAccessIterator first, RandomAccessIterator last,
+                         RandomAccessIterator result, T value,
+                         const Compare &comp = Compare()) {
+  using Distance = difference_type_t<RandomAccessIterator>;
+  *result = *first;// 将尾端设置为取出值,而原本的尾端值变为了value
+  adjust_heap(first, Distance(0), Distance(last - first), value, comp);
 }
 
 // 堆排序（不断调用pop_heap即可）
