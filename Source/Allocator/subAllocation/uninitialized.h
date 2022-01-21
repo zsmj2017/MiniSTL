@@ -2,7 +2,7 @@
 #include "Algorithms/algobase/stl_algobase.h"
 #include "Allocator/subAllocation/construct.h"
 #include "Iterator/stl_iterator.h"
-#include "Iterator/typeTraits.h"
+#include "Utils/type_traits.h"
 #include <cstring>// memove
 
 namespace MiniSTL {

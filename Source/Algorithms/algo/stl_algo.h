@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Algorithms/heap/heap_algorithm.h"// for partial_sort()
 #include "Iterator/stl_iterator.h"
 #include "Utils/stl_tempbuf.h"
 
@@ -302,33 +303,27 @@ OutputIterator merge(InputIterator1 first1, InputIterator1 last1,
 }
 
 // partition:将被pred判定为true的移动到前列，unstable
-// 存在stable_partition
+// TODO::need complete stable_partition()
 template<class BidirectionalIterator, class Predicate>
 BidirectionalIterator partition(BidirectionalIterator first,
                                 BidirectionalIterator last, Predicate pred) {
   while (true) {
-    //双指针找到交换点，交换
     while (true) {
       if (first == last) {
         return first;
-      } else if (pred(*first)) {//头指针所指元素为true
-        ++first;                //拒绝移动，头指针前进
-      } else {
-        break;//找到了需要被移动的元素
       }
-      --last;
-      while (true) {
-        if (first == last) {
-          return first;
-        } else if (!pred(*last)) {//尾指针指向元素为false
-          --last;                 //拒绝移动
-        } else {
-          break;//找到了需要被移动的元素
-        }
+      if (!pred(*first)) {// 找到需要交换的头部元素
+        break;
       }
-      iter_swap(first, last);
       ++first;
     }
+    do {
+      if (first == --last) {
+        return first;
+      }
+    } while (!pred(*last));// 找到需要交换的尾部元素
+    iter_swap(first, last);
+    ++first;
   }
 }
 
@@ -442,7 +437,7 @@ template<class RandomAccessIterator>
 void _reverse(RandomAccessIterator first, RandomAccessIterator last,
               random_access_iterator_tag) {
   while (first < last) {//只有random_access_iterator_tag支持operator<
-    iter_swap(first++, last--);
+    iter_swap(first++, --last);
   }
 }
 
@@ -932,11 +927,11 @@ bool next_permutation(BidirectionIterator first, BidirectionIterator last) {
   }
 }
 
-// pre_permutation:字典序下的上一个排列
+// prev_permutation:字典序下的上一个排列
 //算法精要：从后向前，找出一组相邻元素，记第一元素为*i,第二元素为*ii,此二者满足*i>*ii
 //再次从后向前，找出第一个小于*i的元素,记为*j，将i与j对调，再将ii之后的元素颠倒重排即可
 template<class BidirectionIterator>
-bool pre_permutation(BidirectionIterator first, BidirectionIterator last) {
+bool prev_permutation(BidirectionIterator first, BidirectionIterator last) {
   if (first == last) {
     return false;
   }
@@ -952,7 +947,7 @@ bool pre_permutation(BidirectionIterator first, BidirectionIterator last) {
     --i;
     if (*i > *ii) {
       BidirectionIterator j = last;
-      while (!(*j-- < *i))
+      while (!(*--j < *i))
         ;//此时j必然存在，最不济也是ii
       iter_swap(i, j);
       reverse(ii, last);
@@ -995,6 +990,19 @@ void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
   }
 }
 
+template<class RandomAccessIterator, class T>
+inline void _partial_sort(RandomAccessIterator first,
+                          RandomAccessIterator middle, RandomAccessIterator last,
+                          T *) {
+  make_heap(first, middle);
+  for (RandomAccessIterator i = middle; i != last; ++i) {
+    if (*i < *first) {
+      pop_heap_aux(first, middle, i, T(*i), less<T>());
+    }
+  }
+  sort_heap(first, middle);
+}
+
 //partial_sort:接收迭代器first,middle,last，使序列中的middle-first个元素以递增序置于[first,middle)中
 //算法精要：将[first,middle)做成最大堆，然后将[middle，last)中的元素与max-heap中的元素比较
 //若小于最大值，交换位置，并重新维持max-heap （在算法中的直接体现为pop_heap)
@@ -1003,20 +1011,7 @@ template<class RandomAccessIterator>
 inline void partial_sort(RandomAccessIterator first,
                          RandomAccessIterator middle,
                          RandomAccessIterator last) {
-  partial_sort(first, middle, last);
-}
-
-template<class RandomAccessIterator, class T>
-inline void partial_sort(RandomAccessIterator first,
-                         RandomAccessIterator middle, RandomAccessIterator last,
-                         T *) {
-  make_heap(first, middle);//in heap_algorithm.h
-  for (RandomAccessIterator i = middle; i != last; ++i) {
-    if (*i < *first) {
-      _pop_heap(first, middle, i, T(*i), difference_type_t<RandomAccessIterator>());
-    }
-  }
-  sort_heap(first, middle);
+  _partial_sort(first, middle, last, pointer_t<RandomAccessIterator>());
 }
 
 // TODO::need partial_sort_copy, 其行为类似于partial_sort
@@ -1432,15 +1427,6 @@ inline void inplace_merge(BidirectionalIterator first,
                      difference_type_t<BidirectionalIterator>());
 }
 
-//nth_element:重新排序[first,last)，使得nth指向的元素与完全排列后同一位置的元素同值
-//nth_element还保证[nth,last）内的元素必然不大于nth，但对于[first,nth)与[nth,last)中的序列则毫无保证
-//由此看来，nth_element更类似于partition而非partial_sort(后者采用heap_sort)
-template<class RandomAccessIterator>
-inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth,
-                        RandomAccessIterator last) {
-  _nth_element(first, nth, last, pointer_t<RandomAccessIterator>());
-}
-
 template<class RandomAccessIterator, class T>
 void _nth_element(RandomAccessIterator first, RandomAccessIterator nth,
                   RandomAccessIterator last, T *) {
@@ -1449,7 +1435,7 @@ void _nth_element(RandomAccessIterator first, RandomAccessIterator nth,
     //返回一个迭代器，指向分割后右侧的第一个元素
     RandomAccessIterator cut = _unguarded_partition(
         first, last,
-        T(_median(*first, *(first + (last - first) / 2, *(last - 1)))));
+        T(_median(*first, *(first + (last - first) / 2), *(last - 1))));
     if (cut <= nth) {
       first = cut;//右端起点<=nth,再次对右侧分割
     } else {
@@ -1457,6 +1443,15 @@ void _nth_element(RandomAccessIterator first, RandomAccessIterator nth,
     }
   }
   _insertion_sort(first, last);
+}
+
+//nth_element:重新排序[first,last)，使得nth指向的元素与完全排列后同一位置的元素同值
+//nth_element还保证[nth,last）内的元素必然不大于nth，但对于[first,nth)与[nth,last)中的序列则毫无保证
+//由此看来，nth_element更类似于partition而非partial_sort(后者采用heap_sort)
+template<class RandomAccessIterator>
+inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth,
+                        RandomAccessIterator last) {
+  _nth_element(first, nth, last, pointer_t<RandomAccessIterator>());
 }
 
 // mergesort::调用inplace_merge完成归并排序，需要额外的缓冲区，此外在内存间不断移动（复制）元素亦需要较高成本，弱于quick_sort
