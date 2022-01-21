@@ -1432,15 +1432,6 @@ inline void inplace_merge(BidirectionalIterator first,
                      difference_type_t<BidirectionalIterator>());
 }
 
-//nth_element:重新排序[first,last)，使得nth指向的元素与完全排列后同一位置的元素同值
-//nth_element还保证[nth,last）内的元素必然不大于nth，但对于[first,nth)与[nth,last)中的序列则毫无保证
-//由此看来，nth_element更类似于partition而非partial_sort(后者采用heap_sort)
-template<class RandomAccessIterator>
-inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth,
-                        RandomAccessIterator last) {
-  _nth_element(first, nth, last, pointer_t<RandomAccessIterator>());
-}
-
 template<class RandomAccessIterator, class T>
 void _nth_element(RandomAccessIterator first, RandomAccessIterator nth,
                   RandomAccessIterator last, T *) {
@@ -1449,7 +1440,7 @@ void _nth_element(RandomAccessIterator first, RandomAccessIterator nth,
     //返回一个迭代器，指向分割后右侧的第一个元素
     RandomAccessIterator cut = _unguarded_partition(
         first, last,
-        T(_median(*first, *(first + (last - first) / 2, *(last - 1)))));
+        T(_median(*first, *(first + (last - first) / 2), *(last - 1))));
     if (cut <= nth) {
       first = cut;//右端起点<=nth,再次对右侧分割
     } else {
@@ -1457,6 +1448,15 @@ void _nth_element(RandomAccessIterator first, RandomAccessIterator nth,
     }
   }
   _insertion_sort(first, last);
+}
+
+//nth_element:重新排序[first,last)，使得nth指向的元素与完全排列后同一位置的元素同值
+//nth_element还保证[nth,last）内的元素必然不大于nth，但对于[first,nth)与[nth,last)中的序列则毫无保证
+//由此看来，nth_element更类似于partition而非partial_sort(后者采用heap_sort)
+template<class RandomAccessIterator>
+inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth,
+                        RandomAccessIterator last) {
+  _nth_element(first, nth, last, pointer_t<RandomAccessIterator>());
 }
 
 // mergesort::调用inplace_merge完成归并排序，需要额外的缓冲区，此外在内存间不断移动（复制）元素亦需要较高成本，弱于quick_sort
