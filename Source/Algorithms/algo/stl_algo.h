@@ -437,7 +437,7 @@ template<class RandomAccessIterator>
 void _reverse(RandomAccessIterator first, RandomAccessIterator last,
               random_access_iterator_tag) {
   while (first < last) {//只有random_access_iterator_tag支持operator<
-    iter_swap(first++, last--);
+    iter_swap(first++, --last);
   }
 }
 
