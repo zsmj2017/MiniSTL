@@ -303,33 +303,27 @@ OutputIterator merge(InputIterator1 first1, InputIterator1 last1,
 }
 
 // partition:将被pred判定为true的移动到前列，unstable
-// 存在stable_partition
+// TODO::need complete stable_partition()
 template<class BidirectionalIterator, class Predicate>
 BidirectionalIterator partition(BidirectionalIterator first,
                                 BidirectionalIterator last, Predicate pred) {
   while (true) {
-    //双指针找到交换点，交换
     while (true) {
       if (first == last) {
         return first;
-      } else if (pred(*first)) {//头指针所指元素为true
-        ++first;                //拒绝移动，头指针前进
-      } else {
-        break;//找到了需要被移动的元素
       }
-      --last;
-      while (true) {
-        if (first == last) {
-          return first;
-        } else if (!pred(*last)) {//尾指针指向元素为false
-          --last;                 //拒绝移动
-        } else {
-          break;//找到了需要被移动的元素
-        }
+      if (!pred(*first)) {// 找到需要交换的头部元素
+        break;
       }
-      iter_swap(first, last);
       ++first;
     }
+    do {
+      if (first == --last) {
+        return first;
+      }
+    } while (!pred(*last));// 找到需要交换的尾部元素
+    iter_swap(first, last);
+    ++first;
   }
 }
 
