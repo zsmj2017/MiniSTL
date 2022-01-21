@@ -947,7 +947,7 @@ bool prev_permutation(BidirectionIterator first, BidirectionIterator last) {
     --i;
     if (*i > *ii) {
       BidirectionIterator j = last;
-      while (!(*j-- < *i))
+      while (!(*--j < *i))
         ;//此时j必然存在，最不济也是ii
       iter_swap(i, j);
       reverse(ii, last);
