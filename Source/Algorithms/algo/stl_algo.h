@@ -594,24 +594,13 @@ OutputIterator rotate_copy(ForwardIterator first, ForwardIterator middle,
   return copy(first, middle, copy(middle, last, result));
 }
 
-// search:在区间S1中查找区间S2首次出现的位置，若不匹配则返回last
-template<class ForwardIterator1, class ForwardIterator2>
-inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
-                               ForwardIterator2 first2,
-                               ForwardIterator2 last2) {
-  return _search(first1, last1, first2, last2, difference_type_t<ForwardIterator1>(),
-                 difference_type_t<ForwardIterator2>());
-}
-
 template<class ForwardIterator1, class ForwardIterator2, class Distance1,
          class Distance2>
-inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
-                               ForwardIterator2 first2, ForwardIterator2 last2,
-                               Distance1 *, Distance2 *) {
-  Distance1 d1 = 0;
-  distance(first1, last1, d1);
-  Distance2 d2 = 0;
-  distance(first2, last2, d2);
+inline ForwardIterator1 _search(ForwardIterator1 first1, ForwardIterator1 last1,
+                                ForwardIterator2 first2, ForwardIterator2 last2,
+                                Distance1, Distance2) {
+  Distance1 d1 = distance(first1, last1);
+  Distance2 d2 = distance(first2, last2);
   if (d1 < d2) {//若S2长度大于S1，不可能属于
     return last1;
   }
@@ -632,6 +621,15 @@ inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
     }
   }
   return first1;
+}
+
+// search:在区间S1中查找区间S2首次出现的位置，若不匹配则返回last
+template<class ForwardIterator1, class ForwardIterator2>
+inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
+                               ForwardIterator2 first2,
+                               ForwardIterator2 last2) {
+  return _search(first1, last1, first2, last2, difference_type_t<ForwardIterator1>(),
+                 difference_type_t<ForwardIterator2>());
 }
 
 // search_n:查找“连续count个符合条件之元素”所形成的子序列，并返回该子序列起点
