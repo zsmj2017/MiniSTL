@@ -26,7 +26,7 @@ MiniSTL
 
  &emsp;[iterator_traits(stl_iterator.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Source/Iterator/stl_iterator.h):100%  
 
- &emsp;[type_traits(type_traits.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Source/Iterator/typeTraits.h):100%  
+ &emsp;[type_traits(type_traits.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Source/Utils/type_traits.h):100%  
 
  3. **序列式容器（sequence containers)**
 
