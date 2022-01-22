@@ -334,7 +334,6 @@ OutputIterator remove_copy(InputIterator first, InputIterator last,
   for (; first != last; ++first) {
     if (*first != value) {
       *result++ = *first;
-      ++result;
     }
   }
   return result;
@@ -356,7 +355,6 @@ OutputIterator remove_copy_if(InputIterator first, InputIterator last,
   for (; first != last; ++first) {
     if (!pred(*first)) {
       *result++ = *first;
-      ++result;
     }
   }
   return result;
@@ -406,9 +404,9 @@ void replace_if(ForwardIterator first, ForwardIterator last,
 
 // replace_copy_if:在replace_copy的基础上加入了谓词
 template<class InputIterator, class OutputIterator, class Predicate, class T>
-OutputIterator remove_copy_if(InputIterator first, InputIterator last,
-                              OutputIterator result, Predicate pred,
-                              const T &new_value) {
+OutputIterator replace_copy_if(InputIterator first, InputIterator last,
+                               OutputIterator result, Predicate pred,
+                               const T &new_value) {
   for (; first != last; ++first, ++result) {
     *result = pred(*first) ? new_value : *first;
   }
@@ -443,11 +441,11 @@ void _reverse(RandomAccessIterator first, RandomAccessIterator last,
 
 //reverse_copy:将指定区间颠倒重排，迭代器的性质会对效率产生影响
 template<class BidirectionalIterator, class OutputIterator>
-void reverse_copy(BidirectionalIterator first, BidirectionalIterator last,
-                  OutputIterator result) {
+OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator last,
+                            OutputIterator result) {
   while (first != last) {
     --last;
-    *result = last;
+    *result = *last;
     ++result;
   }
   return result;
@@ -596,24 +594,13 @@ OutputIterator rotate_copy(ForwardIterator first, ForwardIterator middle,
   return copy(first, middle, copy(middle, last, result));
 }
 
-// search:在区间S1中查找区间S2首次出现的位置，若不匹配则返回last
-template<class ForwardIterator1, class ForwardIterator2>
-inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
-                               ForwardIterator2 first2,
-                               ForwardIterator2 last2) {
-  return _search(first1, last1, first2, last2, difference_type_t<ForwardIterator1>(),
-                 difference_type_t<ForwardIterator2>());
-}
-
 template<class ForwardIterator1, class ForwardIterator2, class Distance1,
          class Distance2>
-inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
-                               ForwardIterator2 first2, ForwardIterator2 last2,
-                               Distance1 *, Distance2 *) {
-  Distance1 d1 = 0;
-  distance(first1, last1, d1);
-  Distance2 d2 = 0;
-  distance(first2, last2, d2);
+inline ForwardIterator1 _search(ForwardIterator1 first1, ForwardIterator1 last1,
+                                ForwardIterator2 first2, ForwardIterator2 last2,
+                                Distance1, Distance2) {
+  Distance1 d1 = distance(first1, last1);
+  Distance2 d2 = distance(first2, last2);
   if (d1 < d2) {//若S2长度大于S1，不可能属于
     return last1;
   }
@@ -634,6 +621,15 @@ inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
     }
   }
   return first1;
+}
+
+// search:在区间S1中查找区间S2首次出现的位置，若不匹配则返回last
+template<class ForwardIterator1, class ForwardIterator2>
+inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
+                               ForwardIterator2 first2,
+                               ForwardIterator2 last2) {
+  return _search(first1, last1, first2, last2, difference_type_t<ForwardIterator1>(),
+                 difference_type_t<ForwardIterator2>());
 }
 
 // search_n:查找“连续count个符合条件之元素”所形成的子序列，并返回该子序列起点
@@ -960,17 +956,9 @@ bool prev_permutation(BidirectionIterator first, BidirectionIterator last) {
   }
 }
 
-// random_shuffle:将区间[first,last)内的元素随机重排，即对于存在N个元素的区间，从N！的可能性中挑出一种
-//存在两个版本：一个采用内部随机数生成器，另一个则是产生随机数的仿函数，值得注意的是仿函数pass-by-reference而非value，因为该仿函数存在局部状态
-template<class RandomAccessIterator>
-inline void random_shuffle(RandomAccessIterator first,
-                           RandomAccessIterator last) {
-  _random_shuffle(first, last, difference_type_t<RandomAccessIterator>());
-}
-
 template<class RandomAccessIterator, class Distance>
 void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
-                     Distance *) {
+                     Distance) {
   if (first == last) {
     return;
   }
@@ -979,9 +967,17 @@ void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
   }
 }
 
+// random_shuffle:将区间[first,last)内的元素随机重排，即对于存在N个元素的区间，从N！的可能性中挑出一种
+//存在两个版本：一个采用内部随机数生成器，另一个则是产生随机数的仿函数，值得注意的是仿函数pass-by-reference而非value，因为该仿函数存在局部状态
+template<class RandomAccessIterator>
+inline void random_shuffle(RandomAccessIterator first,
+                           RandomAccessIterator last) {
+  _random_shuffle(first, last, difference_type_t<RandomAccessIterator>());
+}
+
 template<class RandomAccessIterator, class RandomNumberGenerator>
-void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
-                     RandomNumberGenerator &rand) {
+void random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
+                    RandomNumberGenerator &rand) {
   if (first == last) {
     return;
   }
