@@ -958,17 +958,9 @@ bool prev_permutation(BidirectionIterator first, BidirectionIterator last) {
   }
 }
 
-// random_shuffle:将区间[first,last)内的元素随机重排，即对于存在N个元素的区间，从N！的可能性中挑出一种
-//存在两个版本：一个采用内部随机数生成器，另一个则是产生随机数的仿函数，值得注意的是仿函数pass-by-reference而非value，因为该仿函数存在局部状态
-template<class RandomAccessIterator>
-inline void random_shuffle(RandomAccessIterator first,
-                           RandomAccessIterator last) {
-  _random_shuffle(first, last, difference_type_t<RandomAccessIterator>());
-}
-
 template<class RandomAccessIterator, class Distance>
 void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
-                     Distance *) {
+                     Distance) {
   if (first == last) {
     return;
   }
@@ -977,9 +969,17 @@ void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
   }
 }
 
+// random_shuffle:将区间[first,last)内的元素随机重排，即对于存在N个元素的区间，从N！的可能性中挑出一种
+//存在两个版本：一个采用内部随机数生成器，另一个则是产生随机数的仿函数，值得注意的是仿函数pass-by-reference而非value，因为该仿函数存在局部状态
+template<class RandomAccessIterator>
+inline void random_shuffle(RandomAccessIterator first,
+                           RandomAccessIterator last) {
+  _random_shuffle(first, last, difference_type_t<RandomAccessIterator>());
+}
+
 template<class RandomAccessIterator, class RandomNumberGenerator>
-void _random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
-                     RandomNumberGenerator &rand) {
+void random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
+                    RandomNumberGenerator &rand) {
   if (first == last) {
     return;
   }
