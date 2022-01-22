@@ -10,6 +10,7 @@ class IterTest : public testing::Test {
   void SetUp() override {
   }
 };
+
 TEST_F(IterTest, iter1) {
   vector<const char *> v; // Vector of character strings.
   v.push_back("zippy");   // First element.
@@ -75,7 +76,7 @@ TEST_F(IterTest, iterswap0) {
 }
 TEST_F(IterTest, iterswap1) {
   vector<int> v1(6);
-  for (int i = 0; i < (int)v1.size(); ++i)
+  for (int i = 0; i < (int) v1.size(); ++i)
     v1[i] = i;
   iter_swap(v1.begin(), v1.begin() + 3);
 
