@@ -334,7 +334,6 @@ OutputIterator remove_copy(InputIterator first, InputIterator last,
   for (; first != last; ++first) {
     if (*first != value) {
       *result++ = *first;
-      ++result;
     }
   }
   return result;
@@ -356,7 +355,6 @@ OutputIterator remove_copy_if(InputIterator first, InputIterator last,
   for (; first != last; ++first) {
     if (!pred(*first)) {
       *result++ = *first;
-      ++result;
     }
   }
   return result;
@@ -406,9 +404,9 @@ void replace_if(ForwardIterator first, ForwardIterator last,
 
 // replace_copy_if:在replace_copy的基础上加入了谓词
 template<class InputIterator, class OutputIterator, class Predicate, class T>
-OutputIterator remove_copy_if(InputIterator first, InputIterator last,
-                              OutputIterator result, Predicate pred,
-                              const T &new_value) {
+OutputIterator replace_copy_if(InputIterator first, InputIterator last,
+                               OutputIterator result, Predicate pred,
+                               const T &new_value) {
   for (; first != last; ++first, ++result) {
     *result = pred(*first) ? new_value : *first;
   }
@@ -443,11 +441,11 @@ void _reverse(RandomAccessIterator first, RandomAccessIterator last,
 
 //reverse_copy:将指定区间颠倒重排，迭代器的性质会对效率产生影响
 template<class BidirectionalIterator, class OutputIterator>
-void reverse_copy(BidirectionalIterator first, BidirectionalIterator last,
-                  OutputIterator result) {
+OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator last,
+                            OutputIterator result) {
   while (first != last) {
     --last;
-    *result = last;
+    *result = *last;
     ++result;
   }
   return result;
