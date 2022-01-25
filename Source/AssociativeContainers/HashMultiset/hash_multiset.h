@@ -127,8 +127,8 @@ inline bool operator!=(
 }
 
 template<class Value, class HashFcn, class EqualKey, class Alloc>
-inline void swap(const hash_multiset<Value, HashFcn, EqualKey, Alloc> &lhs,
-                 const hash_multiset<Value, HashFcn, EqualKey, Alloc> &rhs) {
+inline void swap(hash_multiset<Value, HashFcn, EqualKey, Alloc> &lhs,
+                 hash_multiset<Value, HashFcn, EqualKey, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

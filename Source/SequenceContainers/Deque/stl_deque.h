@@ -907,7 +907,7 @@ inline bool operator>=(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs) {
 }
 
 template<class T, class Alloc>
-inline void swap(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs) {
+inline void swap(deque<T, Alloc> &lhs, deque<T, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

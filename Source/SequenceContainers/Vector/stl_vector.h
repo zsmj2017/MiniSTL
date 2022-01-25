@@ -558,7 +558,7 @@ inline bool operator>=(const vector<T> &lhs, const vector<T> &rhs) {
 }
 
 template<class T, class Alloc>
-inline void swap(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs) {
+inline void swap(vector<T, Alloc> &lhs, vector<T, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 
