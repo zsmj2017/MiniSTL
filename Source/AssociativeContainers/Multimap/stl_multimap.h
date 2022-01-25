@@ -187,7 +187,7 @@ inline bool operator>=(const multimap<Key, Tp, Compare, Alloc> &lhs,
 
 template<class Key, class Tp, class Compare, class Alloc>
 inline void swap(multimap<Key, Tp, Compare, Alloc> &lhs,
-                 multimap<Key, Tp, Compare, Alloc> &rhs) {
+                 multimap<Key, Tp, Compare, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

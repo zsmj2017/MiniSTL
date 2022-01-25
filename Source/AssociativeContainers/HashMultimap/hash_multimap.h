@@ -133,8 +133,8 @@ inline bool operator!=(
 
 template<class Key, class Value, class HashFcn, class EqualKey, class Alloc>
 inline void swap(
-    const hash_multimap<Key, Value, HashFcn, EqualKey, Alloc> &lhs,
-    const hash_multimap<Key, Value, HashFcn, EqualKey, Alloc> &rhs) {
+    hash_multimap<Key, Value, HashFcn, EqualKey, Alloc> &lhs,
+    hash_multimap<Key, Value, HashFcn, EqualKey, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

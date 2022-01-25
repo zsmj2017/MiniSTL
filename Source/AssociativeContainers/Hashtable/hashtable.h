@@ -817,9 +817,9 @@ bool operator!=(
 
 template<class Value, class Key, class HashFcn, class ExtractKey,
          class EqualKey, class Alloc>
-void swap(
-    const hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc> &lhs,
-    hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc> &rhs) {
+inline void swap(
+    hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc> &lhs,
+    hashtable<Value, Key, HashFcn, ExtractKey, EqualKey, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

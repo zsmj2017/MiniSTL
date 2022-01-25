@@ -548,7 +548,7 @@ inline bool operator>=(const slist<T, Alloc> &lhs, const slist<T, Alloc> &rhs) {
 
 // swap
 template<class T, class Alloc>
-inline void swap(slist<T, Alloc> &lhs, slist<T, Alloc> &rhs) {
+inline void swap(slist<T, Alloc> &lhs, slist<T, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

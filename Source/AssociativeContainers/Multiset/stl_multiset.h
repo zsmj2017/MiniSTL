@@ -169,7 +169,7 @@ inline bool operator>=(const multiset<Key, Compare, Alloc> &lhs,
 
 template<class Key, class Compare, class Alloc>
 inline void swap(multiset<Key, Compare, Alloc> &lhs,
-                 multiset<Key, Compare, Alloc> &rhs) {
+                 multiset<Key, Compare, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

@@ -201,7 +201,7 @@ inline bool operator>=(const set<Key, Compare, Alloc> &lhs,
 
 template<class Key, class Compare, class Alloc>
 inline void swap(const set<Key, Compare, Alloc> &lhs,
-                 const set<Key, Compare, Alloc> &rhs) {
+                 const set<Key, Compare, Alloc> &rhs) noexcept {
   lhs.swap(rhs);
 }
 

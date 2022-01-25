@@ -200,4 +200,11 @@ inline bool operator>=(const map<Key, Tp, Compare, Alloc> &lhs,
   return !(lhs < rhs);
 }
 
+template<class Key, class Tp, class Compare, class Alloc>
+inline void swap(
+    map<Key, Tp, Compare, Alloc> &lhs,
+    map<Key, Tp, Compare, Alloc> &rhs) noexcept {
+  lhs.swap(rhs);
+}
+
 }// namespace MiniSTL

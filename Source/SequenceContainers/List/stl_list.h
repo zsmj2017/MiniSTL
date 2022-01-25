@@ -417,7 +417,7 @@ void list<T, Alloc>::sort() {
 }
 
 template<class T>
-inline void swap(list<T> &lhs, list<T> &rhs) {
+inline void swap(list<T> &lhs, list<T> &rhs) noexcept {
   lhs.swap(rhs);
 }
 
