@@ -54,9 +54,11 @@ class queue {
   bool empty() const noexcept { return c.empty(); }
   size_type size() const noexcept { return c.size(); }
   const_reference front() const { return c.front(); }
+  const_reference back() const { return c.back(); }
 
  public:// setter
   reference front() { return c.front(); }
+  reference back() { return c.back(); }
 
  public:// push && pop
   void push(const value_type &value) { c.push_back(value); }
