@@ -1,5 +1,4 @@
 #include "Algorithms/algo/stl_algo.h"
-#include "SequenceContainers/Vector/stl_vector.h"
 #include <gtest/gtest.h>
 
 using namespace ::MiniSTL;
