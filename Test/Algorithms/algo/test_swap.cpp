@@ -1,5 +1,4 @@
 #include "Algorithms/algo/stl_algo.h"
-#include "SequenceContainers/Queue/stl_queue.h"
 #include "SequenceContainers/Vector/stl_vector.h"
 #include <gtest/gtest.h>
 
