@@ -720,24 +720,6 @@ OutputIterator transform(InputIterator1 first1, InputIterator1 last1,
   return result;
 }
 
-// unique:只移处相邻重复元素的去重操作
-template<class ForwardIterator>
-ForwardIterator unique(ForwardIterator first, ForwardIterator last) {
-  first = adjacent_find(first, last);//找到相邻重复元素的起点
-  return unique_copy(first, last, first);
-}
-
-// unique_copy:提供copy操作，返回新序列的尾端
-//根据输出迭代器性质作不同的处理
-template<class InputIterator, class OutputIterator>
-OutputIterator unique_copy(InputIterator first, InputIterator last,
-                           OutputIterator result) {
-  if (first == last) {
-    return result;
-  }
-  return _unique_copy(first, last, result, iterator_category_t<OutputIterator>());
-}
-
 // forward
 template<class InputIterator, class ForwardIterator>
 ForwardIterator _unique_copy(InputIterator first, InputIterator last,
@@ -751,16 +733,9 @@ ForwardIterator _unique_copy(InputIterator first, InputIterator last,
   return ++result;
 }
 
-// OutputIterator存在限制，必须了解value_type
-template<class InputIterator, class OutputIterator>
-OutputIterator unique_copy(InputIterator first, InputIterator last,
-                           OutputIterator result, output_iterator_tag) {
-  return _unique_copy(first, last, result, pointer_t<InputIterator>());
-}
-
 template<class InputIterator, class OutputIterator, class T>
-OutputIterator _unique_copy(InputIterator first, InputIterator last,
-                            OutputIterator result, T *) {
+OutputIterator _unique_copy_aux(InputIterator first, InputIterator last,
+                                OutputIterator result, T *) {
   T value = *first;
   *result = value;
   while (++first != last) {
@@ -769,6 +744,31 @@ OutputIterator _unique_copy(InputIterator first, InputIterator last,
     }
   }
   return ++result;
+}
+
+// OutputIterator存在限制，必须了解value_type
+template<class InputIterator, class OutputIterator>
+OutputIterator _unique_copy(InputIterator first, InputIterator last,
+                            OutputIterator result, output_iterator_tag) {
+  return _unique_copy_aux(first, last, result, pointer_t<InputIterator>());
+}
+
+// unique_copy:提供copy操作，返回新序列的尾端
+//根据输出迭代器性质作不同的处理
+template<class InputIterator, class OutputIterator>
+OutputIterator unique_copy(InputIterator first, InputIterator last,
+                           OutputIterator result) {
+  if (first == last) {
+    return result;
+  }
+  return _unique_copy(first, last, result, iterator_category_t<OutputIterator>());
+}
+
+// unique:只移处相邻重复元素的去重操作
+template<class ForwardIterator>
+ForwardIterator unique(ForwardIterator first, ForwardIterator last) {
+  first = adjacent_find(first, last);//找到相邻重复元素的起点
+  return unique_copy(first, last, first);
 }
 
 //lower_bound:二分查找的一个版本，返回指向第一个不小于value的元素的迭代器。亦可认为是第一个可插入位置
