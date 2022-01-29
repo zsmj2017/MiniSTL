@@ -61,8 +61,6 @@ TEST_F(PermTest, prevprm1) {
   ASSERT_TRUE(v1[2] == 0);
 }
 
-// TODO:: prev_permutation() need pred
-#if 0
 TEST_F(PermTest, prevprm2) {
   vector<int> v1(3);
   for (int i = 0; i < (int) v1.size(); ++i) {
@@ -106,7 +104,6 @@ TEST_F(PermTest, prevprm2) {
   ASSERT_TRUE(v1[1] == 2);
   ASSERT_TRUE(v1[2] == 0);
 }
-#endif
 
 TEST_F(PermTest, nextprm0) {
   int v1[3] = {0, 1, 2};
@@ -160,8 +157,6 @@ TEST_F(PermTest, nextprm1) {
   ASSERT_TRUE(v1[2] == 0);
 }
 
-// TODO:: next_permutation() need pred
-#if 0
 TEST_F(PermTest, nextprm2) {
   vector<char> v1(3);
   for (int i = 0; i < (int) v1.size(); ++i) {
@@ -205,4 +200,3 @@ TEST_F(PermTest, nextprm2) {
   ASSERT_TRUE(v1[1] == 'C');
   ASSERT_TRUE(v1[2] == 'A');
 }
-#endif
