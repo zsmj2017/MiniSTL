@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Algorithms/heap/heap_algorithm.h"// for partial_sort()
+#include "Function/stl_function.h"
 #include "Iterator/stl_iterator.h"
 #include "Utils/stl_tempbuf.h"
 
@@ -893,8 +894,8 @@ bool binary_search(ForwardIterator first, ForwardIterator last,
 // next_permutation:字典序下的下一个排列
 //算法精要：从后向前，找出一组相邻元素，记第一元素为*i,第二元素为*ii,此二者满足*i<*ii
 //再次从后向前，找出第一个大于*i的元素,记为*j，将i与j对调，再将ii之后的元素颠倒重排即可
-template<class BidirectionIterator>
-bool next_permutation(BidirectionIterator first, BidirectionIterator last) {
+template<class BidirectionIterator, class Pred = less<value_type_t<BidirectionIterator>>>
+bool next_permutation(BidirectionIterator first, BidirectionIterator last, Pred pred = less<value_type_t<BidirectionIterator>>()) {
   if (first == last) {
     return false;
   }
@@ -908,9 +909,9 @@ bool next_permutation(BidirectionIterator first, BidirectionIterator last) {
   for (;;) {
     BidirectionIterator ii = i;
     --i;
-    if (*i < *ii) {
+    if (pred(*i, *ii)) {
       BidirectionIterator j = last;
-      while (!(*i < *--j))
+      while (!pred(*i, *--j))
         ;//此时j必然存在，最不济也是ii
       iter_swap(i, j);
       reverse(ii, last);
@@ -926,8 +927,8 @@ bool next_permutation(BidirectionIterator first, BidirectionIterator last) {
 // prev_permutation:字典序下的上一个排列
 //算法精要：从后向前，找出一组相邻元素，记第一元素为*i,第二元素为*ii,此二者满足*i>*ii
 //再次从后向前，找出第一个小于*i的元素,记为*j，将i与j对调，再将ii之后的元素颠倒重排即可
-template<class BidirectionIterator>
-bool prev_permutation(BidirectionIterator first, BidirectionIterator last) {
+template<class BidirectionIterator, class Pred = less<value_type_t<BidirectionIterator>>>
+bool prev_permutation(BidirectionIterator first, BidirectionIterator last, Pred pred = less<value_type_t<BidirectionIterator>>()) {
   if (first == last) {
     return false;
   }
@@ -941,9 +942,9 @@ bool prev_permutation(BidirectionIterator first, BidirectionIterator last) {
   for (;;) {
     BidirectionIterator ii = i;
     --i;
-    if (*i > *ii) {
+    if (pred(*ii, *i)) {
       BidirectionIterator j = last;
-      while (!(*--j < *i))
+      while (!pred(*--j, *i))
         ;//此时j必然存在，最不济也是ii
       iter_swap(i, j);
       reverse(ii, last);
