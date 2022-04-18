@@ -633,38 +633,10 @@ inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
                  difference_type_t<ForwardIterator2>());
 }
 
-// search_n:查找“连续count个符合条件之元素”所形成的子序列，并返回该子序列起点
-template<class ForwardIterator, class Integer, class T>
-ForwardIterator search_n(ForwardIterator first, ForwardIterator last,
-                         Integer count, const T &value) {
-  if (count < 0) {
-    return first;
-  } else {
-    first = find(first, last, value);//找出下一次出现点
-    while (first != last) {
-      Integer n = count - 1;// value应当再出现n次
-      ForwardIterator i = first;
-      ++i;
-      while (i != last && n != 0 && *i == value) {//接下来也是value
-        ++i;
-        --n;
-      }
-      if (n == 0) {
-        return first;
-      } else {
-        first = find(i, last, value);//以i为起点开始接着寻找，在i之前均没有正确起点
-      }
-    }
-    return last;
-  }
-}
-
-// TODO::应统一使用谓词版本，无谓词版本仅是谓词版本的特例化
-// search_n:谓词版本
-template<class ForwardIterator, class Integer, class T, class BinaryPredicate>
+template<class ForwardIterator, class Integer, class T, class BinaryPredicate = equal_to<T>>
 ForwardIterator search_n(ForwardIterator first, ForwardIterator last,
                          Integer count, const T &value,
-                         BinaryPredicate binary_pred) {
+                         const BinaryPredicate &binary_pred = BinaryPredicate()) {
   if (count < 0) {
     return first;
   } else {
