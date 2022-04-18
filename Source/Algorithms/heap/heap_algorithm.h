@@ -4,18 +4,6 @@
 
 namespace MiniSTL {
 
-// 两个形参表征顺序表头尾，当前元素已作为顺序表尾部元素
-template<class RandomAccessIterator,
-         class Compare = less<value_type_t<RandomAccessIterator>>>
-inline void push_heap(RandomAccessIterator first, RandomAccessIterator last,
-                      const Compare &comp = Compare()) {
-  // 容器最尾端即为第一个洞号(last-first)-1
-  using Distance = difference_type_t<RandomAccessIterator>;
-  using T = value_type_t<RandomAccessIterator>;
-  push_heap_aux(first, Distance((last - first) - 1), Distance(0),
-                T(*(last - 1)), comp);
-}
-
 template<class RandomAccessIterator, class Distance, class T, class Compare>
 void push_heap_aux(RandomAccessIterator first, Distance holeIndex,
                    Distance topIndex, T value,
@@ -28,15 +16,6 @@ void push_heap_aux(RandomAccessIterator first, Distance holeIndex,
   }
   // 结束循环时更新洞值
   *(first + holeIndex) = value;
-}
-
-// 将heap的根节点（最大值）取走（其实放置于vector尾部）
-template<class RandomAccessIterator,
-         class Compare = less<value_type_t<RandomAccessIterator>>>
-inline void pop_heap(RandomAccessIterator first, RandomAccessIterator last,
-                     const Compare &comp = Compare()) {
-  using T = value_type_t<RandomAccessIterator>;
-  pop_heap_aux(first, last - 1, last - 1, T(*(last - 1)), comp);
 }
 
 template<class RandomAccessIterator, class Distance, class T, class Compare>
@@ -68,6 +47,27 @@ inline void pop_heap_aux(RandomAccessIterator first, RandomAccessIterator last,
   using Distance = difference_type_t<RandomAccessIterator>;
   *result = *first;// 将尾端设置为取出值,而原本的尾端值变为了value
   adjust_heap(first, Distance(0), Distance(last - first), value, comp);
+}
+
+// 两个形参表征顺序表头尾，当前元素已作为顺序表尾部元素
+template<class RandomAccessIterator,
+         class Compare = less<value_type_t<RandomAccessIterator>>>
+inline void push_heap(RandomAccessIterator first, RandomAccessIterator last,
+                      const Compare &comp = Compare()) {
+  // 容器最尾端即为第一个洞号(last-first)-1
+  using Distance = difference_type_t<RandomAccessIterator>;
+  using T = value_type_t<RandomAccessIterator>;
+  push_heap_aux(first, Distance((last - first) - 1), Distance(0),
+                T(*(last - 1)), comp);
+}
+
+// 将heap的根节点（最大值）取走（其实放置于vector尾部）
+template<class RandomAccessIterator,
+         class Compare = less<value_type_t<RandomAccessIterator>>>
+inline void pop_heap(RandomAccessIterator first, RandomAccessIterator last,
+                     const Compare &comp = Compare()) {
+  using T = value_type_t<RandomAccessIterator>;
+  pop_heap_aux(first, last - 1, last - 1, T(*(last - 1)), comp);
 }
 
 // 堆排序（不断调用pop_heap即可）
