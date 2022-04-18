@@ -595,10 +595,11 @@ OutputIterator rotate_copy(ForwardIterator first, ForwardIterator middle,
   return copy(first, middle, copy(middle, last, result));
 }
 
-template<class ForwardIterator1, class ForwardIterator2, class Distance1,
+template<class ForwardIterator1, class ForwardIterator2, class BinaryPredicate, class Distance1,
          class Distance2>
 inline ForwardIterator1 _search(ForwardIterator1 first1, ForwardIterator1 last1,
                                 ForwardIterator2 first2, ForwardIterator2 last2,
+                                const BinaryPredicate &pred,
                                 Distance1, Distance2) {
   Distance1 d1 = distance(first1, last1);
   Distance2 d2 = distance(first2, last2);
@@ -607,8 +608,8 @@ inline ForwardIterator1 _search(ForwardIterator1 first1, ForwardIterator1 last1,
   }
   ForwardIterator1 cur1 = first1;
   ForwardIterator2 cur2 = first2;
-  while (cur2 != last2) {//遍历S2
-    if (*cur1 == *cur2) {//当前相同，对比下一个
+  while (cur2 != last2) {    //遍历S2
+    if (pred(*cur1, *cur2)) {//当前相同，对比下一个
       ++cur1;
       ++cur2;
     } else {
@@ -625,11 +626,12 @@ inline ForwardIterator1 _search(ForwardIterator1 first1, ForwardIterator1 last1,
 }
 
 // search:在区间S1中查找区间S2首次出现的位置，若不匹配则返回last
-template<class ForwardIterator1, class ForwardIterator2>
+template<class ForwardIterator1, class ForwardIterator2, class BinaryPredicate = equal_to<value_type_t<ForwardIterator1>>>
 inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1,
                                ForwardIterator2 first2,
-                               ForwardIterator2 last2) {
-  return _search(first1, last1, first2, last2, difference_type_t<ForwardIterator1>(),
+                               ForwardIterator2 last2,
+                               const BinaryPredicate &pred = BinaryPredicate()) {
+  return _search(first1, last1, first2, last2, pred, difference_type_t<ForwardIterator1>(),
                  difference_type_t<ForwardIterator2>());
 }
 
