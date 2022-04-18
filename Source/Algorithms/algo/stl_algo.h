@@ -22,9 +22,9 @@ ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last) {
   return last;
 }
 
-template<class ForwardIterator, class BinaryPredicate>
+template<class ForwardIterator, class BinaryPredicate = equal_to<value_type_t<ForwardIterator>>>
 ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last,
-                              BinaryPredicate binary_pred) {
+                              const BinaryPredicate &binary_pred) {
   if (first == last) return last;
   ForwardIterator next = first;
   while (++next != last) {
@@ -696,25 +696,25 @@ OutputIterator transform(InputIterator1 first1, InputIterator1 last1,
 }
 
 // forward
-template<class InputIterator, class ForwardIterator>
+template<class InputIterator, class ForwardIterator, class BinaryPredicate>
 ForwardIterator _unique_copy(InputIterator first, InputIterator last,
-                             ForwardIterator result, forward_iterator_tag) {
+                             ForwardIterator result, const BinaryPredicate &pred, forward_iterator_tag) {
   *result = *first;//记录第一个元素
   while (++first != last) {
-    if (*result != *first) {//不同则记录
+    if (!pred(*result, *first)) {//不同则记录
       *++result = *first;
     }
   }
   return ++result;
 }
 
-template<class InputIterator, class OutputIterator, class T>
+template<class InputIterator, class OutputIterator, class BinaryPredicate, class T>
 OutputIterator _unique_copy_aux(InputIterator first, InputIterator last,
-                                OutputIterator result, T *) {
+                                OutputIterator result, const BinaryPredicate &pred, T *) {
   T value = *first;
   *result = value;
   while (++first != last) {
-    if (*result != *first) {
+    if (!pred(*result, *first)) {
       *++result = *first;
     }
   }
@@ -722,28 +722,28 @@ OutputIterator _unique_copy_aux(InputIterator first, InputIterator last,
 }
 
 // OutputIterator存在限制，必须了解value_type
-template<class InputIterator, class OutputIterator>
+template<class InputIterator, class OutputIterator, class BinaryPredicate>
 OutputIterator _unique_copy(InputIterator first, InputIterator last,
-                            OutputIterator result, output_iterator_tag) {
-  return _unique_copy_aux(first, last, result, pointer_t<InputIterator>());
+                            OutputIterator result, const BinaryPredicate &pred, output_iterator_tag) {
+  return _unique_copy_aux(first, last, result, pred, pointer_t<InputIterator>());
 }
 
 // unique_copy:提供copy操作，返回新序列的尾端
-//根据输出迭代器性质作不同的处理
-template<class InputIterator, class OutputIterator>
+// 根据输出迭代器性质作不同的处理
+template<class InputIterator, class OutputIterator, class BinaryPredicate = equal_to<value_type_t<InputIterator>>>
 OutputIterator unique_copy(InputIterator first, InputIterator last,
-                           OutputIterator result) {
+                           OutputIterator result, const BinaryPredicate &pred = BinaryPredicate()) {
   if (first == last) {
     return result;
   }
-  return _unique_copy(first, last, result, iterator_category_t<OutputIterator>());
+  return _unique_copy(first, last, result, pred, iterator_category_t<OutputIterator>());
 }
 
 // unique:只移处相邻重复元素的去重操作
-template<class ForwardIterator>
-ForwardIterator unique(ForwardIterator first, ForwardIterator last) {
-  first = adjacent_find(first, last);//找到相邻重复元素的起点
-  return unique_copy(first, last, first);
+template<class ForwardIterator, class BinaryPredicate = equal_to<value_type_t<ForwardIterator>>>
+ForwardIterator unique(ForwardIterator first, ForwardIterator last, const BinaryPredicate &pred = BinaryPredicate()) {
+  first = adjacent_find(first, last, pred);//找到相邻重复元素的起点
+  return unique_copy(first, last, first, pred);
 }
 
 //lower_bound:二分查找的一个版本，返回指向第一个不小于value的元素的迭代器。亦可认为是第一个可插入位置

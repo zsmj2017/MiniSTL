@@ -27,9 +27,6 @@ TEST_F(UniqueTest, unique1) {
   ASSERT_TRUE(numbers[7] == 4);
 }
 
-// TODO::unique_copy() need pred
-
-#if 0
 TEST_F(UniqueTest, unique2) {
   const char *labels[] = {"Q", "Q", "W", "W", "E", "E", "R", "T", "T", "Y", "Y"};
 
@@ -45,7 +42,6 @@ TEST_F(UniqueTest, unique2) {
   ASSERT_TRUE(*labels[4] == 'T');
   ASSERT_TRUE(*labels[5] == 'Y');
 }
-#endif
 
 TEST_F(UniqueTest, uniqcpy1) {
   int numbers[8] = {0, 1, 1, 2, 2, 2, 3, 4};
@@ -64,8 +60,6 @@ TEST_F(UniqueTest, uniqcpy1) {
   ASSERT_TRUE(result[7] == 0);
 }
 
-// TODO::unique_copy() need pred
-#if 0
 TEST_F(UniqueTest, uniqcpy2) {
   const char *labels[] = {"Q", "Q", "W", "W", "E", "E", "R", "T", "T", "Y", "Y"};
   const char **plabels = (const char **) labels;
@@ -85,4 +79,3 @@ TEST_F(UniqueTest, uniqcpy2) {
   ASSERT_TRUE(*uCopy[4] == 'T');
   ASSERT_TRUE(*uCopy[5] == 'Y');
 }
-#endif
