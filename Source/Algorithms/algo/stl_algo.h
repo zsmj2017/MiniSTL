@@ -1219,8 +1219,8 @@ inline pair<RandomAccessIterator, RandomAccessIterator> _equal_range(
     } else if (comp(value, *middle)) {
       len = half;
     } else {//中央元素等于指定值
-      left = lower_bound(first, middle, value);
-      right = upper_bound(++middle, first + len, value);
+      left = lower_bound(first, middle, value, comp);
+      right = upper_bound(++middle, first + len, value, comp);
       return pair<RandomAccessIterator, RandomAccessIterator>(left,
                                                               right);
     }
@@ -1249,9 +1249,9 @@ inline pair<ForwardIterator, ForwardIterator> _equal_range(
     } else if (comp(value, *middle)) {
       len = half;
     } else {//中央元素等于指定值
-      left = lower_bound(first, middle, value);
+      left = lower_bound(first, middle, value, comp);
       advance(first, len);
-      right = upper_bound(++middle, first, value);
+      right = upper_bound(++middle, first, value, comp);
       return pair<ForwardIterator, ForwardIterator>(left, right);
     }
   }
@@ -1259,16 +1259,17 @@ inline pair<ForwardIterator, ForwardIterator> _equal_range(
   return pair<ForwardIterator, ForwardIterator>(first, first);
 }
 
-template<class BidirectionalIter, class Distance>
+template<class BidirectionalIter, class Compare, class Distance>
 void _merge_without_buffer(BidirectionalIter first,
                            BidirectionalIter middle,
                            BidirectionalIter last,
+                           const Compare &comp,
                            Distance len1, Distance len2) {
   if (len1 == 0 || len2 == 0) {// 递归基
     return;
   }
   if (len1 + len2 == 2) {
-    if (*middle < *first) {
+    if (comp(*middle, *first)) {
       iter_swap(first, middle);
     }
     return;
@@ -1280,27 +1281,28 @@ void _merge_without_buffer(BidirectionalIter first,
   if (len1 > len2) {
     len11 = len1 / 2;
     advance(first_cut, len11);
-    second_cut = lower_bound(middle, last, *first_cut);
+    second_cut = lower_bound(middle, last, *first_cut, comp);
     len22 += distance(middle, second_cut);
   } else {
     len22 = len2 / 2;
     advance(second_cut, len22);
-    first_cut = upper_bound(first, middle, *second_cut);
+    first_cut = upper_bound(first, middle, *second_cut, comp);
     len11 += distance(first, first_cut);
   }
   BidirectionalIter new_middle = rotate(first_cut, middle, second_cut);
-  _merge_without_buffer(first, first_cut, new_middle, len11, len22);
-  _merge_without_buffer(new_middle, second_cut, last, len1 - len11,
+  _merge_without_buffer(first, first_cut, new_middle, comp, len11, len22);
+  _merge_without_buffer(new_middle, second_cut, last, comp, len1 - len11,
                         len2 - len22);
 }
 
 template<class BidirectionalIter1, class BidirectionalIter2,
-         class BidirectionalIter3>
+         class BidirectionalIter3, class Compare>
 BidirectionalIter3 _merge_backward(BidirectionalIter1 first1,
                                    BidirectionalIter1 last1,
                                    BidirectionalIter2 first2,
                                    BidirectionalIter2 last2,
-                                   BidirectionalIter3 result) {
+                                   BidirectionalIter3 result,
+                                   const Compare &comp) {
   if (first1 == last1) {
     return copy_backward(first2, last2, result);
   }
@@ -1310,7 +1312,7 @@ BidirectionalIter3 _merge_backward(BidirectionalIter1 first1,
   --last1;
   --last2;
   while (true) {
-    if (*last2 < *last1) {
+    if (comp(*last2, *last1)) {
       *--result = *last1;
       if (first1 == last1) {
         return copy_backward(first2, ++last2, result);
@@ -1352,18 +1354,18 @@ BidirectionalIterator1 _rotate_adaptive(BidirectionalIterator1 first,
   }
 }
 
-template<class BidirectionalIterator, class Distance, class Pointer>
+template<class BidirectionalIterator, class Compare, class Distance, class Pointer>
 void _merge_adaptive(BidirectionalIterator first, BidirectionalIterator middle,
-                     BidirectionalIterator last, Distance len1, Distance len2,
+                     BidirectionalIterator last, const Compare &comp, Distance len1, Distance len2,
                      Pointer buffer, Distance buffer_size) {
   if (len1 <= len2 && len1 <= buffer_size) {
     //缓冲区足以安置序列一
     Pointer end_buffer = copy(first, middle, buffer);
-    merge(buffer, end_buffer, middle, last, first);
+    merge(buffer, end_buffer, middle, last, first, comp);
   } else if (len2 <= buffer_size) {
     //缓冲区足以安置序列二
     Pointer end_buffer = copy(first, middle, buffer);
-    _merge_backward(first, middle, buffer, end_buffer, last);
+    _merge_backward(first, middle, buffer, end_buffer, last, comp);
   } else {
     //缓冲区不足以安置任何一个序列
     BidirectionalIterator first_cut = first;
@@ -1373,51 +1375,53 @@ void _merge_adaptive(BidirectionalIterator first, BidirectionalIterator middle,
     if (len1 > len2) {//哪个序列长就分割哪个
       len11 = len1 / 2;
       advance(first_cut, len11);
-      second_cut = lower_bound(middle, last, *first_cut);
+      second_cut = lower_bound(middle, last, *first_cut, comp);
       len22 = distance(middle, second_cut);
     } else {
       len22 = len2 / 2;
       advance(second_cut, len22);
-      first_cut = upper_bound(first, middle, *second_cut);
+      first_cut = upper_bound(first, middle, *second_cut, comp);
       len11 = distance(first, first_cut);
     }
     BidirectionalIterator new_middle =
         _rotate_adaptive(first_cut, middle, second_cut, len1 - len11,
                          len22, buffer, buffer_size);
     //针对左端递归
-    _merge_adaptive(first, first_cut, new_middle, len11, len22, buffer,
+    _merge_adaptive(first, first_cut, new_middle, comp, len11, len22, buffer,
                     buffer_size);
     //针对右端递归
-    _merge_adaptive(new_middle, second_cut, last, len1 - len11,
+    _merge_adaptive(new_middle, second_cut, last, comp, len1 - len11,
                     len2 - len22, buffer, buffer_size);
   }
 }
 
-template<class BidirectionalIterator, class T, class Distance>
+template<class BidirectionalIterator, class T, class Compare, class Distance>
 inline void _inplace_merge_aux(BidirectionalIterator first,
                                BidirectionalIterator middle,
-                               BidirectionalIterator last, T *, Distance) {
+                               BidirectionalIterator last,
+                               const Compare &comp, T *, Distance) {
   Distance len1 = distance(first, middle);
   Distance len2 = distance(middle, last);
 
   temporary_buffer<BidirectionalIterator, T> buf(first, last);//临时缓冲区
   if (buf.begin() == 0) {
-    _merge_without_buffer(first, middle, last, len1, len2);
+    _merge_without_buffer(first, middle, last, comp, len1, len2);
   } else {
-    _merge_adaptive(first, middle, last, len1, len2, buf.begin(),
+    _merge_adaptive(first, middle, last, comp, len1, len2, buf.begin(),
                     Distance(buf.size()));
   }
 }
 
 // inplace_merge:stable，在存在缓冲区的情况下性能较优
-template<class BidirectionalIterator>
+template<class BidirectionalIterator, class Compare = less<value_type_t<BidirectionalIterator>>>
 inline void inplace_merge(BidirectionalIterator first,
                           BidirectionalIterator middle,
-                          BidirectionalIterator last) {
+                          BidirectionalIterator last,
+                          const Compare &comp = Compare()) {
   if (first == middle || middle == last) {
     return;
   }
-  _inplace_merge_aux(first, middle, last, pointer_t<BidirectionalIterator>(),
+  _inplace_merge_aux(first, middle, last, comp, pointer_t<BidirectionalIterator>(),
                      difference_type_t<BidirectionalIterator>());
 }
 

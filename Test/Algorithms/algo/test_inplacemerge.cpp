@@ -22,8 +22,6 @@ TEST_F(InplaceTest, inplmrg1) {
   ASSERT_TRUE(numbers[5] == 42);
 }
 
-// TODO::inplace_merge() need pred
-#if 0
 TEST_F(InplaceTest, inplmrg2) {
   vector<size_t> v1(10);
   for (size_t i = 0; i < v1.size(); ++i)
@@ -42,4 +40,3 @@ TEST_F(InplaceTest, inplmrg2) {
   ASSERT_TRUE(v1[8] == 0);
   ASSERT_TRUE(v1[9] == 0);
 }
-#endif
