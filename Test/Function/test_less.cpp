@@ -9,24 +9,21 @@ class LessTest : public testing::Test {
   }
 };
 
-// TODO::sort() need pred
-#if 0
 TEST_F(LessTest, lesst) {
   int array[4] = {3, 1, 4, 2};
   sort(array, array + 4, less<int>());
 
-  CPPUNIT_ASSERT(array[0] == 1);
-  CPPUNIT_ASSERT(array[1] == 2);
-  CPPUNIT_ASSERT(array[2] == 3);
-  CPPUNIT_ASSERT(array[3] == 4);
+  ASSERT_TRUE(array[0] == 1);
+  ASSERT_TRUE(array[1] == 2);
+  ASSERT_TRUE(array[2] == 3);
+  ASSERT_TRUE(array[3] == 4);
 }
 TEST_F(LessTest, lesseqt) {
   int array[4] = {3, 1, 4, 2};
   sort(array, array + 4, less_equal<int>());
 
-  CPPUNIT_ASSERT(array[0] == 1);
-  CPPUNIT_ASSERT(array[1] == 2);
-  CPPUNIT_ASSERT(array[2] == 3);
-  CPPUNIT_ASSERT(array[3] == 4);
+  ASSERT_TRUE(array[0] == 1);
+  ASSERT_TRUE(array[1] == 2);
+  ASSERT_TRUE(array[2] == 3);
+  ASSERT_TRUE(array[3] == 4);
 }
-#endif

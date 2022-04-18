@@ -9,8 +9,6 @@ class BnegateTest : public testing::Test {
   }
 };
 
-// TODO::sort need pred
-#if 0
 TEST_F(BnegateTest, bnegate1) {
   int array [4] = { 4, 9, 7, 1 };
   sort(array, array + 4, binary_negate<greater<int> >(greater<int>()));
@@ -27,4 +25,3 @@ TEST_F(BnegateTest, bnegate2) {
   ASSERT_TRUE(array[2]==7);
   ASSERT_TRUE(array[3]==9);
 }
-#endif

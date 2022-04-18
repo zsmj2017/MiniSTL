@@ -44,8 +44,10 @@ TEST_F(PartialTest, parsrt1) {
   ASSERT_TRUE(v1[9] == 5);
 }
 
-// TODO:: partial_sort() need pred
-#if 0
+bool str_compare(const char *a_, const char *b_) {
+  return strcmp(a_, b_) < 0 ? 1 : 0;
+}
+
 TEST_F(PartialTest, parsrt2) {
   char const *names[] = {"aa", "ff", "dd", "ee", "cc", "bb"};
 
@@ -70,4 +72,3 @@ TEST_F(PartialTest, parsrt2) {
   ASSERT_TRUE(strcmp(v1[5], "dd") == 0);
   ASSERT_TRUE(v1[5] == names[2]);
 }
-#endif
