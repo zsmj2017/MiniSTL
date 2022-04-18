@@ -984,37 +984,39 @@ void random_shuffle(RandomAccessIterator first, RandomAccessIterator last,
   }
 }
 
-template<class RandomAccessIterator, class T>
+template<class RandomAccessIterator, class Compare, class T>
 inline void _partial_sort(RandomAccessIterator first,
                           RandomAccessIterator middle, RandomAccessIterator last,
+                          const Compare &comp,
                           T *) {
-  make_heap(first, middle);
+  make_heap(first, middle, comp);
   for (RandomAccessIterator i = middle; i != last; ++i) {
-    if (*i < *first) {
-      pop_heap_aux(first, middle, i, T(*i), less<T>());
+    if (comp(*i, *first)) {
+      pop_heap_aux(first, middle, i, T(*i), comp);
     }
   }
-  sort_heap(first, middle);
+  sort_heap(first, middle, comp);
 }
 
 //partial_sort:接收迭代器first,middle,last，使序列中的middle-first个元素以递增序置于[first,middle)中
 //算法精要：将[first,middle)做成最大堆，然后将[middle，last)中的元素与max-heap中的元素比较
 //若小于最大值，交换位置，并重新维持max-heap （在算法中的直接体现为pop_heap)
 //因此当走完[first,last)时较大元素已被抽离[first,middle),最后再次以sort_heap对[first,middle)作出排序
-template<class RandomAccessIterator>
+template<class RandomAccessIterator, class Compare = less<value_type_t<RandomAccessIterator>>>
 inline void partial_sort(RandomAccessIterator first,
                          RandomAccessIterator middle,
-                         RandomAccessIterator last) {
-  _partial_sort(first, middle, last, pointer_t<RandomAccessIterator>());
+                         RandomAccessIterator last,
+                         const Compare &comp = Compare()) {
+  _partial_sort(first, middle, last, comp, pointer_t<RandomAccessIterator>());
 }
 
 // TODO::need partial_sort_copy, 其行为类似于partial_sort
 
-template<class RandomAccessIterator, class T>
-void _unguarded_linear_insert(RandomAccessIterator last, T value) {
+template<class RandomAccessIterator, class Compare, class T>
+void _unguarded_linear_insert(RandomAccessIterator last, T value, const Compare &comp) {
   RandomAccessIterator next = last;
   --next;
-  while (value < *next) {
+  while (comp(value, *next)) {
     *last = *next;
     last = next;
     --next;
@@ -1022,26 +1024,26 @@ void _unguarded_linear_insert(RandomAccessIterator last, T value) {
   *last = value;
 }
 
-template<class RandomAccessIterator, class T>
+template<class RandomAccessIterator, class Compare, class T>
 inline void _linear_insert(RandomAccessIterator first,
-                           RandomAccessIterator last, T *) {
+                           RandomAccessIterator last, const Compare &comp, T *) {
   T value = *last;                       //记录尾元素
-  if (value < *first) {                  //尾元素小于头元素（头必为最小元素）
+  if (comp(value, *first)) {             //尾元素小于头元素（头必为最小元素）
     copy_backward(first, last, last + 1);//整个区间右移一位
     *first = value;
   } else {
-    _unguarded_linear_insert(last, value);
+    _unguarded_linear_insert(last, value, comp);
   }
 }
 
 // insertion_sort:插入排序
-template<class RandomAccessIterator>
-void _insertion_sort(RandomAccessIterator first, RandomAccessIterator last) {
+template<class RandomAccessIterator, class Compare>
+void _insertion_sort(RandomAccessIterator first, RandomAccessIterator last, const Compare &comp) {
   if (first == last) {
     return;
   }
   for (RandomAccessIterator i = first + 1; i != last; ++i) {
-    _linear_insert(first, i, pointer_t<RandomAccessIterator>());//[first,i)形成一个有序子区间
+    _linear_insert(first, i, comp, pointer_t<RandomAccessIterator>());//[first,i)形成一个有序子区间
   }
 }
 
@@ -1071,16 +1073,17 @@ inline const T &_median(const T &a, const T &b, const T &c) {
   }
 }
 
-// partitioining:分割，其核心思想类似于前文算法partition
-template<class RandomAccessIterator, class T>
+// 其核心思想类似于前文算法partition
+template<class RandomAccessIterator, class Compare, class T>
 RandomAccessIterator _unguarded_partition(RandomAccessIterator first,
-                                          RandomAccessIterator last, T pivot) {
+                                          RandomAccessIterator last, T pivot,
+                                          const Compare &comp) {
   while (true) {
-    while (*first < pivot) {
+    while (comp(*first, pivot)) {
       ++first;
     }
     --last;
-    while (pivot < *last) {
+    while (comp(pivot, *last)) {
       --last;
     }
     if (!(first < last)) {
@@ -1109,56 +1112,59 @@ inline Size _lg(Size n) {
 
 //_introsort_loop：intosort的具体实现
 //结束排序后，[first,last)内有多个“元素个数少于16”的子序列，每个子序列有一定程序的排序，但尚未完全排序
-template<class RandomAccessIterator, class T, class Size>
-void _introsort_loop(RandomAccessIterator first, RandomAccessIterator last,
+template<class RandomAccessIterator, class Compare, class T, class Size>
+void _introsort_loop(RandomAccessIterator first, RandomAccessIterator last, const Compare &comp,
                      T *, Size depth_limit) {
   //_STL_threshold是一个定义为16的全局常数
   while (last - first > /*_stl_threshold*/ 16) {
-    if (depth_limit == 0) {           //已经产生了分割恶化
-      partial_sort(first, last, last);//改用heap-sort
+    if (depth_limit == 0) {                 //已经产生了分割恶化
+      partial_sort(first, last, last, comp);//改用heap-sort
       return;
     }
     --depth_limit;
     RandomAccessIterator cut = _unguarded_partition(
         first, last,
-        _median(*first, *(first + (last - first) / 2), *(last - 1)));
-    _introsort_loop(cut, last, pointer_t<RandomAccessIterator>(), depth_limit);
+        _median(*first, *(first + (last - first) / 2), *(last - 1)), comp);
+    _introsort_loop(cut, last, comp, pointer_t<RandomAccessIterator>(), depth_limit);
     last = cut;//回归while，执行左侧排序
   }
 }
 
-template<class RandomAccessIterator, class T>
+template<class RandomAccessIterator, class Compare, class T>
 void _unguarded_insertion_sort_aux(RandomAccessIterator first,
-                                   RandomAccessIterator last, T *) {
+                                   RandomAccessIterator last,
+                                   const Compare &comp, T *) {
   for (RandomAccessIterator i = first; i != last; ++i)
-    _unguarded_linear_insert(i, T(*i));
+    _unguarded_linear_insert(i, T(*i), comp);
 }
 
-template<class RandomAccessIterator>
+template<class RandomAccessIterator, class Compare>
 inline void _unguarded_insertion_sort(RandomAccessIterator first,
-                                      RandomAccessIterator last) {
-  _unguarded_insertion_sort_aux(first, last, pointer_t<RandomAccessIterator>());
+                                      RandomAccessIterator last,
+                                      const Compare &comp) {
+  _unguarded_insertion_sort_aux(first, last, comp, pointer_t<RandomAccessIterator>());
 }
 
 //_finial_insertion_sort:最终版本插入排序
 //首先判断元素个数是否大于16，若答案为是，则将其分为两部分
-template<class RandomAccessIterator>
+template<class RandomAccessIterator, class Compare>
 void _final_insertion_sort(RandomAccessIterator first,
-                           RandomAccessIterator last) {
+                           RandomAccessIterator last,
+                           const Compare &comp) {
   if (last - first > /*_stl_threshold*/ 16) {
-    _insertion_sort(first, first + /*_stl_threshold*/ 16);
-    _unguarded_insertion_sort(first + /*_stl_threshold, last*/ 16, last);
+    _insertion_sort(first, first + /*_stl_threshold*/ 16, comp);
+    _unguarded_insertion_sort(first + /*_stl_threshold, last*/ 16, last, comp);
   } else
-    _insertion_sort(first, last);
+    _insertion_sort(first, last, comp);
 }
 
 //introsort：在快排表现良好时使用快排，在其表现不佳（分割导致了问题的恶化）时则转向使用heapsort，从而确保O(NlogN）
-template<class RandomAccessIterator>
-inline void sort(RandomAccessIterator first, RandomAccessIterator last) {
+template<class RandomAccessIterator, class Compare = less<value_type_t<RandomAccessIterator>>>
+inline void sort(RandomAccessIterator first, RandomAccessIterator last, const Compare &comp = Compare()) {
   if (first != last) {
-    _introsort_loop(first, last, pointer_t<RandomAccessIterator>(),
+    _introsort_loop(first, last, comp, pointer_t<RandomAccessIterator>(),
                     _lg(last - first) * 2);
-    _final_insertion_sort(first, last);
+    _final_insertion_sort(first, last, comp);
   }
 }
 
@@ -1425,31 +1431,31 @@ inline void inplace_merge(BidirectionalIterator first,
                      difference_type_t<BidirectionalIterator>());
 }
 
-template<class RandomAccessIterator, class T>
+template<class RandomAccessIterator, class Compare, class T>
 void _nth_element(RandomAccessIterator first, RandomAccessIterator nth,
-                  RandomAccessIterator last, T *) {
+                  RandomAccessIterator last, const Compare &comp, T *) {
   while (last - first > 3) {
     //三点中值法分割
     //返回一个迭代器，指向分割后右侧的第一个元素
     RandomAccessIterator cut = _unguarded_partition(
         first, last,
-        T(_median(*first, *(first + (last - first) / 2), *(last - 1))));
+        T(_median(*first, *(first + (last - first) / 2), *(last - 1))), comp);
     if (cut <= nth) {
       first = cut;//右端起点<=nth,再次对右侧分割
     } else {
       last = cut;//对左侧分割
     }
   }
-  _insertion_sort(first, last);
+  _insertion_sort(first, last, comp);
 }
 
 //nth_element:重新排序[first,last)，使得nth指向的元素与完全排列后同一位置的元素同值
 //nth_element还保证[nth,last）内的元素必然不大于nth，但对于[first,nth)与[nth,last)中的序列则毫无保证
 //由此看来，nth_element更类似于partition而非partial_sort(后者采用heap_sort)
-template<class RandomAccessIterator>
+template<class RandomAccessIterator, class Compare = less<value_type_t<RandomAccessIterator>>>
 inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth,
-                        RandomAccessIterator last) {
-  _nth_element(first, nth, last, pointer_t<RandomAccessIterator>());
+                        RandomAccessIterator last, const Compare &comp = Compare()) {
+  _nth_element(first, nth, last, comp, pointer_t<RandomAccessIterator>());
 }
 
 // mergesort::调用inplace_merge完成归并排序，需要额外的缓冲区，此外在内存间不断移动（复制）元素亦需要较高成本，弱于quick_sort
