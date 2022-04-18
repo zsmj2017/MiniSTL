@@ -168,7 +168,7 @@ void generate(InputIterator first, InputIterator last, Generator gen) {
 
 // generate_n:将gen的运算结果填写于起点为first，长度为n的区间内，采用assignment
 template<class OutputIterator, class Size, class Generator>
-OutputIterator generate(OutputIterator first, Size n, Generator gen) {
+OutputIterator generate_n(OutputIterator first, Size n, Generator gen) {
   for (; n > 0; --n, ++first) {
     *first = gen();
   }
