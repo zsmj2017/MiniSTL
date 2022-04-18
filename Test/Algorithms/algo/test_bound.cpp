@@ -32,8 +32,6 @@ TEST_F(BoundTest, lwrbnd1) {
   ASSERT_TRUE((location - v1.begin()) == 12);
 }
 
-// TODO::upper_bound() && lower_bound() need pred
-#if 0
 TEST_F(BoundTest, uprbnd2) {
   char const *str[] = {"a", "a", "b", "b", "q", "w", "z"};
 
@@ -51,4 +49,3 @@ TEST_F(BoundTest, lwrbnd2) {
 
   ASSERT_TRUE((location - str) == 4);
 }
-#endif
