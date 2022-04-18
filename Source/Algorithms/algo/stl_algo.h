@@ -1194,18 +1194,18 @@ inline void sort(RandomAccessIterator first, RandomAccessIterator last) {
   }
 #endif
 // equal_range:本质上返回了lower_bound与upper_bound组成的pair
-template<class ForwardIterator, class T>
+template<class ForwardIterator, class T, class Compare = less<T>>
 inline pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first,
                                                           ForwardIterator last,
-                                                          const T &value) {
-  return _equal_range(first, last, value, difference_type_t<ForwardIterator>(),
+                                                          const T &value, const Compare &comp = Compare()) {
+  return _equal_range(first, last, value, comp, difference_type_t<ForwardIterator>(),
                       iterator_category_t<ForwardIterator>());
 }
 
-template<class RandomAccessIterator, class T, class Distance>
+template<class RandomAccessIterator, class T, class Compare, class Distance>
 inline pair<RandomAccessIterator, RandomAccessIterator> _equal_range(
-    RandomAccessIterator first, RandomAccessIterator last, const T &value,
-    Distance *, random_access_iterator_tag) {
+    RandomAccessIterator first, RandomAccessIterator last, const T &value, const Compare &comp,
+    Distance, random_access_iterator_tag) {
   Distance len = last - first;
   Distance half;
   RandomAccessIterator middle, left, right;
@@ -1213,10 +1213,10 @@ inline pair<RandomAccessIterator, RandomAccessIterator> _equal_range(
   while (len > 0) {
     half = len >> 1;
     middle = first + half;
-    if (*middle < value) {
+    if (comp(*middle, value)) {
       first = middle + 1;
       len = len - half - 1;
-    } else if (value < *middle) {
+    } else if (comp(value, *middle)) {
       len = half;
     } else {//中央元素等于指定值
       left = lower_bound(first, middle, value);
@@ -1229,9 +1229,9 @@ inline pair<RandomAccessIterator, RandomAccessIterator> _equal_range(
   return pair<RandomAccessIterator, RandomAccessIterator>(first, first);
 }
 
-template<class ForwardIterator, class T, class Distance>
+template<class ForwardIterator, class T, class Compare, class Distance>
 inline pair<ForwardIterator, ForwardIterator> _equal_range(
-    ForwardIterator first, ForwardIterator last, const T &value, Distance *,
+    ForwardIterator first, ForwardIterator last, const T &value, const Compare &comp, Distance,
     forward_iterator_tag) {
   Distance len = 0;
   distance(first, last, len);
@@ -1242,11 +1242,11 @@ inline pair<ForwardIterator, ForwardIterator> _equal_range(
     half = len >> 1;
     middle = first;
     advance(middle, half);
-    if (*middle < value) {
+    if (comp(*middle, value)) {
       first = middle;
       ++first;
       len = len - half - 1;
-    } else if (value < *middle) {
+    } else if (comp(value, *middle)) {
       len = half;
     } else {//中央元素等于指定值
       left = lower_bound(first, middle, value);
