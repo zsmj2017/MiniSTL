@@ -9,8 +9,6 @@ class GreaterTest : public testing::Test {
   }
 };
 
-// TODO::sort() need pred
-#if 0
 TEST_F(GreaterTest, greatert) {
   int array[4] = {3, 1, 4, 2};
   sort(array, array + 4, greater<int>());
@@ -28,4 +26,3 @@ TEST_F(GreaterTest, greatereq) {
   ASSERT_TRUE(array[2] == 2);
   ASSERT_TRUE(array[3] == 1);
 }
-#endif

@@ -41,8 +41,6 @@ TEST_F(NthElemTest, nthelem1) {
   ASSERT_TRUE(v1[9] == 6);
 }
 
-// TODO::nth_elemnt() need pred
-#if 0
 TEST_F(NthElemTest, nthelem2) {
   //4 5 4 2 1 7 4 3 1 6
   //6 7 4 4 5 4 3 2 1 1
@@ -62,4 +60,3 @@ TEST_F(NthElemTest, nthelem2) {
   ASSERT_TRUE(v1[8] == 1);
   ASSERT_TRUE(v1[9] == 1);
 }
-#endif

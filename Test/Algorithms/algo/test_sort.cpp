@@ -86,8 +86,6 @@ TEST_F(SortTest, sort1) {
   ASSERT_TRUE(numbers[5] == 50);
 }
 
-// TODO:: sort() need pred
-#if 0
 TEST_F(SortTest, sort2) {
   int numbers[] = {1, 50, -10, 11, 42, 19};
 
@@ -102,7 +100,6 @@ TEST_F(SortTest, sort2) {
   ASSERT_TRUE(numbers[1] == 42);
   ASSERT_TRUE(numbers[0] == 50);
 }
-#endif
 
 TEST_F(SortTest, sort3) {
   vector<bool> boolVector;
