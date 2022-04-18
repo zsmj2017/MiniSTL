@@ -9,18 +9,10 @@
 namespace MiniSTL {
 
 // 不能保证长度相等
-template<class InputIterator1, class InputIterator2>
-inline bool equal(InputIterator1 first1, InputIterator1 last1,
-                  InputIterator2 first2) {
-  for (; first1 != last1; ++first1, ++first2)
-    if (*first1 != *first2) return false;
-  return true;
-}
-
 // 接受自定义比较器
-template<class InputIterator1, class InputIterator2, class BinaryPredicate>
+template<class InputIterator1, class InputIterator2, class BinaryPredicate = equal_to<value_type_t<InputIterator1>>>
 inline bool equal(InputIterator1 first1, InputIterator1 last1,
-                  InputIterator2 first2, BinaryPredicate binary_pred) {
+                  InputIterator2 first2, const BinaryPredicate& binary_pred= BinaryPredicate()) {
   for (; first1 != last1; ++first1, ++first2)
     if (!binary_pred(*first1, *first2)) return false;
   return true;
