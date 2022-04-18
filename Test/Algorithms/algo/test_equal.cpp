@@ -13,8 +13,6 @@ class EqualTest : public testing::Test {
   }
 };
 
-// TODO::need equal_range()
-#if 0
 TEST_F(EqualTest, equal_range0) {
   int numbers[10] = {0, 0, 1, 1, 2, 2, 2, 2, 3, 3};
   pair<int *, int *> range = equal_range((int *) numbers, (int *) numbers + 10, 2);
@@ -64,9 +62,9 @@ TEST_F(EqualTest, equal_range2) {
   ASSERT_TRUE((range.second - range.first) == 1);
   ASSERT_TRUE(*range.first == 'm');
 
-  vector<Test> tv;
-  vector<Test>::iterator it;
-  pair<vector<Test>::iterator, vector<Test>::iterator> p;
+  vector<int> tv;
+  vector<int>::iterator it;
+  pair<vector<int>::iterator, vector<int>::iterator> p;
 
   for (int i = 0; i < 10; ++i) {
     tv.push_back(i);
@@ -87,7 +85,6 @@ TEST_F(EqualTest, equal_range2) {
   ASSERT_TRUE(*p.first == 5);
   ASSERT_TRUE(*p.second == 6);
 }
-#endif
 
 TEST_F(EqualTest, equal0) {
   int numbers1[5] = {1, 2, 3, 4, 5};
