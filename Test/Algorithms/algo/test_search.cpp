@@ -53,8 +53,6 @@ TEST_F(SearchTest, search1) {
   ASSERT_TRUE(location - v1.begin() == 4);
 }
 
-// TODO::search() need pred
-#if 0
 TEST_F(SearchTest, search2) {
   char const *grades[] = {"A", "B", "C", "D", "F"};
   char const *letters[] = {"Q", "E", "D"};
@@ -70,4 +68,3 @@ TEST_F(SearchTest, search2) {
   ASSERT_TRUE(location != grades + gradeCount);
   ASSERT_TRUE(location - grades == 1);
 }
-#endif
