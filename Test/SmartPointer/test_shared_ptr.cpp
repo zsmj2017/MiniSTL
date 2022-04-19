@@ -4,7 +4,6 @@
 #include <string>
 
 using namespace ::MiniSTL;
-using std::move;// todo:: need implement MiniSTL::move
 using std::string;
 
 class SharedPtrTest : public testing::Test {

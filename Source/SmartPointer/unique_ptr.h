@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Algorithms/algobase/stl_algobase.h"
+
 namespace MiniSTL {
 
 class Deleter {
@@ -19,7 +21,7 @@ class unique_ptr {
   unique_ptr &operator=(const unique_ptr &) = delete;
 
  public:// move-only
-  unique_ptr(unique_ptr &&rhs) noexcept : ptr(rhs.ptr), deleter(std::move(rhs.deleter)) { rhs.ptr = nullptr; }
+  unique_ptr(unique_ptr &&rhs) noexcept : ptr(rhs.ptr), deleter(MiniSTL::move(rhs.deleter)) { rhs.ptr = nullptr; }
   unique_ptr &operator=(unique_ptr &&rhs) noexcept;
 
  public:// operator= for nullptr
@@ -49,8 +51,8 @@ class unique_ptr {
 
 template<class T, class D>
 inline void unique_ptr<T, D>::swap(unique_ptr<T, D> &rhs) noexcept {
-  swap(ptr, rhs.ptr);
-  swap(deleter, rhs.deleter);
+  MiniSTL::swap(ptr, rhs.ptr);
+  MiniSTL::swap(deleter, rhs.deleter);
 }
 
 template<class T, class D>

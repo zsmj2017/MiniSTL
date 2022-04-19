@@ -51,12 +51,12 @@ TEST_F(QueueTest, COPY_CTOR) {
 }
 
 TEST_F(QueueTest, MOVE_CTOR) {
-  EXPECT_NO_THROW(queue<int>(std::move(qi)));
-  EXPECT_NO_THROW(queue<float>(std::move(qf)));
-  EXPECT_NO_THROW(queue<double>(std::move(qd)));
-  EXPECT_NO_THROW(queue<string>(std::move(qs)));
-  EXPECT_NO_THROW(queue<BAR>(std::move(qb)));
-  EXPECT_NO_THROW(queue<queue<int>>(std::move(qqi)));
+  EXPECT_NO_THROW(queue<int>(MiniSTL::move(qi)));
+  EXPECT_NO_THROW(queue<float>(MiniSTL::move(qf)));
+  EXPECT_NO_THROW(queue<double>(MiniSTL::move(qd)));
+  EXPECT_NO_THROW(queue<string>(MiniSTL::move(qs)));
+  EXPECT_NO_THROW(queue<BAR>(MiniSTL::move(qb)));
+  EXPECT_NO_THROW(queue<queue<int>>(MiniSTL::move(qqi)));
 }
 
 TEST_F(QueueTest, DTOR) {
@@ -95,7 +95,7 @@ TEST_F(QueueTest, COPYASSIGN_WITH_SELF) {
 TEST_F(QueueTest, MOVEASSIGN_WITH_SELF) {
   queue<int> temp_qi;
   temp_qi.push(2);
-  qi = std::move(temp_qi);
+  qi = MiniSTL::move(temp_qi);
   EXPECT_EQ(qi.front(), 2);
   queue<float> temp_qf;
   temp_qf.push(2.0f);
@@ -314,13 +314,13 @@ TEST_F(Priority_Queue_Test, COPY_CTOR) {
 
 TEST_F(Priority_Queue_Test, MOVE_CTOR) {
   EXPECT_NO_THROW(
-      (priority_queue<int, vector<int>, less<int>>{std::move(pqvl)}));
+      (priority_queue<int, vector<int>, less<int>>{MiniSTL::move(pqvl)}));
   EXPECT_NO_THROW(
-      (priority_queue<int, vector<int>, greater<int>>{std::move(pqvg)}));
+      (priority_queue<int, vector<int>, greater<int>>{MiniSTL::move(pqvg)}));
   EXPECT_NO_THROW(
-      (priority_queue<int, deque<int>, less<int>>{std::move(pqdl)}));
+      (priority_queue<int, deque<int>, less<int>>{MiniSTL::move(pqdl)}));
   EXPECT_NO_THROW(
-      (priority_queue<int, deque<int>, greater<int>>{std::move(pqdg)}));
+      (priority_queue<int, deque<int>, greater<int>>{MiniSTL::move(pqdg)}));
 }
 
 TEST_F(Priority_Queue_Test, DTOR) {
@@ -344,7 +344,7 @@ TEST_F(Priority_Queue_Test, COPYASSIGN_WITH_SELF) {
 TEST_F(Priority_Queue_Test, MOVEASSIGN_WITH_SELF) {
   priority_queue<int> temp_qi;
   temp_qi.push(2);
-  pqvl = std::move(temp_qi);
+  pqvl = MiniSTL::move(temp_qi);
   EXPECT_EQ(pqvl.top(), 2);
   pqvl.pop();
   EXPECT_TRUE(pqvl.empty());

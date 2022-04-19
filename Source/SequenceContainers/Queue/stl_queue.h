@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Algorithms/algobase/stl_algobase.h"
 #include "Function/stl_function.h"
 #include "SequenceContainers/Deque/stl_deque.h"
 
@@ -44,9 +45,9 @@ class queue {
   }
 
  public:// move operations
-  queue(queue &&rhs) noexcept : c(std::move(rhs.c)) {}
+  queue(queue &&rhs) noexcept : c(MiniSTL::move(rhs.c)) {}
   queue &operator=(queue &&rhs) noexcept {
-    c.operator=(std::move(rhs.c));
+    c.operator=(MiniSTL::move(rhs.c));
     return *this;
   }
 

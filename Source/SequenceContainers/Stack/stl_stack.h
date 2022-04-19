@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Algorithms/algobase/stl_algobase.h"
 #include "SequenceContainers/Deque/stl_deque.h"
 
 namespace MiniSTL {
@@ -43,9 +44,9 @@ class stack {
   }
 
  public:// move operations
-  stack(stack &&rhs) noexcept : c(std::move(rhs.c)) {}
+  stack(stack &&rhs) noexcept : c(MiniSTL::move(rhs.c)) {}
   stack &operator=(stack &&rhs) noexcept {
-    c.operator=(std::move(rhs.c));
+    c.operator=(MiniSTL::move(rhs.c));
     return *this;
   }
 

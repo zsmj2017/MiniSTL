@@ -78,9 +78,9 @@ class set {
   }
 
  public:// move operation
-  set(set &&rhs) noexcept : t(std::move(rhs.t)) {}
+  set(set &&rhs) noexcept : t(MiniSTL::move(rhs.t)) {}
   set &operator=(set &&rhs) noexcept {
-    t = std::move(rhs.t);
+    t = MiniSTL::move(rhs.t);
     return *this;
   }
 

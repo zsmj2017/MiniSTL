@@ -22,7 +22,7 @@ class priority_queue {
   explicit priority_queue(const Compare &compare) : c(), comp(compare) {}
   explicit priority_queue(const Compare &compare = Compare(),
                           const Sequence &&seq = Sequence())
-      : c(std::move(seq)), comp(compare) {
+      : c(MiniSTL::move(seq)), comp(compare) {
     make_heap(c.begin(), c.end(), comp);
   }
   priority_queue(std::initializer_list<T> il,
@@ -41,7 +41,7 @@ class priority_queue {
   priority_queue(InputIterator first, InputIterator last,
                  const Compare &compare = Compare(),
                  const Sequence &&seq = Sequence())
-      : c(std::move(seq)), comp(compare) {
+      : c(MiniSTL::move(seq)), comp(compare) {
     c.insert(c.end(), first, last);
     make_heap(c.begin(), c.end(), comp);
   }
@@ -57,11 +57,11 @@ class priority_queue {
   }
 
  public:// move operation
-  priority_queue(priority_queue &&rhs) noexcept : c(std::move(rhs.c)),
-                                                  comp(std::move(rhs.comp)) {}
+  priority_queue(priority_queue &&rhs) noexcept : c(MiniSTL::move(rhs.c)),
+                                                  comp(MiniSTL::move(rhs.comp)) {}
   priority_queue &operator=(priority_queue &&rhs) noexcept {
-    c = std::move(rhs.c);
-    comp = std::move(rhs.comp);
+    c = MiniSTL::move(rhs.c);
+    comp = MiniSTL::move(rhs.comp);
     return *this;
   }
 

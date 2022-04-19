@@ -94,12 +94,12 @@ TEST_F(SlistTest, COPY_CTOR) {
 }
 
 TEST_F(SlistTest, MOVE_CTOR) {
-  EXPECT_NO_THROW(slist<int>(std::move(li)));
-  EXPECT_NO_THROW(slist<float>(std::move(lf)));
-  EXPECT_NO_THROW(slist<double>(std::move(ld)));
-  EXPECT_NO_THROW(slist<string>(std::move(ls)));
-  EXPECT_NO_THROW(slist<BAR>(std::move(lb)));
-  EXPECT_NO_THROW(slist<slist<int>>(std::move(lli)));
+  EXPECT_NO_THROW(slist<int>(MiniSTL::move(li)));
+  EXPECT_NO_THROW(slist<float>(MiniSTL::move(lf)));
+  EXPECT_NO_THROW(slist<double>(MiniSTL::move(ld)));
+  EXPECT_NO_THROW(slist<string>(MiniSTL::move(ls)));
+  EXPECT_NO_THROW(slist<BAR>(MiniSTL::move(lb)));
+  EXPECT_NO_THROW(slist<slist<int>>(MiniSTL::move(lli)));
 }
 
 TEST_F(SlistTest, COPYASSIGN_WITH_SELF) {
@@ -135,23 +135,23 @@ TEST_F(SlistTest, COPYASSIGN_WITH_INITIAL_LIST) {
 
 TEST_F(SlistTest, MOVEASSIGN_WITH_SELF) {
   slist<int> temp_li(5, 2);
-  li = std::move(temp_li);
+  li = MiniSTL::move(temp_li);
   for (auto i : li) EXPECT_EQ(i, 2);
   for (auto i : temp_li) EXPECT_NE(i, 2);
   slist<float> temp_lf(5, 2.0f);
-  lf = std::move(temp_lf);
+  lf = MiniSTL::move(temp_lf);
   for (auto f : lf) EXPECT_EQ(f, 2.0f);
   for (auto f : temp_lf) EXPECT_NE(f, 2.0f);
   slist<double> temp_ld(5, 2.235f);
-  ld = std::move(temp_ld);
+  ld = MiniSTL::move(temp_ld);
   for (auto d : ld) EXPECT_EQ(d, 2.235f);
   for (auto d : temp_ld) EXPECT_NE(d, 2.235f);
   slist<string> temp_ls(5, "hello");
-  ls = std::move(temp_ls);
+  ls = MiniSTL::move(temp_ls);
   for (auto s : ls) EXPECT_EQ(s, "hello");
   for (auto s : temp_ls) EXPECT_NE(s, "hello");
   slist<slist<int>> temp_lli(5, {1, 2, 3});
-  lli = std::move(temp_lli);
+  lli = MiniSTL::move(temp_lli);
   for (auto li : lli) EXPECT_EQ(li, slist<int>({1, 2, 3}));
   for (auto li : temp_lli) EXPECT_NE(li, slist<int>({1, 2, 3}));
 }
@@ -227,7 +227,7 @@ TEST_F(SlistTest, COMPARATOR) {
   slist<double> temp_ld(ld.cbegin(), ld.cend());
   EXPECT_TRUE(temp_ld == ld);
   EXPECT_FALSE(temp_ld != ld);
-  slist<string> temp_ls(std::move(ls));
+  slist<string> temp_ls(MiniSTL::move(ls));
   EXPECT_FALSE(temp_ls == ls);
   EXPECT_TRUE(temp_ls != ls);
   slist<slist<int>> temp_lli({{1, 2, 3}, {1, 2, 3}});
@@ -378,6 +378,7 @@ TEST_F(SlistTest, SORT) {
 }
 
 TEST_F(SlistTest, REMOVE) {
+  li.remove(1);
   li.remove(1);
   EXPECT_EQ(li.size(), 4);
   EXPECT_EQ(li.front(), 2);

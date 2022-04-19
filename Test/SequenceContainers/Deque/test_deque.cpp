@@ -94,12 +94,12 @@ TEST_F(DequeTest, COPY_CTOR) {
 }
 
 TEST_F(DequeTest, MOVE_CTOR) {
-  EXPECT_NO_THROW(deque<int>(std::move(di)));
-  EXPECT_NO_THROW(deque<float>(std::move(df)));
-  EXPECT_NO_THROW(deque<double>(std::move(dd)));
-  EXPECT_NO_THROW(deque<string>(std::move(ds)));
-  EXPECT_NO_THROW(deque<BAR>(std::move(db)));
-  EXPECT_NO_THROW(deque<deque<int>>(std::move(ddi)));
+  EXPECT_NO_THROW(deque<int>(MiniSTL::move(di)));
+  EXPECT_NO_THROW(deque<float>(MiniSTL::move(df)));
+  EXPECT_NO_THROW(deque<double>(MiniSTL::move(dd)));
+  EXPECT_NO_THROW(deque<string>(MiniSTL::move(ds)));
+  EXPECT_NO_THROW(deque<BAR>(MiniSTL::move(db)));
+  EXPECT_NO_THROW(deque<deque<int>>(MiniSTL::move(ddi)));
 }
 
 TEST_F(DequeTest, DTOR) {
@@ -143,23 +143,23 @@ TEST_F(DequeTest, COPYASSIGN_WITH_INITIAL_LIST) {
 
 TEST_F(DequeTest, MOVEASSIGN_WITH_SELF) {
   deque<int> temp_di(5, 2);
-  di = std::move(temp_di);
+  di = MiniSTL::move(temp_di);
   for (auto i : di) EXPECT_EQ(i, 2);
   for (auto i : temp_di) EXPECT_NE(i, 2);
   deque<float> temp_df(5, 2.0f);
-  df = std::move(temp_df);
+  df = MiniSTL::move(temp_df);
   for (auto f : df) EXPECT_EQ(f, 2.0f);
   for (auto f : temp_df) EXPECT_NE(f, 2.0f);
   deque<double> temp_dd(5, 2.235f);
-  dd = std::move(temp_dd);
+  dd = MiniSTL::move(temp_dd);
   for (auto d : dd) EXPECT_EQ(d, 2.235f);
   for (auto d : temp_dd) EXPECT_NE(d, 2.235f);
   deque<string> temp_ds(5, "hello");
-  ds = std::move(temp_ds);
+  ds = MiniSTL::move(temp_ds);
   for (auto s : ds) EXPECT_EQ(s, "hello");
   for (auto s : temp_ds) EXPECT_NE(s, "hello");
   deque<deque<int>> temp_ddi(5, {1, 2, 3});
-  ddi = std::move(temp_ddi);
+  ddi = MiniSTL::move(temp_ddi);
   for (auto di : ddi) EXPECT_EQ(di, deque<int>({1, 2, 3}));
   for (auto di : temp_ddi) EXPECT_NE(di, deque<int>({1, 2, 3}));
 }
@@ -289,7 +289,7 @@ TEST_F(DequeTest, COMPARATOR) {
   deque<double> temp_dd(dd.cbegin(), dd.cend());
   EXPECT_TRUE(temp_dd == dd);
   EXPECT_FALSE(temp_dd != dd);
-  deque<string> temp_ds(std::move(ds));
+  deque<string> temp_ds(MiniSTL::move(ds));
   EXPECT_FALSE(temp_ds == ds);
   EXPECT_TRUE(temp_ds != ds);
   deque<deque<int>> temp_ddi({{1, 2, 3}, {1, 2, 3}});

@@ -1,6 +1,6 @@
 #pragma once
-#include "Algorithms/algo/stl_algo.h"// swap
-#include <functional>                // TODO::need implementation ministl function
+#include "Algorithms/algobase/stl_algobase.h"// swap
+#include <functional>                        // TODO::need implementation ministl function
 
 // TODO::need add atomic_ref_count
 
@@ -26,7 +26,7 @@ class shared_ptr {
 
  public:// move operation
   shared_ptr(shared_ptr &&rhs) noexcept
-      : ptr(rhs.ptr), ref_count(rhs.ref_count), deleter(std::move(rhs.deleter)) {
+      : ptr(rhs.ptr), ref_count(rhs.ref_count), deleter(MiniSTL::move(rhs.deleter)) {
     rhs.ptr = nullptr;
     rhs.ref_count = nullptr;
   }

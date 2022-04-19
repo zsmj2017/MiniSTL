@@ -49,12 +49,12 @@ TEST_F(StackTest, COPY_CTOR) {
 }
 
 TEST_F(StackTest, MOVE_CTOR) {
-  EXPECT_NO_THROW(stack<int>(std::move(si)));
-  EXPECT_NO_THROW(stack<float>(std::move(sf)));
-  EXPECT_NO_THROW(stack<double>(std::move(sd)));
-  EXPECT_NO_THROW(stack<string>(std::move(ss)));
-  EXPECT_NO_THROW(stack<BAR>(std::move(sb)));
-  EXPECT_NO_THROW(stack<stack<int>>(std::move(ssi)));
+  EXPECT_NO_THROW(stack<int>(MiniSTL::move(si)));
+  EXPECT_NO_THROW(stack<float>(MiniSTL::move(sf)));
+  EXPECT_NO_THROW(stack<double>(MiniSTL::move(sd)));
+  EXPECT_NO_THROW(stack<string>(MiniSTL::move(ss)));
+  EXPECT_NO_THROW(stack<BAR>(MiniSTL::move(sb)));
+  EXPECT_NO_THROW(stack<stack<int>>(MiniSTL::move(ssi)));
 }
 
 TEST_F(StackTest, DTOR) {
@@ -93,7 +93,7 @@ TEST_F(StackTest, COPYASSIGN_WITH_SELF) {
 TEST_F(StackTest, MOVEASSIGN_WITH_SELF) {
   stack<int> temp_si;
   temp_si.push(2);
-  si = std::move(temp_si);
+  si = MiniSTL::move(temp_si);
   EXPECT_EQ(si.top(), 2);
   stack<float> temp_sf;
   temp_sf.push(2.0f);

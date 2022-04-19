@@ -4,7 +4,6 @@
 #include <string>
 
 using namespace ::MiniSTL;
-using std::move;// todo:: need implement MiniSTL::move
 using std::string;
 
 class UniquePtrTest : public testing::Test {
@@ -38,7 +37,7 @@ TEST(UniquePtrTest, Dtor) {
 TEST(UniquePtrTest, Opearor) {
   {
     unique_ptr<int> up1(new int(5));
-    unique_ptr<int> up2 = std::move(up1);
+    unique_ptr<int> up2 = move(up1);
     EXPECT_TRUE(up2);
   }
   {
