@@ -2,8 +2,6 @@
 #include "Algorithms/algobase/stl_algobase.h"// swap
 #include <functional>                        // TODO::need implementation ministl function
 
-// TODO::need add atomic_ref_count
-
 namespace MiniSTL {
 template<class T>
 class shared_ptr {
@@ -12,7 +10,7 @@ class shared_ptr {
 
  public:// ctor && dtor
   shared_ptr(
-      T *p = nullptr, del_t del = [](T *p) { delete p; }) : ptr(p), ref_count(new size_t(p != nullptr)), deleter(del) {}
+      T *p = nullptr, del_t del = [](T *p) { delete p; }) : ptr(p), ref_count(new std::atomic<size_t>(p != nullptr)), deleter(del) {}
   ~shared_ptr() {
     decrementAndDestory();
   }
@@ -52,7 +50,7 @@ class shared_ptr {
 
  private:// data member
   T *ptr;
-  size_t *ref_count;
+  std::atomic<size_t> *ref_count;
   del_t deleter;
 };
 
@@ -84,7 +82,7 @@ inline void shared_ptr<T>::reset(T *p, const del_t &d) {
   if (ptr != p) {
     decrementAndDestory();
     ptr = p;
-    ref_count = new std::size_t(p != nullptr);
+    ref_count = new std::atomic<size_t>(p != nullptr);
   }
   deleter = d;
 }
