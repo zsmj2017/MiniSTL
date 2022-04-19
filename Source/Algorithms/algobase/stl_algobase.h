@@ -12,7 +12,7 @@ namespace MiniSTL {
 // 接受自定义比较器
 template<class InputIterator1, class InputIterator2, class BinaryPredicate = equal_to<value_type_t<InputIterator1>>>
 inline bool equal(InputIterator1 first1, InputIterator1 last1,
-                  InputIterator2 first2, const BinaryPredicate& binary_pred= BinaryPredicate()) {
+                  InputIterator2 first2, const BinaryPredicate &binary_pred = BinaryPredicate()) {
   for (; first1 != last1; ++first1, ++first2) {
     if (!binary_pred(*first1, *first2)) {
       return false;
@@ -271,6 +271,17 @@ inline BI2 copy_backward(BI1 first, BI1 last, BI2 result) {
   using Trivial = typename _type_traits<
       value_type_t<BI2>>::has_trivial_assignment_operator;
   return _copy_backward_dispatch<BI1, BI2, Trivial>()(first, last, result);
+}
+
+template<typename T>
+decltype(auto) move(T &&param) {
+  using ReturnType = remove_reference_t<T> &&;
+  return static_cast<ReturnType>(param);
+}
+
+template<typename T>
+T &&forward(remove_reference_t<T> &param) {
+  return static_cast<T &&>(param);
 }
 
 }// namespace MiniSTL
