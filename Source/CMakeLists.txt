@@ -3,9 +3,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.20.0)
 project(STL)
 
 # Use C++11
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-message(STATUS "C++11 support has been enabled by default.")
 
 file(GLOB_RECURSE SOURCE_FILES *.cpp *.h)
 

@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.20.0)
 
-project (Test)
+project(Test)
 
-# Use C++11
-set(CMAKE_CXX_STANDARD 11)
+# Use C++14
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-message(STATUS "C++11 support has been enabled by default.")
 
 FILE(GLOB_RECURSE TEST_SRC *.cpp)
 
