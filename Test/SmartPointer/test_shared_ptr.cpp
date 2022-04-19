@@ -26,7 +26,7 @@ TEST(SharedPtrTest, Ctor) {
   }
   {
     shared_ptr<vector<int>> sp1(new vector<int>{1, 2, 3});
-    shared_ptr<vector<int>> sp2(move(sp1));
+    shared_ptr<vector<int>> sp2(MiniSTL::move(sp1));
     EXPECT_FALSE(sp1);
     EXPECT_TRUE(sp2);
   }
@@ -35,23 +35,14 @@ TEST(SharedPtrTest, Ctor) {
 TEST(SharedPtrTest, Dtor) {
   {
     int *p = new int(5);
-    {
-      shared_ptr<int> sp(p);
-    }
-    EXPECT_FALSE(*p == 5);
-  }
-  {
-    int *p = new int(5);
     shared_ptr<int> sp1(p);
     shared_ptr<int> sp2(sp1);
     sp1.~shared_ptr();
     EXPECT_TRUE(*p == 5);
-    sp2.~shared_ptr();
-    EXPECT_FALSE(*p == 5);
   }
 }
 
-TEST(SharedPtrTest, Opearor) {
+TEST(SharedPtrTest, Operator) {
   {
     shared_ptr<int> sp1(new int(5));
     shared_ptr<int> sp2((new int(6)));
@@ -62,7 +53,7 @@ TEST(SharedPtrTest, Opearor) {
   {
     shared_ptr<int> sp1(new int(5));
     shared_ptr<int> sp2((new int(6)));
-    sp2 = move(sp1);
+    sp2 = MiniSTL::move(sp1);
     EXPECT_FALSE(sp1);
     EXPECT_TRUE(sp2);
   }
