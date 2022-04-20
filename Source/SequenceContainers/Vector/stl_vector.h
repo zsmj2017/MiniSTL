@@ -71,9 +71,10 @@ class vector {
   vector() : start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
   explicit vector(size_type n) { fill_initialize(n, value_type()); }
   vector(size_type n, const value_type &value) { fill_initialize(n, value); }
+  // InputIterator 可能会被推导为size_type，因此需要is_integer_t
   template<class InputIterator>
   vector(InputIterator first, InputIterator last) {
-    initialize_aux(first, last, _is_integer_t<InputIterator>());
+    initialize_aux(first, last, is_integer_t<InputIterator>());
   }
   vector(std::initializer_list<T>);
   vector(const vector &);
@@ -182,7 +183,7 @@ class vector {
   void insert(iterator pos, size_type n, const value_type &val);
   template<class InputIterator>
   void insert(iterator pos, InputIterator first, InputIterator last) {
-    insert_dispatch(pos, first, last, _is_integer_t<InputIterator>());
+    insert_dispatch(pos, first, last, is_integer_t<InputIterator>());
   }
 
  private:// aux_interface for assign
@@ -206,7 +207,7 @@ class vector {
   void assign(size_type n, const value_type &val) { fill_assign(n, val); }
   template<class InputIterator>
   void assign(InputIterator first, InputIterator last) {
-    assign_dispatch(first, last, _is_integer_t<InputIterator>());
+    assign_dispatch(first, last, is_integer_t<InputIterator>());
   }
   void assign(std::initializer_list<value_type> ils) {
     assign(ils.begin(), ils.end());
