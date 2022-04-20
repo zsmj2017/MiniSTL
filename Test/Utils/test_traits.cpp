@@ -55,18 +55,10 @@ struct any_type {
 
 any_type any;
 any_type *any_pointer;
-any_type const *any_const_pointer;
-any_type volatile *any_volatile_pointer;
-any_type const volatile *any_const_volatile_pointer;
 
 //A type that represent any pod type
 struct any_pod_type {};
-
 any_pod_type any_pod;
-any_pod_type *any_pod_pointer;
-any_pod_type const *any_pod_const_pointer;
-any_pod_type volatile *any_pod_volatile_pointer;
-any_pod_type const volatile *any_pod_const_volatile_pointer;
 
 template<>
 struct _type_traits<any_pod_type> {
@@ -76,9 +68,6 @@ struct _type_traits<any_pod_type> {
   using has_trivial_destructor = _true_type;
   using is_POD_type = _true_type;
 };
-
-struct base {};
-struct derived : public base {};
 
 TEST(TraitsTest, integral_constant) {
   typedef std::integral_constant<int, 2> two_t;
@@ -153,7 +142,7 @@ struct _type_traits<DestructorMonitor> {
   using is_POD_type = _true_type;
 };
 
-TEST(Traits, trivial_destructor) {
+TEST(TraitsTest, trivial_destructor) {
   ASSERT_TRUE(has_trivial_destructor(int_pointer) == 1);
   ASSERT_TRUE(has_trivial_destructor(int_const_pointer) == 1);
   ASSERT_TRUE(has_trivial_destructor(int_volatile_pointer) == 1);
@@ -177,7 +166,7 @@ int is_POD_type(T) {
   return type_to_value(is_POD_type_t<T>());
 }
 
-TEST(Traits, is_POD) {
+TEST(TraitsTest, is_POD) {
   ASSERT_TRUE(is_POD_type(int_pointer) == 1);
   ASSERT_TRUE(is_POD_type(int_const_pointer) == 1);
   ASSERT_TRUE(is_POD_type(int_volatile_pointer) == 1);
