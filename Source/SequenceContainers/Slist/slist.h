@@ -144,13 +144,13 @@ class slist {
   }
   template<class Integer>
   void insert_after_range_aux(list_node_base *pos, Integer n, Integer val,
-                              _true_type) {
+                              true_type) {
     insert_after_fill(pos, static_cast<size_type>(n),
                       static_cast<value_type>(val));
   }
   template<class InputIterator>
   void insert_after_range_aux(list_node_base *pos, InputIterator first,
-                              InputIterator last, _false_type) {
+                              InputIterator last, false_type) {
     while (first != last) {
       pos = slist_make_link(pos, create_node(*first));
       ++first;
@@ -205,11 +205,11 @@ class slist {
  private:// aux interface for assign
   void fill_assign(size_type, const value_type &);
   template<class Integer>
-  void assign_dispatch(Integer n, Integer val, _true_type) {
+  void assign_dispatch(Integer n, Integer val, true_type) {
     fill_assign(static_cast<size_type>(n), static_cast<value_type>(val));
   }
   template<class InputIterator>
-  void assign_dispatch(InputIterator first, InputIterator last, _false_type);
+  void assign_dispatch(InputIterator first, InputIterator last, false_type);
 
  public:// assign
   void assign(size_type n, const value_type &val) { fill_assign(n, val); }
@@ -345,7 +345,7 @@ void slist<T, Alloc>::fill_assign(size_type n, const value_type &val) {
 template<class T, class Alloc>
 template<class InputIterator>
 void slist<T, Alloc>::assign_dispatch(InputIterator first, InputIterator last,
-                                      _false_type) {
+                                      false_type) {
   list_node_base *prev = &head;
   list_node *cur = reinterpret_cast<list_node *>(head.next);
   while (cur != nullptr && first != last) {

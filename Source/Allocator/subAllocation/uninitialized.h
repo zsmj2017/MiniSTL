@@ -12,7 +12,7 @@ inline ForwardIterator uninitialized_copy(InputIterator first,
                                           InputIterator last,
                                           ForwardIterator result) {
   using isPODType =
-      typename _type_traits<value_type_t<InputIterator>>::is_POD_type;
+      typename type_traits<value_type_t<InputIterator>>::is_POD_type;
   return _uninitialized_copy_aux(first, last, result, isPODType());
 }
 
@@ -20,7 +20,7 @@ template<class InputIterator, class ForwardIterator>
 inline ForwardIterator _uninitialized_copy_aux(InputIterator first,
                                                InputIterator last,
                                                ForwardIterator result,
-                                               _true_type) {
+                                               true_type) {
   return MiniSTL::copy(first, last, result);// in stl_algobase.h
 }
 
@@ -28,7 +28,7 @@ template<class InputIterator, class ForwardIterator>
 inline ForwardIterator _uninitialized_copy_aux(InputIterator first,
                                                InputIterator last,
                                                ForwardIterator result,
-                                               _false_type) {
+                                               false_type) {
   ForwardIterator cur = result;
   for (; first != last; ++cur, ++first) construct(&*cur, *first);
   return cur;
@@ -51,20 +51,20 @@ template<class ForwardIterator, class T>
 inline void uninitialized_fill(ForwardIterator first, ForwardIterator last,
                                const T &value) {
   using isPODType =
-      typename _type_traits<value_type_t<ForwardIterator>>::is_POD_type;
+      typename type_traits<value_type_t<ForwardIterator>>::is_POD_type;
   _uninitialized_fill_aux(first, last, value, isPODType());
 }
 
 template<class ForwardIterator, class T>
 inline void _uninitialized_fill_aux(ForwardIterator first,
                                     ForwardIterator last, const T &value,
-                                    _true_type) {
+                                    true_type) {
   MiniSTL::fill(first, last, value);
 }
 
 template<class ForwardIterator, class T>
 void _uninitialized_fill_aux(ForwardIterator first, ForwardIterator last,
-                             const T &value, _false_type) {
+                             const T &value, false_type) {
   ForwardIterator cur = first;
   for (; cur != last; ++cur) construct(&*cur, value);
 }
@@ -73,19 +73,19 @@ template<class ForwardIterator, class Size, class T>
 inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n,
                                             const T &value) {
   using isPODType =
-      typename _type_traits<value_type_t<ForwardIterator>>::is_POD_type;
+      typename type_traits<value_type_t<ForwardIterator>>::is_POD_type;
   return _uninitialized_fill_n_aux(first, n, value, isPODType());
 }
 
 template<class ForwardIterator, class Size, class T>
 inline ForwardIterator _uninitialized_fill_n_aux(ForwardIterator first, Size n,
-                                                 const T &value, _true_type) {
+                                                 const T &value, true_type) {
   return MiniSTL::fill_n(first, n, value);
 }
 
 template<class ForwardIterator, class Size, class T>
 ForwardIterator _uninitialized_fill_n_aux(ForwardIterator first, Size n,
-                                          const T &value, _false_type) {
+                                          const T &value, false_type) {
   // 忽略异常处理
   // 需要明确的是一旦一个对象构造失败则需要析构所有对象
   ForwardIterator cur = first;

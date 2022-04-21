@@ -35,12 +35,12 @@ class vector {
     end_of_storage = finish;
   }
   template<class Integer>
-  void initialize_aux(Integer n, Integer val, _true_type) {
+  void initialize_aux(Integer n, Integer val, true_type) {
     fill_initialize(static_cast<size_type>(n),
                     static_cast<value_type>(val));
   }
   template<class InputIterator>
-  void initialize_aux(InputIterator first, InputIterator last, _false_type) {
+  void initialize_aux(InputIterator first, InputIterator last, false_type) {
     start = allocate_and_copy(first, last);
     finish = end_of_storage = start + MiniSTL::distance(first, last);
   }
@@ -167,12 +167,12 @@ class vector {
   void range_insert(iterator pos, ForwardIterator first, ForwardIterator last,
                     forward_iterator_tag);
   template<class Integer>
-  void insert_dispatch(iterator pos, Integer n, Integer value, _true_type) {
+  void insert_dispatch(iterator pos, Integer n, Integer value, true_type) {
     fill_insert(pos, static_cast<int>(n), value_type(value));
   }
   template<class InputIterator>
   void insert_dispatch(iterator pos, InputIterator first, InputIterator last,
-                       _false_type) {
+                       false_type) {
     range_insert(pos, first, last, iterator_category_t<InputIterator>());
   }
 
@@ -189,11 +189,11 @@ class vector {
  private:// aux_interface for assign
   void fill_assign(size_type, const value_type &);
   template<class Integer>
-  void assign_dispatch(Integer n, Integer val, _true_type) {
+  void assign_dispatch(Integer n, Integer val, true_type) {
     fill_assign(static_cast<size_type>(n), static_cast<value_type>(val));
   }
   template<class InputIterator>
-  void assign_dispatch(InputIterator first, InputIterator last, _false_type) {
+  void assign_dispatch(InputIterator first, InputIterator last, false_type) {
     assign_aux(first, last, iterator_category_t<InputIterator>());
   }
   template<class InputIterator>

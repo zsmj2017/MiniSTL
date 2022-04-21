@@ -24,9 +24,6 @@ TEST(TraitsTest, is_instantiation_of) {
   ASSERT_FALSE((is_instantiation_of<A, B>::value));
 }
 
-int type_to_value(_true_type) { return 1; }
-int type_to_value(_false_type) { return 0; }
-
 int *int_pointer;
 int const *int_const_pointer;
 int volatile *int_volatile_pointer;
@@ -61,12 +58,12 @@ struct any_pod_type {};
 any_pod_type any_pod;
 
 template<>
-struct _type_traits<any_pod_type> {
-  using has_trivial_default_constructor = _true_type;
-  using has_trivial_copy_constructor = _true_type;
-  using has_trivial_assignment_operator = _true_type;
-  using has_trivial_destructor = _true_type;
-  using is_POD_type = _true_type;
+struct type_traits<any_pod_type> {
+  using has_trivial_default_constructor = true_type;
+  using has_trivial_copy_constructor = true_type;
+  using has_trivial_assignment_operator = true_type;
+  using has_trivial_destructor = true_type;
+  using is_POD_type = true_type;
 };
 
 TEST(TraitsTest, integral_constant) {
@@ -99,31 +96,31 @@ TEST(TraitsTest, bool_constant) {
 }
 
 TEST(TraitsTest, is_integer) {
-  ASSERT_TRUE(type_to_value(is_integer_t<bool>()));
-  ASSERT_TRUE(type_to_value(is_integer_t<char>()));
+  ASSERT_TRUE(is_integer_t<bool>());
+  ASSERT_TRUE(is_integer_t<char>());
   typedef signed char signed_char;
-  ASSERT_TRUE(type_to_value(is_integer_t<signed_char>()));
+  ASSERT_TRUE(is_integer_t<signed_char>());
   typedef unsigned char unsigned_char;
-  ASSERT_TRUE(type_to_value(is_integer_t<unsigned_char>()));
-  ASSERT_TRUE(type_to_value(is_integer_t<wchar_t>()));
-  ASSERT_TRUE(type_to_value(is_integer_t<short>()));
+  ASSERT_TRUE(is_integer_t<unsigned_char>());
+  ASSERT_TRUE(is_integer_t<wchar_t>());
+  ASSERT_TRUE(is_integer_t<short>());
   typedef unsigned short unsigned_short;
-  ASSERT_TRUE(type_to_value(is_integer_t<unsigned_short>()));
-  ASSERT_TRUE(type_to_value(is_integer_t<int>()));
+  ASSERT_TRUE(is_integer_t<unsigned_short>());
+  ASSERT_TRUE(is_integer_t<int>());
   typedef unsigned int unsigned_int;
-  ASSERT_TRUE(type_to_value(is_integer_t<unsigned_int>()));
-  ASSERT_TRUE(type_to_value(is_integer_t<long>()));
+  ASSERT_TRUE(is_integer_t<unsigned_int>());
+  ASSERT_TRUE(is_integer_t<long>());
   typedef unsigned long unsigned_long;
-  ASSERT_TRUE(type_to_value(is_integer_t<unsigned_long>()));
-  ASSERT_TRUE(type_to_value(is_integer_t<float>()) == 0);
-  ASSERT_TRUE(type_to_value(is_integer_t<double>()) == 0);
-  ASSERT_TRUE(type_to_value(is_integer_t<any_type>()) == 0);
-  ASSERT_TRUE(type_to_value(is_integer_t<any_type *>()) == 0);
+  ASSERT_TRUE(is_integer_t<unsigned_long>());
+  ASSERT_TRUE(is_integer_t<float>() == 0);
+  ASSERT_TRUE(is_integer_t<double>() == 0);
+  ASSERT_TRUE(is_integer_t<any_type>() == 0);
+  ASSERT_TRUE(is_integer_t<any_type *>() == 0);
 }
 
 template<typename T>
-int has_trivial_destructor(T) {
-  return type_to_value(has_trivial_destructor_t<T>());
+bool has_trivial_destructor(T) {
+  return has_trivial_destructor_t<T>();
 }
 
 struct DestructorMonitor {
@@ -134,12 +131,12 @@ struct DestructorMonitor {
 size_t DestructorMonitor::nb_destructor_call = 0;
 
 template<>
-struct _type_traits<DestructorMonitor> {
-  using has_trivial_default_constructor = _true_type;
-  using has_trivial_copy_constructor = _true_type;
-  using has_trivial_assignment_operator = _true_type;
-  using has_trivial_destructor = _true_type;
-  using is_POD_type = _true_type;
+struct type_traits<DestructorMonitor> {
+  using has_trivial_default_constructor = true_type;
+  using has_trivial_copy_constructor = true_type;
+  using has_trivial_assignment_operator = true_type;
+  using has_trivial_destructor = true_type;
+  using is_POD_type = true_type;
 };
 
 TEST(TraitsTest, trivial_destructor) {
@@ -163,7 +160,7 @@ TEST(TraitsTest, trivial_destructor) {
 
 template<typename T>
 int is_POD_type(T) {
-  return type_to_value(is_POD_type_t<T>());
+  return is_POD_type_t<T>();
 }
 
 TEST(TraitsTest, is_POD) {

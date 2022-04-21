@@ -70,16 +70,16 @@ class list {
  private:// aux interface for assign
   void fill_assign(size_type, const value_type &);
   template<class Integer>
-  void assign_dispatch(Integer n, Integer val, _true_type) {
+  void assign_dispatch(Integer n, Integer val, true_type) {
     fill_assign(static_cast<size_type>(n), static_cast<value_type>(val));
   }
   template<class InputIterator>
-  void assign_dispatch(InputIterator, InputIterator, _false_type);
+  void assign_dispatch(InputIterator, InputIterator, false_type);
 
  public:// assignment
   void assign(size_type n, const value_type &val) { fill_assign(n, val); }
   void assign(std::initializer_list<value_type> ils) {
-    assign_dispatch(ils.begin(), ils.end(), _false_type());
+    assign_dispatch(ils.begin(), ils.end(), false_type());
   }
   template<class InputIterator>
   void assign(InputIterator first, InputIterator last) {
@@ -135,12 +135,12 @@ class list {
  private:// aux interface for insert
   void fill_insert(iterator, size_type, const value_type &);
   template<class Integer>
-  void insert_dispatch(iterator pos, Integer n, Integer val, _true_type) {
+  void insert_dispatch(iterator pos, Integer n, Integer val, true_type) {
     fill_insert(pos, static_cast<size_type>(n),
                 static_cast<value_type>(val));
   }
   template<class InputIterator>
-  void insert_dispatch(iterator, InputIterator, InputIterator, _false_type);
+  void insert_dispatch(iterator, InputIterator, InputIterator, false_type);
 
  public:// insert
   iterator insert(iterator pos) { return insert(pos, value_type()); }
@@ -212,7 +212,7 @@ void list<T, Alloc>::fill_assign(size_type n, const value_type &val) {
 template<class T, class Alloc>
 template<class InputIterator>
 void list<T, Alloc>::assign_dispatch(InputIterator first, InputIterator last,
-                                     _false_type) {
+                                     false_type) {
   iterator start = begin();
   iterator finish = end();
   for (; start != finish && first != last; ++start, ++first) *start = *first;
@@ -254,7 +254,7 @@ void list<T, Alloc>::fill_insert(iterator position, size_type n,
 template<class T, class Alloc>
 template<class InputIterator>
 void list<T, Alloc>::insert_dispatch(iterator position, InputIterator first,
-                                     InputIterator last, _false_type) {
+                                     InputIterator last, false_type) {
   for (; first != last; ++first) insert(position, *first);
 }
 

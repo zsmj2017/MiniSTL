@@ -145,7 +145,7 @@ struct _copy_dispatch {// 仿函数对象
 template<class T>
 struct _copy_dispatch<T *, T *> {
   T *operator()(T *first, T *last, T *result) {
-    using t = typename _type_traits<T>::has_trivial_assignment_operator;
+    using t = typename type_traits<T>::has_trivial_assignment_operator;
     return _copy_t(first, last, result, t());
   }
 };
@@ -154,7 +154,7 @@ struct _copy_dispatch<T *, T *> {
 template<class T>
 struct _copy_dispatch<const T *, T *> {
   T *operator()(const T *first, const T *last, T *result) {
-    using t = typename _type_traits<T>::has_trivial_assignment_operator;
+    using t = typename type_traits<T>::has_trivial_assignment_operator;
     return _copy_t(first, last, result, t());
   }
 };
@@ -207,14 +207,14 @@ inline OutputIterator _copy(InputIterator first, InputIterator last,
 
 // 具备trivial copy assignment operator，可执行memmove
 template<class T>
-inline T *_copy_t(const T *first, const T *last, T *result, _true_type) {
+inline T *_copy_t(const T *first, const T *last, T *result, true_type) {
   memmove(result, first, sizeof(T) * (last - first));
   return result + (last - first);
 }
 
 // 原始指针是一种random_access_iterator
 template<class T>
-inline T *_copy_t(const T *first, const T *last, T *result, _false_type) {
+inline T *_copy_t(const T *first, const T *last, T *result, false_type) {
   return _copy_d(first, last, result, ptrdiff_t());
 }
 
@@ -250,7 +250,7 @@ struct _copy_backward_dispatch {
 };
 
 template<class T>
-struct _copy_backward_dispatch<T *, T *, _true_type> {
+struct _copy_backward_dispatch<T *, T *, true_type> {
   T *operator()(const T *first, const T *last, T *result) {
     const ptrdiff_t n = last - first;
     memmove(result - n, first, sizeof(T) * n);
@@ -259,16 +259,16 @@ struct _copy_backward_dispatch<T *, T *, _true_type> {
 };
 
 template<class T>
-struct _copy_backward_dispatch<const T *, T *, _true_type> {
+struct _copy_backward_dispatch<const T *, T *, true_type> {
   T *operator()(const T *first, const T *last, T *result) {
-    return _copy_backward_dispatch<T *, T *, _true_type>()(first, last,
-                                                           result);
+    return _copy_backward_dispatch<T *, T *, true_type>()(first, last,
+                                                          result);
   }
 };
 
 template<class BI1, class BI2>
 inline BI2 copy_backward(BI1 first, BI1 last, BI2 result) {
-  using Trivial = typename _type_traits<
+  using Trivial = typename type_traits<
       value_type_t<BI2>>::has_trivial_assignment_operator;
   return _copy_backward_dispatch<BI1, BI2, Trivial>()(first, last, result);
 }

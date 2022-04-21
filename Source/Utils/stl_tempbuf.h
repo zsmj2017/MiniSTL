@@ -55,8 +55,8 @@ class __temporary_buffer {
   }
 
   // use type_traits
-  void initialize_buffer(const T &, _true_type) {}
-  void initialize_buffer(const T &val, _false_type) {
+  void initialize_buffer(const T &, true_type) {}
+  void initialize_buffer(const T &val, false_type) {
     uninitialized_fill_n(buffer, len, val);
   }
 
@@ -70,7 +70,7 @@ class __temporary_buffer {
 
  public:// ctor && dtor
   __temporary_buffer(ForwardIterator first, ForwardIterator last) {
-    using trivial = typename _type_traits<T>::is_POD_type;
+    using trivial = typename type_traits<T>::is_POD_type;
     try {
       len = distance(first, last);
       allocate_buffer();

@@ -59,13 +59,13 @@ class deque {
   size_type buffer_size() const noexcept { return iterator::buffer_size(); }
   void fill_initialize(const value_type &);
   template<class Integer>
-  void initialize_dispatch(Integer n, Integer val, _true_type) {
+  void initialize_dispatch(Integer n, Integer val, true_type) {
     initialize_map(static_cast<size_type>(n));
     fill_initialize(static_cast<value_type>(val));
   }
   template<class InputIterator>
   void initialize_dispatch(InputIterator first, InputIterator last,
-                           _false_type) {
+                           false_type) {
     range_initialize(first, last, iterator_category_t<InputIterator>());
   }
   template<class InputIterator>
@@ -153,11 +153,11 @@ class deque {
  private:// aux_interface for assign
   void fill_assign(size_type, const value_type &);
   template<class Integer>
-  void assign_dispatch(Integer n, Integer val, _true_type) {
+  void assign_dispatch(Integer n, Integer val, true_type) {
     fill_assign(static_cast<size_type>(n), static_cast<value_type>(val));
   }
   template<class InputIterator>
-  void assign_dispatch(InputIterator first, InputIterator last, _false_type) {
+  void assign_dispatch(InputIterator first, InputIterator last, false_type) {
     assign_aux(first, last, iterator_category_t<InputIterator>());
   }
   template<class InputIterator>
@@ -182,13 +182,13 @@ class deque {
  private:// aux_interface for insert
   void fill_insert(iterator, size_type, const value_type &);
   template<class Integer>
-  void insert_dispatch(iterator pos, Integer n, Integer val, _true_type) {
+  void insert_dispatch(iterator pos, Integer n, Integer val, true_type) {
     fill_insert(pos, static_cast<size_type>(n),
                 static_cast<value_type>(val));
   }
   template<class InputIterator>
   void insert_dispatch(iterator pos, InputIterator first, InputIterator last,
-                       _false_type) {
+                       false_type) {
     range_insert_aux(pos, first, last,
                      iterator_category_t<InputIterator>());
   }
