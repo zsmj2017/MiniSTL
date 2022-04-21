@@ -227,20 +227,20 @@ TEST_F(TraitsTest, enable_if) {
 }
 
 TEST_F(TraitsTest, void_t) {
-  EXPECT_TRUE((is_same<void_t<>, void>::value));
-  EXPECT_TRUE((is_same<void_t<int>, void>::value));
-  EXPECT_TRUE((is_same<void_t<int, short>, void>::value));
-  EXPECT_TRUE(
+  ASSERT_TRUE((is_same<void_t<>, void>::value));
+  ASSERT_TRUE((is_same<void_t<int>, void>::value));
+  ASSERT_TRUE((is_same<void_t<int, short>, void>::value));
+  ASSERT_TRUE(
       (is_same<void_t<int, short, std::string>, void>::value));
-  EXPECT_TRUE((has_value_type<std::string>::value));
-  EXPECT_FALSE((has_value_type<int>::value));
+  ASSERT_TRUE((has_value_type<std::string>::value));
+  ASSERT_FALSE((has_value_type<int>::value));
 }
 
 TEST_F(TraitsTest, type_t) {
-  EXPECT_TRUE((is_same<type_t<float>, float>::value));
-  EXPECT_TRUE((is_same<type_t<float, int>, float>::value));
-  EXPECT_TRUE((is_same<type_t<float, int, short>, float>::value));
-  EXPECT_TRUE(
+  ASSERT_TRUE((is_same<type_t<float>, float>::value));
+  ASSERT_TRUE((is_same<type_t<float, int>, float>::value));
+  ASSERT_TRUE((is_same<type_t<float, int, short>, float>::value));
+  ASSERT_TRUE(
       (is_same<type_t<float, int, short, std::string>, float>::
            value));
 }
@@ -253,35 +253,35 @@ TEST_F(TraitsTest, detected_or_t) {
   // char c;
   // std::string::size_type size;
   // size = str.find(c)
-  EXPECT_TRUE((
+  ASSERT_TRUE((
       std::is_same<
           detected_or_t<float, detector_find, std::string, char>,
           std::string::size_type>::value));
   // can not compile detector_find<double,char> , so detected_or_t return float
-  EXPECT_TRUE((
+  ASSERT_TRUE((
       std::is_same<
           detected_or_t<float, detector_find, double, char>,
           float>::value));
 }
 
 TEST_F(TraitsTest, detected_t) {
-  EXPECT_TRUE((
+  ASSERT_TRUE((
       std::is_same<
           detected_t<detector_find, std::string, char>,
           std::string::size_type>::value));
   // can not compile detector_find<double,char> , so detected_t return nonesuch
-  EXPECT_TRUE((
+  ASSERT_TRUE((
       std::is_same<
           detected_t<detector_find, double, char>,
           nonesuch>::value));
 }
 
 TEST_F(TraitsTest, is_detected) {
-  EXPECT_TRUE((is_detected<detector_find, std::string, char>::value));
-  EXPECT_FALSE((is_detected<detector_find, double, char>::value));
+  ASSERT_TRUE((is_detected<detector_find, std::string, char>::value));
+  ASSERT_FALSE((is_detected<detector_find, double, char>::value));
 }
 
 TEST_F(TraitsTest, is_detected_v) {
-  EXPECT_TRUE((is_detected_v<detector_find, std::string, char>) );
-  EXPECT_FALSE((is_detected_v<detector_find, double, char>) );
+  ASSERT_TRUE((is_detected_v<detector_find, std::string, char>) );
+  ASSERT_FALSE((is_detected_v<detector_find, double, char>) );
 }

@@ -348,6 +348,28 @@ struct remove_reference<T &&> {
 template<class T>
 using remove_reference_t = typename remove_reference<T>::type;
 
+// add reference
+template<class T>
+struct add_lvalue_reference {
+  using type = T &;
+};
+
+template<class T>
+using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
+
+template<class T>
+struct add_rvalue_reference {
+  using type = T &&;
+};
+
+template<class T>
+using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
+
+// usually use declval with decltype
+// return T&&
+template<class T>
+add_rvalue_reference_t<T> declval() noexcept;
+
 // remove pointer
 template<class T>
 struct remove_pointer { using type = T; };
@@ -366,11 +388,6 @@ struct remove_pointer<T *const volatile> { using type = T; };
 
 template<class T>
 using remove_pointer_t = typename remove_pointer<T>::type;
-
-// usually use declval with decltype
-// return T not T&&
-template<typename T>
-T declval() noexcept;
 
 // 判断当前类型是否为某class template的实例化
 // 使用方法可见UT
