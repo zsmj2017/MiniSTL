@@ -367,6 +367,11 @@ struct remove_pointer<T *const volatile> { using type = T; };
 template<class T>
 using remove_pointer_t = typename remove_pointer<T>::type;
 
+// usually use declval with decltype
+// return T not T&&
+template<typename T>
+T declval() noexcept;
+
 // 判断当前类型是否为某class template的实例化
 // 使用方法可见UT
 template<template<typename...> class, typename>

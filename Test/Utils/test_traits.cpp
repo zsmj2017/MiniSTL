@@ -246,7 +246,7 @@ TEST_F(TraitsTest, type_t) {
 }
 
 template<typename T, typename V>
-using detector_find = decltype(std::declval<T>().find(std::declval<V>()));
+using detector_find = decltype(declval<T>().find(declval<V>()));
 
 TEST_F(TraitsTest, detected_or_t) {
   // std::string str;
