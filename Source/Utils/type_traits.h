@@ -10,6 +10,9 @@ struct enable_if<true, T> {
   using type = T;
 };
 
+template<bool b, class T>
+using enable_if_t = typename enable_if<b, T>::type;
+
 template<class T, T val>
 struct integral_constant {
   static constexpr T value = val;

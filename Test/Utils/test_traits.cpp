@@ -47,6 +47,8 @@ struct any_type {
   }
   ~any_type() { m_data = 0; }
 
+  bool operator==(const any_type &rhs) const { return m_data == rhs.m_data; }
+
   size_t m_data;
 };
 
@@ -218,4 +220,8 @@ TEST_F(TraitsTest, remove_pointer) {
 }
 
 TEST_F(TraitsTest, enable_if) {
+  ASSERT_TRUE((is_same<int, enable_if_t<true, int>>()));
+  // cannot compile
+  //enable_if_t<is_same_v<int, float>, float>;
+  ASSERT_TRUE((enable_if_t<is_same_v<int, int>, any_type>() == any_type()));
 }
