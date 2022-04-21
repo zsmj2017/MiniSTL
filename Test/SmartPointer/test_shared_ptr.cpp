@@ -11,7 +11,7 @@ class SharedPtrTest : public testing::Test {
   void SetUp() override {}
 };
 
-TEST(SharedPtrTest, Ctor) {
+TEST_F(SharedPtrTest, Ctor) {
   {
     shared_ptr<int> sp(new int(5));
     EXPECT_TRUE(sp);
@@ -32,7 +32,7 @@ TEST(SharedPtrTest, Ctor) {
   }
 }
 
-TEST(SharedPtrTest, Dtor) {
+TEST_F(SharedPtrTest, Dtor) {
   {
     int *p = new int(5);
     shared_ptr<int> sp1(p);
@@ -42,7 +42,7 @@ TEST(SharedPtrTest, Dtor) {
   }
 }
 
-TEST(SharedPtrTest, Operator) {
+TEST_F(SharedPtrTest, Operator) {
   {
     shared_ptr<int> sp1(new int(5));
     shared_ptr<int> sp2((new int(6)));
@@ -69,7 +69,7 @@ TEST(SharedPtrTest, Operator) {
   }
 }
 
-TEST(SharedPtrTest, GETTER) {
+TEST_F(SharedPtrTest, GETTER) {
   {
     vector<int> *vp = new vector<int>{1, 2, 3};
     shared_ptr<vector<int>> sp(vp);
@@ -90,7 +90,7 @@ TEST(SharedPtrTest, GETTER) {
   }
 }
 
-TEST(SharedPtrTest, SETTER) {
+TEST_F(SharedPtrTest, SETTER) {
   {
     shared_ptr<vector<int>> sp(new vector<int>{1, 2, 3});
     sp.reset();

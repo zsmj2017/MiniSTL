@@ -14,12 +14,12 @@ template<class>
 struct A {};
 struct B {};
 
-TEST(TraitsTest, is_instantiation_of_v) {
+TEST_F(TraitsTest, is_instantiation_of_v) {
   ASSERT_TRUE((is_instantiation_of_v<A, A<int>>) );
   ASSERT_FALSE((is_instantiation_of_v<A, B>) );
 }
 
-TEST(TraitsTest, is_instantiation_of) {
+TEST_F(TraitsTest, is_instantiation_of) {
   ASSERT_TRUE((is_instantiation_of<A, A<int>>::value));
   ASSERT_FALSE((is_instantiation_of<A, B>::value));
 }
@@ -66,7 +66,7 @@ struct type_traits<any_pod_type> {
   using is_POD_type = true_type;
 };
 
-TEST(TraitsTest, integral_constant) {
+TEST_F(TraitsTest, integral_constant) {
   typedef std::integral_constant<int, 2> two_t;
   typedef std::integral_constant<int, 4> four_t;
 
@@ -84,7 +84,7 @@ TEST(TraitsTest, integral_constant) {
   ASSERT_TRUE((is_same<my_e_e2, my_e_e2>()));
 }
 
-TEST(TraitsTest, bool_constant) {
+TEST_F(TraitsTest, bool_constant) {
   ASSERT_TRUE(bool_constant<0>() == false);
   ASSERT_TRUE(bool_constant<1>() == true);
   // cannot compile
@@ -93,7 +93,7 @@ TEST(TraitsTest, bool_constant) {
   ASSERT_TRUE(bool_constant<true>() == true);
 }
 
-TEST(TraitsTest, is_integer) {
+TEST_F(TraitsTest, is_integer) {
   ASSERT_TRUE(is_integral<bool>());
   ASSERT_TRUE(is_integral<char>());
   typedef signed char signed_char;
@@ -137,7 +137,7 @@ struct type_traits<DestructorMonitor> {
   using is_POD_type = true_type;
 };
 
-TEST(TraitsTest, trivial_destructor) {
+TEST_F(TraitsTest, trivial_destructor) {
   ASSERT_TRUE(has_trivial_destructor(int_pointer) == 1);
   ASSERT_TRUE(has_trivial_destructor(int_const_pointer) == 1);
   ASSERT_TRUE(has_trivial_destructor(int_volatile_pointer) == 1);
@@ -161,7 +161,7 @@ int is_POD_type(T) {
   return is_POD_type_t<T>();
 }
 
-TEST(TraitsTest, is_POD) {
+TEST_F(TraitsTest, is_POD) {
   ASSERT_TRUE(is_POD_type(int_pointer) == 1);
   ASSERT_TRUE(is_POD_type(int_const_pointer) == 1);
   ASSERT_TRUE(is_POD_type(int_volatile_pointer) == 1);
@@ -173,7 +173,7 @@ TEST(TraitsTest, is_POD) {
   ASSERT_TRUE(is_POD_type(string()) == 0);
 }
 
-TEST(TraitsTest, is_same) {
+TEST_F(TraitsTest, is_same) {
   ASSERT_TRUE((is_same<int, int>()));
   // usually true if 'int' is 32 bit
   ASSERT_TRUE((is_same<int, std::int32_t>()));
@@ -203,7 +203,7 @@ TEST(TraitsTest, is_same) {
   ASSERT_FALSE((is_same<const int, int>()));
 }
 
-TEST(TraitsTest, remove_pointer) {
+TEST_F(TraitsTest, remove_pointer) {
   ASSERT_TRUE((is_same<int, int>()));
   ASSERT_FALSE((is_same<int, int *>()));
   ASSERT_FALSE((is_same<int, int **>()));
@@ -215,4 +215,7 @@ TEST(TraitsTest, remove_pointer) {
   ASSERT_TRUE((is_same<int, remove_pointer_t<int *const>>()));
   ASSERT_TRUE((is_same<int, remove_pointer_t<int *volatile>>()));
   ASSERT_TRUE((is_same<int, remove_pointer_t<int *const volatile>>()));
+}
+
+TEST_F(TraitsTest, enable_if) {
 }

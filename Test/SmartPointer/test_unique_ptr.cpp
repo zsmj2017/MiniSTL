@@ -11,7 +11,7 @@ class UniquePtrTest : public testing::Test {
   void SetUp() override {}
 };
 
-TEST(UniquePtrTest, Ctor) {
+TEST_F(UniquePtrTest, Ctor) {
   {
     unique_ptr<int> up(new int(5));
     EXPECT_TRUE(up);
@@ -24,7 +24,7 @@ TEST(UniquePtrTest, Ctor) {
   }
 }
 
-TEST(UniquePtrTest, Dtor) {
+TEST_F(UniquePtrTest, Dtor) {
   {
     int *p = new int(5);
     {
@@ -34,7 +34,7 @@ TEST(UniquePtrTest, Dtor) {
   }
 }
 
-TEST(UniquePtrTest, Opearor) {
+TEST_F(UniquePtrTest, Opearor) {
   {
     unique_ptr<int> up1(new int(5));
     unique_ptr<int> up2 = move(up1);
@@ -50,7 +50,7 @@ TEST(UniquePtrTest, Opearor) {
   }
 }
 
-TEST(UniquePtrTest, GETTER) {
+TEST_F(UniquePtrTest, GETTER) {
   {
     vector<int> *vp = new vector<int>{1, 2, 3};
     unique_ptr<vector<int>> up(vp);
@@ -58,7 +58,7 @@ TEST(UniquePtrTest, GETTER) {
   }
 }
 
-TEST(UniquePtrTest, SETTER) {
+TEST_F(UniquePtrTest, SETTER) {
   {
     unique_ptr<vector<int>> up(new vector<int>{1, 2, 3});
     up.reset();
