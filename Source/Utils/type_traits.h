@@ -337,6 +337,25 @@ struct remove_reference<T &&> {
 template<class T>
 using remove_reference_t = typename remove_reference<T>::type;
 
+// remove pointer
+template<class T>
+struct remove_pointer { using type = T; };
+
+template<class T>
+struct remove_pointer<T *> { using type = T; };
+
+template<class T>
+struct remove_pointer<T *const> { using type = T; };
+
+template<class T>
+struct remove_pointer<T *volatile> { using type = T; };
+
+template<class T>
+struct remove_pointer<T *const volatile> { using type = T; };
+
+template<class T>
+using remove_pointer_t = typename remove_pointer<T>::type;
+
 // 判断当前类型是否为某class template的实例化
 // 使用方法可见UT
 template<template<typename...> class, typename>

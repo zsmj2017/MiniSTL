@@ -202,3 +202,17 @@ TEST(TraitsTest, is_same) {
 
   ASSERT_FALSE((is_same<const int, int>()));
 }
+
+TEST(TraitsTest, remove_pointer) {
+  ASSERT_TRUE((is_same<int, int>()));
+  ASSERT_FALSE((is_same<int, int *>()));
+  ASSERT_FALSE((is_same<int, int **>()));
+
+  ASSERT_TRUE((is_same<int, remove_pointer<int>::type>()));
+  ASSERT_TRUE((is_same<int, remove_pointer<int *>::type>()));
+  ASSERT_FALSE((is_same<int, remove_pointer<int **>::type>()));
+
+  ASSERT_TRUE((is_same<int, remove_pointer_t<int *const>>()));
+  ASSERT_TRUE((is_same<int, remove_pointer_t<int *volatile>>()));
+  ASSERT_TRUE((is_same<int, remove_pointer_t<int *const volatile>>()));
+}
