@@ -2,6 +2,14 @@
 
 namespace MiniSTL {
 
+template<bool b, class T>
+struct enable_if {};
+
+template<class T>
+struct enable_if<true, T> {
+  using type = T;
+};
+
 template<class T, T val>
 struct integral_constant {
   static constexpr T value = val;
