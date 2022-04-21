@@ -22,6 +22,15 @@ using bool_constant = integral_constant<bool, val>;
 struct true_type : bool_constant<true> {};
 struct false_type : bool_constant<false> {};
 
+template<class T, class U>
+struct is_same : false_type {};
+
+template<class T>
+struct is_same<T, T> : true_type {};
+
+template<class T, class U>
+constexpr bool is_same_v = is_same<T, U>::value;
+
 // 自定义类型默认为false
 template<class T>
 struct is_integral : false_type {};

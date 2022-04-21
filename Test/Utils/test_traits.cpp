@@ -81,9 +81,7 @@ TEST(TraitsTest, integral_constant) {
   typedef std::integral_constant<my_e, my_e::e2> my_e_e2;
 
   ASSERT_TRUE(my_e_e1() == my_e::e1);
-
-  static_assert(std::is_same<my_e_e2, my_e_e2>::value,
-                "my_e_e2 != my_e_e2");
+  ASSERT_TRUE((is_same<my_e_e2, my_e_e2>()));
 }
 
 TEST(TraitsTest, bool_constant) {
@@ -173,4 +171,34 @@ TEST(TraitsTest, is_POD) {
   ASSERT_TRUE(is_POD_type(any_pointer) == 1);
   ASSERT_TRUE(is_POD_type(any_pod) == 1);
   ASSERT_TRUE(is_POD_type(string()) == 0);
+}
+
+TEST(TraitsTest, is_same) {
+  ASSERT_TRUE((is_same<int, int>()));
+  // usually true if 'int' is 32 bit
+  ASSERT_TRUE((is_same<int, std::int32_t>()));
+  // possibly true if ILP64 data model is used
+  ASSERT_FALSE((is_same<int, std::int64_t>()));
+
+  ASSERT_TRUE((is_same_v<int, std::int32_t>) );
+  ASSERT_FALSE((is_same_v<int, std::int64_t>) );
+
+  // compare the types of a couple variables
+  long double num1 = 1.0;
+  long double num2 = 2.0;
+  ASSERT_TRUE((is_same_v<decltype(num1), decltype(num2)>) );
+
+  // 'float' is never an integral type
+  ASSERT_FALSE((is_same<float, int>()));
+
+  // 'int' is implicitly 'signed'
+  ASSERT_FALSE((is_same<int, unsigned int>()));
+  ASSERT_TRUE((is_same<int, signed int>()));
+
+  // unlike other types, 'char' is neither 'unsigned' nor 'signed'
+  ASSERT_TRUE((is_same<char, char>()));
+  ASSERT_FALSE((is_same<char, signed char>()));
+  ASSERT_FALSE((is_same<char, unsigned char>()));
+
+  ASSERT_FALSE((is_same<const int, int>()));
 }
