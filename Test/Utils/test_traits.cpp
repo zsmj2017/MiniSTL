@@ -96,26 +96,26 @@ TEST(TraitsTest, bool_constant) {
 }
 
 TEST(TraitsTest, is_integer) {
-  ASSERT_TRUE(is_integer_t<bool>());
-  ASSERT_TRUE(is_integer_t<char>());
+  ASSERT_TRUE(is_integral<bool>());
+  ASSERT_TRUE(is_integral<char>());
   typedef signed char signed_char;
-  ASSERT_TRUE(is_integer_t<signed_char>());
+  ASSERT_TRUE(is_integral<signed_char>());
   typedef unsigned char unsigned_char;
-  ASSERT_TRUE(is_integer_t<unsigned_char>());
-  ASSERT_TRUE(is_integer_t<wchar_t>());
-  ASSERT_TRUE(is_integer_t<short>());
+  ASSERT_TRUE(is_integral<unsigned_char>());
+  ASSERT_TRUE(is_integral<wchar_t>());
+  ASSERT_TRUE(is_integral<short>());
   typedef unsigned short unsigned_short;
-  ASSERT_TRUE(is_integer_t<unsigned_short>());
-  ASSERT_TRUE(is_integer_t<int>());
+  ASSERT_TRUE(is_integral<unsigned_short>());
+  ASSERT_TRUE(is_integral<int>());
   typedef unsigned int unsigned_int;
-  ASSERT_TRUE(is_integer_t<unsigned_int>());
-  ASSERT_TRUE(is_integer_t<long>());
+  ASSERT_TRUE(is_integral<unsigned_int>());
+  ASSERT_TRUE(is_integral<long>());
   typedef unsigned long unsigned_long;
-  ASSERT_TRUE(is_integer_t<unsigned_long>());
-  ASSERT_TRUE(is_integer_t<float>() == 0);
-  ASSERT_TRUE(is_integer_t<double>() == 0);
-  ASSERT_TRUE(is_integer_t<any_type>() == 0);
-  ASSERT_TRUE(is_integer_t<any_type *>() == 0);
+  ASSERT_TRUE(is_integral<unsigned_long>());
+  ASSERT_TRUE(is_integral<float>() == 0);
+  ASSERT_TRUE(is_integral<double>() == 0);
+  ASSERT_TRUE(is_integral<any_type>() == 0);
+  ASSERT_TRUE(is_integral<any_type *>() == 0);
 }
 
 template<typename T>

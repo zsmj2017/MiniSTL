@@ -140,7 +140,7 @@ class slist {
   void insert_after_range(list_node_base *pos, InputIterator first,
                           InputIterator last) {
     insert_after_range_aux(pos, first, last,
-                           is_integer_t<InputIterator>());
+                           is_integral<InputIterator>());
   }
   template<class Integer>
   void insert_after_range_aux(list_node_base *pos, Integer n, Integer val,
@@ -215,7 +215,7 @@ class slist {
   void assign(size_type n, const value_type &val) { fill_assign(n, val); }
   template<class InputIterator>
   void assign(InputIterator first, InputIterator last) {
-    assign_dispatch(first, last, is_integer_t<InputIterator>());
+    assign_dispatch(first, last, is_integral<InputIterator>());
   }
   void assign(std::initializer_list<value_type> ils) {
     assign(ils.begin(), ils.end());

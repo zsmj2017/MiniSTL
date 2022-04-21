@@ -90,7 +90,7 @@ class deque {
   }
   template<class InputIterator>
   deque(InputIterator first, InputIterator last) {
-    initialize_dispatch(first, last, is_integer_t<InputIterator>());
+    initialize_dispatch(first, last, is_integral<InputIterator>());
   }
   deque(std::initializer_list<value_type> ils) {
     range_initialize(ils.begin(), ils.end(), random_access_iterator_tag());
@@ -172,7 +172,7 @@ class deque {
   }
   template<class InputIterator>
   void assign(InputIterator first, InputIterator last) {
-    assign_dispatch(first, last, is_integer_t<InputIterator>());
+    assign_dispatch(first, last, is_integral<InputIterator>());
   }
   deque &operator=(std::initializer_list<value_type> ils) {
     assign(ils.begin(), ils.end());
@@ -211,7 +211,7 @@ class deque {
   }
   template<class InputIterator>
   void insert(iterator pos, InputIterator first, InputIterator last) {
-    insert_dispatch(pos, first, last, is_integer_t<InputIterator>());
+    insert_dispatch(pos, first, last, is_integral<InputIterator>());
   }
 
  public:// erase

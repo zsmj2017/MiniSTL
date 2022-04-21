@@ -22,6 +22,52 @@ using bool_constant = integral_constant<bool, val>;
 struct true_type : bool_constant<true> {};
 struct false_type : bool_constant<false> {};
 
+// 自定义类型默认为false
+template<class T>
+struct is_integral : false_type {};
+
+template<class T>
+constexpr bool is_integral_v = is_integral<T>::value;
+
+template<>
+struct is_integral<bool> : true_type {};
+
+template<>
+struct is_integral<char> : true_type {};
+
+template<>
+struct is_integral<signed char> : true_type {};
+
+template<>
+struct is_integral<unsigned char> : true_type {};
+
+template<>
+struct is_integral<wchar_t> : true_type {};
+
+template<>
+struct is_integral<short> : true_type {};
+
+template<>
+struct is_integral<unsigned short> : true_type {};
+
+template<>
+struct is_integral<int> : true_type {};
+
+template<>
+struct is_integral<unsigned int> : true_type {};
+
+template<>
+struct is_integral<long> : true_type {};
+
+template<>
+struct is_integral<unsigned long> : true_type {};
+
+template<>
+struct is_integral<long long> : true_type {};
+
+template<>
+struct is_integral<unsigned long long> : true_type {};
+
 // 默认自定义类型均为non-POD类型
 template<class T>
 struct type_traits {
@@ -262,82 +308,6 @@ using has_trivial_destructor_t = typename type_traits<T>::has_trivial_destructor
 
 template<class T>
 using is_POD_type_t = typename type_traits<T>::is_POD_type;
-
-// is_integer(默认自定义类型为false)
-
-template<class T>
-struct is_integer {
-  using _integral = false_type;
-};
-
-// simluate C++14
-template<class T>
-using is_integer_t = typename is_integer<T>::_integral;
-
-template<>
-struct is_integer<bool> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<char> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<signed char> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<unsigned char> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<wchar_t> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<short> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<unsigned short> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<int> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<unsigned int> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<long> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<unsigned long> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<long long> {
-  using _integral = true_type;
-};
-
-template<>
-struct is_integer<unsigned long long> {
-  using _integral = true_type;
-};
 
 // remove reference
 template<class T>
