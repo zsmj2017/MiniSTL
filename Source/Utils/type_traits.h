@@ -2,6 +2,26 @@
 
 namespace MiniSTL {
 
+namespace {
+// for conditional_t
+template<bool>
+struct conditional_;
+template<>
+struct conditional_<false> {
+  template<typename, typename T>
+  using apply = T;
+};
+template<>
+struct conditional_<true> {
+  template<typename T, typename>
+  using apply = T;
+};
+}// namespace
+
+// 为true时，返回T，否则返回F
+template<bool b, typename T, typename F>
+using conditional_t = typename conditional_<b>::template apply<T, F>;
+
 template<bool b, class T>
 struct enable_if {};
 

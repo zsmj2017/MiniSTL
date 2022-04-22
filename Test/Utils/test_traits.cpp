@@ -298,3 +298,8 @@ TEST_F(TraitsTest, is_reference) {
   ASSERT_TRUE(is_reference<double *&>());
   ASSERT_TRUE(is_reference<double *&&>());
 }
+
+TEST_F(TraitsTest, conditional) {
+  ASSERT_TRUE((is_same_v<conditional_t<false, char, int>, int>) );
+  ASSERT_TRUE((is_same_v<conditional_t<true, char, int>, char>) );
+}
