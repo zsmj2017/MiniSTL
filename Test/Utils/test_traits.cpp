@@ -289,12 +289,12 @@ TEST_F(TraitsTest, is_detected_v) {
 TEST_F(TraitsTest, is_reference) {
   class A {};
   ASSERT_FALSE(is_reference<A>());
-  static_assert(is_reference<A &>());
-  static_assert(is_reference<A &&>());
+  ASSERT_TRUE(is_reference<A &>());
+  ASSERT_TRUE(is_reference<A &&>());
   ASSERT_FALSE(is_reference<long>());
-  static_assert(is_reference<long &>());
-  static_assert(is_reference<long &&>());
+  ASSERT_TRUE(is_reference<long &>());
+  ASSERT_TRUE(is_reference<long &&>());
   ASSERT_FALSE(is_reference<double *>());
-  static_assert(is_reference<double *&>());
-  static_assert(is_reference<double *&&>());
+  ASSERT_TRUE(is_reference<double *&>());
+  ASSERT_TRUE(is_reference<double *&&>());
 }
