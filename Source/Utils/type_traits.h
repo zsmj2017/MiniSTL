@@ -329,6 +329,15 @@ using has_trivial_destructor_t = typename type_traits<T>::has_trivial_destructor
 template<class T>
 using is_POD_type_t = typename type_traits<T>::is_POD_type;
 
+template<class T>
+struct is_reference : false_type {};
+
+template<class T>
+struct is_reference<T &> : true_type {};
+
+template<class T>
+struct is_reference<T &&> : true_type {};
+
 // remove reference
 template<class T>
 struct remove_reference {

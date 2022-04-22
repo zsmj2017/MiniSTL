@@ -285,3 +285,16 @@ TEST_F(TraitsTest, is_detected_v) {
   ASSERT_TRUE((is_detected_v<detector_find, std::string, char>) );
   ASSERT_FALSE((is_detected_v<detector_find, double, char>) );
 }
+
+TEST_F(TraitsTest, is_reference) {
+  class A {};
+  ASSERT_FALSE(is_reference<A>());
+  static_assert(is_reference<A &>());
+  static_assert(is_reference<A &&>());
+  ASSERT_FALSE(is_reference<long>());
+  static_assert(is_reference<long &>());
+  static_assert(is_reference<long &&>());
+  ASSERT_FALSE(is_reference<double *>());
+  static_assert(is_reference<double *&>());
+  static_assert(is_reference<double *&&>());
+}
