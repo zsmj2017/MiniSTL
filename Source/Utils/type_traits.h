@@ -2,7 +2,7 @@
 
 namespace MiniSTL {
 
-namespace {
+namespace detail {
 // for conditional_t
 template<bool>
 struct conditional_;
@@ -16,11 +16,11 @@ struct conditional_<true> {
   template<typename T, typename>
   using apply = T;
 };
-}// namespace
+}// namespace detail
 
 // 为true时，返回T，否则返回F
 template<bool b, typename T, typename F>
-using conditional_t = typename conditional_<b>::template apply<T, F>;
+using conditional_t = typename detail::conditional_<b>::template apply<T, F>;
 
 template<bool b, class T>
 struct enable_if {};
@@ -427,7 +427,7 @@ constexpr bool is_instantiation_of_v<C, C<T...>> = true;
 template<template<typename...> class C, typename... T>
 struct is_instantiation_of : bool_constant<is_instantiation_of_v<C, T...>> {};
 
-namespace {
+namespace detail {
 // aux for void_t
 template<class T, class...>
 struct type_t_ {
@@ -437,11 +437,11 @@ struct type_t_ {
 // 获取模板参数的第一个（以此实现void_t)
 template<class T, class... Ts>
 using type_t = typename type_t_<T, Ts...>::type;
-}// namespace
+}// namespace detail
 
 // 获取void类型，常用于模板片特化，具体使用案例可见has_value_type
 template<class... Ts>
-using void_t = type_t<void, Ts...>;
+using void_t = detail::type_t<void, Ts...>;
 
 // has_value_type<T>::value is true if T has a nested type `value_type`
 template<class T, class = void>
@@ -450,7 +450,7 @@ struct has_value_type : false_type {};
 template<class T>
 struct has_value_type<T, void_t<typename T::value_type>> : true_type {};
 
-namespace {
+namespace detail {
 //  nonesuch
 //  A tag type which traits may use to indicate lack of a result type.
 //  Similar to void in that no values of this type may be constructed. Different
@@ -473,23 +473,23 @@ struct detected_<void_t<T<A...>>, D, T, A...> {
   using value_t = true_type;
   using type = T<A...>;
 };
-}// namespace
+}// namespace detail
 
 template<typename D, template<typename...> class T, typename... A>
-using detected_or = detected_<void, D, T, A...>;
+using detected_or = detail::detected_<void, D, T, A...>;
 
 // return T<A...> if T<A...> is detected, otherwise return D
 template<typename D, template<typename...> class T, typename... A>
 using detected_or_t = typename detected_or<D, T, A...>::type;
 
 template<template<typename...> class T, typename... A>
-using detected_t = detected_or_t<nonesuch, T, A...>;
+using detected_t = detected_or_t<detail::nonesuch, T, A...>;
 template<template<typename...> class T, typename... A>
-constexpr bool is_detected_v = detected_or<nonesuch, T, A...>::value_t::value;
+constexpr bool is_detected_v = detected_or<detail::nonesuch, T, A...>::value_t::value;
 
 // 判断是否可以构成T<A...>
 template<template<typename...> class T, typename... A>
-struct is_detected : detected_or<nonesuch, T, A...>::value_t {};
+struct is_detected : detected_or<detail::nonesuch, T, A...>::value_t {};
 
 template<typename, typename>
 constexpr bool is_similar_instantiation_v = false;

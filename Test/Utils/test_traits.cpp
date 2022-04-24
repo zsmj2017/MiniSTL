@@ -237,11 +237,11 @@ TEST_F(TraitsTest, void_t) {
 }
 
 TEST_F(TraitsTest, type_t) {
-  ASSERT_TRUE((is_same<type_t<float>, float>::value));
-  ASSERT_TRUE((is_same<type_t<float, int>, float>::value));
-  ASSERT_TRUE((is_same<type_t<float, int, short>, float>::value));
+  ASSERT_TRUE((is_same<detail::type_t<float>, float>::value));
+  ASSERT_TRUE((is_same<detail::type_t<float, int>, float>::value));
+  ASSERT_TRUE((is_same<detail::type_t<float, int, short>, float>::value));
   ASSERT_TRUE(
-      (is_same<type_t<float, int, short, std::string>, float>::
+      (is_same<detail::type_t<float, int, short, std::string>, float>::
            value));
 }
 
@@ -273,7 +273,7 @@ TEST_F(TraitsTest, detected_t) {
   ASSERT_TRUE((
       std::is_same<
           detected_t<detector_find, double, char>,
-          nonesuch>::value));
+          detail::nonesuch>::value));
 }
 
 TEST_F(TraitsTest, is_detected) {
