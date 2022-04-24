@@ -30,7 +30,7 @@ struct enable_if<true, T> {
   using type = T;
 };
 
-template<bool b, class T>
+template<bool b, class T = void>
 using enable_if_t = typename enable_if<b, T>::type;
 
 template<class T, T val>
@@ -490,5 +490,14 @@ constexpr bool is_detected_v = detected_or<nonesuch, T, A...>::value_t::value;
 // 判断是否可以构成T<A...>
 template<template<typename...> class T, typename... A>
 struct is_detected : detected_or<nonesuch, T, A...>::value_t {};
+
+template<typename, typename>
+constexpr bool is_similar_instantiation_v = false;
+template<template<typename...> class C, typename... A, typename... B>
+constexpr bool
+    is_similar_instantiation_v<C<A...>, C<B...>> = true;
+template<typename A, typename B>
+struct is_similar_instantiation
+    : bool_constant<is_similar_instantiation_v<A, B>> {};
 
 }// namespace MiniSTL

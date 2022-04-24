@@ -303,3 +303,15 @@ TEST_F(TraitsTest, conditional) {
   ASSERT_TRUE((is_same_v<conditional_t<false, char, int>, int>) );
   ASSERT_TRUE((is_same_v<conditional_t<true, char, int>, char>) );
 }
+
+TEST_F(TraitsTest, is_similar_instantiation_v) {
+  ASSERT_TRUE((is_similar_instantiation_v<A<int>, A<long>>) );
+  ASSERT_FALSE((is_similar_instantiation_v<A<int>, B>) );
+  ASSERT_FALSE((is_similar_instantiation_v<B, B>) );
+}
+
+TEST_F(TraitsTest, is_similar_instantiation) {
+  ASSERT_TRUE((is_similar_instantiation<A<int>, A<long>>::value));
+  ASSERT_FALSE((is_similar_instantiation<A<int>, B>::value));
+  ASSERT_FALSE((is_similar_instantiation<B, B>::value));
+}
