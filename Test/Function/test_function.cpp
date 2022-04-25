@@ -27,7 +27,7 @@ TEST_F(functionTest, Emptiness_T) {
   ASSERT_EQ(f, nullptr);
   ASSERT_EQ(nullptr, f);
   ASSERT_FALSE(f);
-  //  EXPECT_THROW(f(98), std::exception);
+  ASSERT_THROW(f(98), std::bad_function_call);
 
   function<int(int)> g([](int x) { return x + 1; });
   EXPECT_NE(g, nullptr);
@@ -45,11 +45,11 @@ TEST_F(functionTest, Emptiness_T) {
   ASSERT_EQ(h, nullptr);
   ASSERT_EQ(nullptr, h);
   ASSERT_FALSE(h);
-  //  EXPECT_THROW(h(101), std::exception);
+  ASSERT_THROW(h(101), std::bad_function_call);
 
   function<int(int)> i{function<int(int)>{}};
   ASSERT_EQ(i, nullptr);
   ASSERT_EQ(nullptr, i);
   ASSERT_FALSE(i);
-  //  EXPECT_THROW(i(107), std::exception);
+  ASSERT_THROW(i(107), std::bad_function_call);
 }
