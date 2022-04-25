@@ -35,7 +35,7 @@ enum class Op { MOVE,
 
 // a callable object
 struct Data {
-  void *big;
+  void *fun_ptr;
 };
 
 size_t exec_(Op, Data *, Data *) noexcept;
@@ -45,11 +45,11 @@ template<typename Fun>
 static size_t default_exec(Op o, Data *src, Data *dst) noexcept {
   switch (o) {
     case Op::MOVE:
-      dst->big = src->big;
-      src->big = nullptr;
+      dst->fun_ptr = src->fun_ptr;
+      src->fun_ptr = nullptr;
       break;
     case Op::NUKE:
-      delete static_cast<Fun *>(src->big);
+      delete static_cast<Fun *>(src->fun_ptr);
       break;
     case Op::HEAP:
       break;
@@ -85,8 +85,8 @@ class function<ReturnType(Args...)> {
   }
 
   template<typename Fun>
-  static ReturnType call(Args... args, Data &p) noexcept {
-    auto &fn = *static_cast<const Fun *>(static_cast<void *>(p.big));
+  static ReturnType call(Args... args, Data &p) {
+    auto &fn = *static_cast<const Fun *>(static_cast<void *>(p.fun_ptr));
     return static_cast<ReturnType>(fn(static_cast<Args &&>(args)...));
   }
 
@@ -94,7 +94,7 @@ class function<ReturnType(Args...)> {
   function(function<Signature> &&fun) {
     using Fun = function<Signature>;
     if (fun) {
-      data_.big = new Fun(static_cast<Fun &&>(fun));
+      data_.fun_ptr = new Fun(static_cast<Fun &&>(fun));
       exec_ = Exec(detail::default_exec<Fun>);
       call_ = &call<Fun>;
     }
@@ -120,7 +120,7 @@ class function<ReturnType(Args...)> {
     if (detail::isEmptyFunction(fun)) {
       return;
     }
-    data_.big = new Fun(static_cast<Fun &&>(fun));
+    data_.fun_ptr = new Fun(static_cast<Fun &&>(fun));
     exec_ = Exec(detail::default_exec<Fun>);
     call_ = &call<Fun>;
   }
@@ -154,6 +154,8 @@ class function<ReturnType(Args...)> {
     that.exec(Op::MOVE, &that.data_, &data_);
     exec_ = that.exec_;
     that.exec_ = nullptr;
+    call_ = that.call_;
+    that.call_ = &detail::uninit_func<ReturnType, Args...>;
     return *this;
   }
 
