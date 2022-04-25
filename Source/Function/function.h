@@ -106,10 +106,10 @@ class function<ReturnType(Args...)> {
   function(std::nullptr_t) noexcept {}
   // not copyable
   function(const function &) = delete;
-  function(function &&that) noexcept : exec_(that.exec_) {
+  function(function &&that) noexcept : exec_(that.exec_), call_(that.call_) {
     that.exec_ = nullptr;
+    that.call_ = &detail::uninit_func<ReturnType, Args...>;
     exec(Op::MOVE, &that.data_, &data_);
-    call_ = that.call_;
   }
 
   template<
