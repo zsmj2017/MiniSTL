@@ -12,6 +12,9 @@ class function;
 namespace detail {
 
 namespace function {
+
+struct CoerceTag {};// 额外参数，for private ctor
+
 // 可执行对象的操作类型
 // move:移动可执行对象
 // nuke:析构可执行对象
@@ -225,13 +228,15 @@ struct DispatchBig {
 
 template<typename functionType>
 class function final : private detail::function::functionTraits<functionType> {
- public:
+ private:
   using Data = detail::function::Data;
   using Op = detail::function::Op;
 
   using Traits = detail::function::functionTraits<functionType>;
   using Call = typename Traits::Call;
   using Exec = detail::function::Exec;
+
+  using CoerceTag = detail::function::CoerceTag;
 
   // sizeof(function) == 64 bytes (on 64-bit platform)
   // data:48 bytes, call_:8 bytes, exec_:8 bytes
@@ -250,7 +255,7 @@ class function final : private detail::function::functionTraits<functionType> {
   friend class function<typename Traits::OtherSignature>;
 
   template<typename Signature>
-  function(function<Signature> &&fun) {
+  function(function<Signature> &&fun, CoerceTag) {
     using Fun = function<Signature>;
     if (fun) {
       data_.big = new Fun(static_cast<Fun &&>(fun));
@@ -259,7 +264,7 @@ class function final : private detail::function::functionTraits<functionType> {
     }
   }
 
-  function(function<typename Traits::OtherSignature> &&that) noexcept
+  function(function<typename Traits::OtherSignature> &&that, CoerceTag) noexcept
       : call_(that.call_), exec_(that.exec_) {
     that.call_ = &Traits::uninitCall;
     that.exec_ = nullptr;
@@ -310,11 +315,11 @@ class function final : private detail::function::functionTraits<functionType> {
   template<
       typename Signature,
       typename Fun = function<Signature>,
-      typename = enable_if_t<!is_same<function, Fun>::value>,
+      typename = std::enable_if_t<!std::is_same<function, Fun>::value>,
       typename = typename Traits::template IfSafeResult<Fun>>
   function(function<Signature> &&that) noexcept(
-      noexcept(function(move(that))))
-      : function(std::move(that)) {}
+      noexcept(function(std::move(that), CoerceTag{})))
+      : function(std::move(that), CoerceTag{}) {}
   template<
       typename Member,
       typename Class,
