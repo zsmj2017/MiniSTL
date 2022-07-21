@@ -1,4 +1,5 @@
 #pragma once
+#include <type_traits>// TODO::REMOVE IT! for std::is_trivially_copyable
 
 namespace MiniSTL {
 
@@ -499,5 +500,15 @@ constexpr bool
 template<typename A, typename B>
 struct is_similar_instantiation
     : bool_constant<is_similar_instantiation_v<A, B>> {};
+
+// Whether a value may be passed in a register.
+inline constexpr std::size_t register_pass_max_size = 16u;
+template<typename T>
+constexpr bool is_register_pass_v =
+    (sizeof(T) <= register_pass_max_size) && std::is_trivially_copyable<T>::value;
+template<typename T>
+constexpr bool is_register_pass_v<T &> = true;
+template<typename T>
+constexpr bool is_register_pass_v<T &&> = true;
 
 }// namespace MiniSTL

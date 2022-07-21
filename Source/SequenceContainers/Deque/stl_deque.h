@@ -279,7 +279,7 @@ void deque<T, Alloc>::fill_initialize(const value_type &val) {
     // 最后一个缓冲区只设定至需要处
     MiniSTL::uninitialized_fill(finish.first, finish.cur, val);
   } catch (std::exception &) {
-    destroy(start, iterator(*cur, cur));
+    MiniSTL::destroy(start, iterator(*cur, cur));
     throw;
   }
 }
@@ -315,7 +315,7 @@ void deque<T, Alloc>::range_initialize(ForwardIterator first,
     }
     MiniSTL::uninitialized_copy(first, last, finish.first);
   } catch (std::exception &) {
-    destroy(start, iterator(*cur_node, cur_node));
+    MiniSTL::destroy(start, iterator(*cur_node, cur_node));
     throw;
   }
 }
@@ -696,7 +696,7 @@ deque<T, Alloc> &deque<T, Alloc>::operator=(deque &&rhs) noexcept {
 
 template<class T, class Alloc>
 inline deque<T, Alloc>::~deque() {
-  destroy(start, finish);
+  MiniSTL::destroy(start, finish);
   if (map) {
     destroy_nodes(start.node,
                   finish.node + 1);// 也需要destroy finish.node
@@ -747,18 +747,18 @@ template<class T, class Alloc>
 inline void deque<T, Alloc>::clear() {
   // 清空所有node，保留唯一缓冲区（需要注意的是尽管map可能存有更多节点，但有[start,finish]占据内存
   for (map_pointer node = start.node + 1; node < finish.node;
-       ++node) {                          //内部均存有元素
-    destroy(*node, *node + buffer_size());//析构所有元素
+       ++node) {                                   //内部均存有元素
+    MiniSTL::destroy(*node, *node + buffer_size());//析构所有元素
     node_allocator::deallocate(*node, buffer_size());
   }
   if (start.node != finish.node) {// 存在头尾两个缓冲区
     // 析构其中所有元素
-    destroy(start.cur, start.last);
-    destroy(finish.first, finish.cur);
+    MiniSTL::destroy(start.cur, start.last);
+    MiniSTL::destroy(finish.first, finish.cur);
     // 保存头部，释放尾部
     node_allocator::deallocate(finish.first, buffer_size());
   } else
-    destroy(start.cur, finish.cur);// 利用finish.cur标记末尾
+    MiniSTL::destroy(start.cur, finish.cur);// 利用finish.cur标记末尾
   finish = start;
 }
 
@@ -787,8 +787,8 @@ typename deque<T, Alloc>::iterator deque<T, Alloc>::erase(iterator first,
     difference_type elems_before = first - start;// 前方元素个数
     if (elems_before < (size() - n) / 2) {       // 后移开销较低
       MiniSTL::copy_backward(start, first, last);
-      iterator new_start = start + n;// 标记新起点
-      destroy(start, new_start);     // 析构多余元素
+      iterator new_start = start + n;    // 标记新起点
+      MiniSTL::destroy(start, new_start);// 析构多余元素
       // 释放多余缓冲区
       for (map_pointer cur = start.node; cur < new_start.node; ++cur)
         node_allocator::deallocate(*cur, buffer_size());
@@ -796,7 +796,7 @@ typename deque<T, Alloc>::iterator deque<T, Alloc>::erase(iterator first,
     } else {// 前移开销较低
       MiniSTL::copy(last, finish, first);
       iterator new_finish = finish - n;// 标记末尾
-      destroy(new_finish, finish);
+      MiniSTL::destroy(new_finish, finish);
       // 释放多余缓冲区
       for (map_pointer cur = new_finish.node + 1; cur <= finish.node;
            ++cur)

@@ -60,7 +60,7 @@ class vector {
     if (start) data_allocator::deallocate(start, end_of_storage - start);
   }
   void destroy_and_deallocate() noexcept {
-    destroy(start, finish);// destroy in "construct.h"
+    MiniSTL::destroy(start, finish);// destroy in "construct.h"
     deallocate();
   }
 
@@ -81,7 +81,7 @@ class vector {
   vector(vector &&) noexcept;
 
   ~vector() {
-    destroy(start, finish);// destory in "construct.h"
+    MiniSTL::destroy(start, finish);// destory in "construct.h"
     deallocate();
   }
 
@@ -391,7 +391,7 @@ template<class T, class Alloc>
 inline typename vector<T, Alloc>::iterator vector<T, Alloc>::erase(
     iterator first, iterator last) {
   iterator i = MiniSTL::copy(last, finish, first);
-  destroy(i, finish);
+  MiniSTL::destroy(i, finish);
   finish -= (last - first);
   return first;
 }
@@ -432,7 +432,7 @@ void vector<T, Alloc>::fill_insert(iterator position, size_type n,
       new_finish =
           MiniSTL::uninitialized_copy(position, finish, new_finish);
     } catch (std::exception &) {
-      destroy(new_start, new_finish);
+      MiniSTL::destroy(new_start, new_finish);
       data_allocator::deallocate(new_start, new_size);
       throw;
     }
