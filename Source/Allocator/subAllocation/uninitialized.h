@@ -111,7 +111,7 @@ inline ForwardIterator uninitialized_copy_copy(InputIterator1 first1,
   try {
     return MiniSTL::uninitialized_copy(first2, last2, mid);
   } catch (std::exception &) {
-    destroy(result, mid);
+    MiniSTL::destroy(result, mid);
     throw;
   }
 }
@@ -129,7 +129,7 @@ inline ForwardIterator uninitialized_fill_copy(ForwardIterator result,
   try {
     return MiniSTL::uninitialized_copy(first, last, mid);
   } catch (std::exception &) {
-    destroy(result, mid);
+    MiniSTL::destroy(result, mid);
     throw;
   }
 }
@@ -145,7 +145,7 @@ inline void uninitialized_copy_fill(InputIterator first1, InputIterator last1,
   try {
     MiniSTL::uninitialized_fill(mid2, last2, val);
   } catch (std::exception &) {
-    destroy(first2, mid2);
+    MiniSTL::destroy(first2, mid2);
     throw;
   }
 }
