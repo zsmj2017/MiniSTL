@@ -3,9 +3,9 @@ PROJECT(miniSTL)
 
 message("current build type is ${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-message(STATUS "C++14 suppddort has been enabled by default.")
+message(STATUS "C++17 support has been enabled by default.")
 
 add_subdirectory(Source)
 
