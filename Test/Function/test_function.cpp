@@ -43,11 +43,11 @@ TEST_F(functionTest, InvokeFunctor) {
   Functor<int, 100> func;
   static_assert(
       sizeof(func) > sizeof(function<int(size_t)>),
-      "sizeof(Function) is much larger than expected");
+      "sizeof(function) is much larger than expected");
   func(5, 123);
   function<int(size_t) const> getter = MiniSTL::move(func);
 
-  // Function will allocate memory on the heap to store the functor object
+  // function will allocate memory on the heap to store the functor object
   ASSERT_GT(getter.heapAllocatedMemory(), 0);
 
   ASSERT_EQ(123, getter(5));
@@ -57,13 +57,13 @@ TEST_F(functionTest, InvokeReference) {
   Functor<int, 10> func;
   func(5, 123);
 
-  // Have Functions for getter and setter, both referencing the same funtor
+  // Have functions for getter and setter, both referencing the same funtor
   function<int(size_t) const> getter = std::ref(func);
   function<int(size_t, int)> setter = std::ref(func);
 
   ASSERT_EQ(123, getter(5));
   ASSERT_EQ(123, setter(5, 456));
-  ASSERT_EQ(123, setter(5, 567));
+  ASSERT_EQ(456, setter(5, 567));
   ASSERT_EQ(567, getter(5));
 }
 
@@ -272,33 +272,24 @@ TEST_F(functionTest, OverloadedFunctor) {
 
   function<int(int, MiniSTL::vector<int> const &) const> variant6const = of;
   ASSERT_EQ(100 + 6 * 21, variant6const(21, {}));
+}
 
-  //  auto variant1_const = constCastFunction(MiniSTL::move(variant1));
-  //  ASSERT_THROW(variant1(0), std::bad_function_call);
-  //  ASSERT_EQ(100 + 1 * 22, variant1_const(22));
-  //
-  //  function<int(int)> variant2_nonconst = MiniSTL::move(variant2);
-  //  ASSERT_THROW(variant2(0), std::bad_function_call);
-  //  ASSERT_EQ(100 + 2 * 23, variant2_nonconst(23));
-  //
-  //  auto variant3_const = constCastFunction(MiniSTL::move(variant3));
-  //  ASSERT_THROW(variant3(0, 0), std::bad_function_call);
-  //  ASSERT_EQ(100 + 3 * 24, variant3_const(24, 0));
-  //
-  //  function<int(int, int)> variant4_nonconst = MiniSTL::move(variant4);
-  //  ASSERT_THROW(variant4(0, 0), std::bad_function_call);
-  //  ASSERT_EQ(100 + 4 * 25, variant4_nonconst(25, 0));
-  //
-  //  auto variant5_const = constCastFunction(MiniSTL::move(variant5));
-  //  ASSERT_THROW(variant5(0, ""), std::bad_function_call);
-  //  ASSERT_EQ(100 + 5 * 26, variant5_const(26, "foo"));
-  //
-  //  auto variant6_const = constCastFunction(MiniSTL::move(variant6));
-  //  ASSERT_THROW(variant6(0, {}), std::bad_function_call);
-  //  ASSERT_EQ(100 + 6 * 27, variant6_const(27, {}));
-  //
-  //  function<int(int, MiniSTL::vector<int> const &)> variant6const_nonconst =
-  //      MiniSTL::move(variant6const);
-  //  ASSERT_THROW(variant6const(0, {}), std::bad_function_call);
-  //  ASSERT_EQ(100 + 6 * 28, variant6const_nonconst(28, {}));
+TEST_F(functionTest, Lambda) {
+  // Non-mutable lambdas: can be stored in a non-const...
+  function<int(int)> func = [](int x) { return 1000 + x; };
+  ASSERT_EQ(1001, func(1));
+
+  // ...as well as in a const function
+  function<int(int) const> func_const = [](int x) { return 2000 + x; };
+  ASSERT_EQ(2001, func_const(1));
+
+  // Mutable lambda: can only be stored in a const function:
+  int number = 3000;
+  function<int()> func_mutable = [number]() mutable { return ++number; };
+  ASSERT_EQ(3001, func_mutable());
+  ASSERT_EQ(3002, func_mutable());
+
+  function<int(int)> func_const_made_nonconst = std::move(func_const);
+  ASSERT_EQ(2002, func_const_made_nonconst(2));
+  ASSERT_THROW(func_const(0), std::bad_function_call);
 }
