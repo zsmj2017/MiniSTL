@@ -9,9 +9,7 @@ namespace MiniSTL {
 template<typename functionType>
 class function;
 
-namespace detail {
-
-namespace function {
+namespace detail::function {
 
 struct CoerceTag {};// 额外参数，for private ctor
 
@@ -24,7 +22,7 @@ enum class Op { MOVE,
                 HEAP };
 
 union Data {// store callable object
-  Data() {}
+  Data() = default;
   void *big;                                          // call object on heap
   std::aligned_storage<6 * sizeof(void *)>::type tiny;// call object on stack
 };
@@ -155,7 +153,7 @@ struct functionTraits<ReturnType(Args...) const> {
 // heap(获取可执行对象在堆上的大小）
 std::size_t exec_(Op, Data *, Data *) noexcept;
 using Exec = decltype(&exec_);
-static_assert(noexcept(Exec(nullptr)(Op{}, nullptr, nullptr)), "");// exec must be noexcept
+static_assert(noexcept(Exec(nullptr)(Op{}, nullptr, nullptr)), "exec must be noexcept");
 
 // call obj 三类操作
 struct DispatchSmallTrivial {
@@ -223,7 +221,6 @@ struct DispatchBig {
   }
 };
 
-}// namespace function
 }// namespace detail
 
 template<typename functionType>
@@ -365,15 +362,23 @@ class function final : private detail::function::functionTraits<functionType> {
       typename = typename Traits::template IfSafeResult<function<Signature>>>
   function &operator=(function<Signature> &&that) noexcept(
       noexcept(function(std::move(that)))) {
-    return (*this = function(std::move(that)));
+    *this = function(std::move(that));
+    return *this;
   }
 
-  function &operator=(std::nullptr_t) noexcept { return (*this = function()); }
+  function &operator=(std::nullptr_t) noexcept {
+    *this = function();
+    return *this;
+  }
 
   template<typename Member, typename Class>
-  auto operator=(Member Class::*ptr) noexcept
-      -> decltype(operator=(std::mem_fn(ptr))) {
-    return ptr ? (*this = std::mem_fn(ptr)) : (*this = function());
+  function &operator=(Member Class::*ptr) noexcept {
+    if (ptr) {
+      *this = std::mem_fn(ptr);
+    } else {
+      *this = function();
+    }
+    return *this;
   }
 
   // operator()函数
