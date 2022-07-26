@@ -1,6 +1,6 @@
 #include "Algorithms/algo/stl_algo.h"
 #include "Algorithms/numeric/stl_numeric.h"
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include "string"
 #include <gtest/gtest.h>
 

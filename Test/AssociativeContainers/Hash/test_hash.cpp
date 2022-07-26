@@ -2,7 +2,7 @@
 #include "AssociativeContainers/HashMultiset/hash_multiset.h"
 #include "AssociativeContainers/Hashmap/hash_map.h"
 #include "AssociativeContainers/Hashset/hash_set.h"
-#include <Function/stl_function.h>
+#include <Function/function_adapter.h>
 #include <Hashtable/hash_func.h>
 #include <gtest/gtest.h>
 #include <string>

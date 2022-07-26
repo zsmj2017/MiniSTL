@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include "Iterator/stl_iterator.h"
 #include "Utils/type_traits.h"
 #include <cstddef>

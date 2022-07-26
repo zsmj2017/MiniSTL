@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include "stl_iterator.h"
 
 namespace MiniSTL {

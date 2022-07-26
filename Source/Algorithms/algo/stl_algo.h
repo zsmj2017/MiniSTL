@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Algorithms/heap/heap_algorithm.h"// for partial_sort()
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include "Iterator/stl_iterator.h"
 #include "Utils/stl_tempbuf.h"
 

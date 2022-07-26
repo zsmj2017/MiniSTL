@@ -1,5 +1,5 @@
 #include "Algorithms/numeric/stl_numeric.h"
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include <gtest/gtest.h>
 
 using namespace ::MiniSTL;

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "AssociativeContainers/RB-Tree/rb_tree.h"
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 
 namespace MiniSTL {
 

@@ -2,7 +2,7 @@
 
 #include "Algorithms/algobase/stl_algobase.h"
 #include "Allocator/subAllocation/allocator.h"
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include "rb_tree_iterator.h"
 
 namespace MiniSTL {

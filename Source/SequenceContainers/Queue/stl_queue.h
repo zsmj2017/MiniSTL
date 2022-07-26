@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Algorithms/algobase/stl_algobase.h"
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include "SequenceContainers/Deque/stl_deque.h"
 
 namespace MiniSTL {

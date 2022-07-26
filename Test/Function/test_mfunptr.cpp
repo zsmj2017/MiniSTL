@@ -1,5 +1,5 @@
 #include "Algorithms/algo/stl_algo.h"
-#include "Function/stl_function.h"
+#include "Function/function_adapter.h"
 #include "SequenceContainers/Vector/stl_vector.h"
 #include <gtest/gtest.h>
 
