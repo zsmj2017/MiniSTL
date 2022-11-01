@@ -76,9 +76,9 @@ MiniSTL
 
 &emsp;[其他算法(stl_algo.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Source/Algorithms/algo/stl_algo.h)
 
-6. **仿函数(function object)**
+6. **函数对象(function object)**
 
-&emsp;[算术、关系运算、逻辑运算仿函数(stl_function.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Source/Function/stl_function.h)
+&emsp;[函数对象(function.h)](https://github.com/zsmj2017/MiniSTL/blob/master/Source/Function/function.h)
 
 7. **配接器(adapter)**
 
@@ -86,7 +86,7 @@ MiniSTL
 
 &emsp;迭代器配接器（`insert_iterator`、`reverse_iterator`、`istream_iterator`)
 
-&emsp;仿函数配接器（`not1`、`not2`、`bind1st`、`bind2nd`、`compose1`、`compose2`、`ptr_fun`...)
+&emsp;函数配接器（`not1`、`not2`、`bind1st`、`bind2nd`、`compose1`、`compose2`、`ptr_fun`...)
 
 8. **智能指针(smart_pointer)**
 
