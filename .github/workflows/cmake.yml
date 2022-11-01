@@ -17,16 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install system packages
+      - name: Upgrade cmake
+        run: brew upgrade cmake
+
+      - name: Install wget manually
         run: brew install wget
 
       - name: Install googletest manually
-        run: |
-          wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz
-          tar xf release-1.10.0.tar.gz
-          (cd googletest-release-1.10.0 &&
-          cmake -DBUILD_SHARED_LIBS=ON . &&
-          sudo make install)
+        run: brew install googletest
 
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_MINISTL_TEST=ON -DCMAKE_CXX_FLAGS="-Werror"
@@ -37,4 +35,3 @@ jobs:
       - name: Test
         working-directory: ${{github.workspace}}/build/Test
         run: ./Test
-      
