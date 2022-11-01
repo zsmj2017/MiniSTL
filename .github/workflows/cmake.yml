@@ -16,8 +16,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Update cmake
+        run: brew update cmake
 
-      - name: Install system packages
+      - name: Install wget manually
         run: brew install wget
 
       - name: Install googletest manually
