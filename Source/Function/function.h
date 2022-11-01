@@ -32,19 +32,22 @@ template<typename T>
 using functionNullptrTest =
     decltype(static_cast<bool>(static_cast<T const &>(T(nullptr)) == nullptr));
 
+template<typename T, typename = void>
+struct isPassFunctionNullptrTest : false_type {};
+
+template<typename T>
+struct isPassFunctionNullptrTest<T, std::void_t<functionNullptrTest<T>>>
+    : true_type {};
+
 // T若不可以转换为nullptr_t类型，返回false
 // 若可以，则判断t == nullptr
-template<
-    typename T,
-    enable_if_t<!is_detected_v<functionNullptrTest, T>, int> = 0>
-constexpr bool isEmptyfunction(T const &) {
-  return false;
-}
-template<
-    typename T,
-    enable_if_t<is_detected_v<functionNullptrTest, T>, int> = 0>
-constexpr bool isEmptyfunction(T const &t) {
-  return static_cast<bool>(t == nullptr);
+template<typename T>
+constexpr bool isEmptyFunction(T const &t) {
+  if constexpr (!isPassFunctionNullptrTest<T>::value) {
+    return false;
+  } else {
+    return static_cast<bool>(t == nullptr);
+  }
 }
 
 // 获取F(Args...)的返回类型
@@ -221,7 +224,7 @@ struct DispatchBig {
   }
 };
 
-}// namespace detail
+}// namespace detail::function
 
 template<typename functionType>
 class function final : private detail::function::functionTraits<functionType> {
@@ -297,7 +300,7 @@ class function final : private detail::function::functionTraits<functionType> {
             IsSmall,
             detail::function::DispatchSmall,
             detail::function::DispatchBig>>;
-    if (detail::function::isEmptyfunction(fun)) {
+    if (detail::function::isEmptyFunction(fun)) {
       return;
     }
     if constexpr (IsSmall) {
