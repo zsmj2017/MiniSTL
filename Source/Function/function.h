@@ -59,7 +59,7 @@ template<
     typename From,
     typename To,
     typename = typename std::enable_if<
-        !std::is_reference<To>::value || std::is_reference<From>::value>::type>
+        !is_reference<To>::value || is_reference<From>::value>::type>
 using IfSafeResultImpl = decltype(void(static_cast<To>(declval<From>())));
 
 template<typename T>
@@ -318,8 +318,8 @@ class function final : private detail::function::functionTraits<functionType> {
       typename = std::enable_if_t<!std::is_same<function, Fun>::value>,
       typename = typename Traits::template IfSafeResult<Fun>>
   function(function<Signature> &&that) noexcept(
-      noexcept(function(std::move(that), CoerceTag{})))
-      : function(std::move(that), CoerceTag{}) {}
+      noexcept(function(move(that), CoerceTag{})))
+      : function(move(that), CoerceTag{}) {}
   template<
       typename Member,
       typename Class,
@@ -364,8 +364,8 @@ class function final : private detail::function::functionTraits<functionType> {
       typename...,
       typename = typename Traits::template IfSafeResult<function<Signature>>>
   function &operator=(function<Signature> &&that) noexcept(
-      noexcept(function(std::move(that)))) {
-    *this = function(std::move(that));
+      noexcept(function(move(that)))) {
+    *this = function(move(that));
     return *this;
   }
 
