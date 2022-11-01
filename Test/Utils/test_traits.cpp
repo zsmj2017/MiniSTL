@@ -14,16 +14,6 @@ template<class>
 struct A {};
 struct B {};
 
-TEST_F(TraitsTest, is_instantiation_of_v) {
-  ASSERT_TRUE((is_instantiation_of_v<A, A<int>>) );
-  ASSERT_FALSE((is_instantiation_of_v<A, B>) );
-}
-
-TEST_F(TraitsTest, is_instantiation_of) {
-  ASSERT_TRUE((is_instantiation_of<A, A<int>>::value));
-  ASSERT_FALSE((is_instantiation_of<A, B>::value));
-}
-
 int *int_pointer;
 int const *int_const_pointer;
 int volatile *int_volatile_pointer;
@@ -243,47 +233,6 @@ TEST_F(TraitsTest, type_t) {
   ASSERT_TRUE(
       (is_same<detail::type_t<float, int, short, std::string>, float>::
            value));
-}
-
-template<typename T, typename V>
-using detector_find = decltype(declval<T>().find(declval<V>()));
-
-TEST_F(TraitsTest, detected_or_t) {
-  // std::string str;
-  // char c;
-  // std::string::size_type size;
-  // size = str.find(c)
-  ASSERT_TRUE((
-      std::is_same<
-          detected_or_t<float, detector_find, std::string, char>,
-          std::string::size_type>::value));
-  // can not compile detector_find<double,char> , so detected_or_t return float
-  ASSERT_TRUE((
-      std::is_same<
-          detected_or_t<float, detector_find, double, char>,
-          float>::value));
-}
-
-TEST_F(TraitsTest, detected_t) {
-  ASSERT_TRUE((
-      std::is_same<
-          detected_t<detector_find, std::string, char>,
-          std::string::size_type>::value));
-  // can not compile detector_find<double,char> , so detected_t return nonesuch
-  ASSERT_TRUE((
-      std::is_same<
-          detected_t<detector_find, double, char>,
-          detail::nonesuch>::value));
-}
-
-TEST_F(TraitsTest, is_detected) {
-  ASSERT_TRUE((is_detected<detector_find, std::string, char>::value));
-  ASSERT_FALSE((is_detected<detector_find, double, char>::value));
-}
-
-TEST_F(TraitsTest, is_detected_v) {
-  ASSERT_TRUE((is_detected_v<detector_find, std::string, char>) );
-  ASSERT_FALSE((is_detected_v<detector_find, double, char>) );
 }
 
 TEST_F(TraitsTest, is_reference) {

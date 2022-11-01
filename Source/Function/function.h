@@ -81,7 +81,7 @@ struct functionTraits<ReturnType(Args...)> {
   template<typename Fun>
   static ReturnType callSmall(CallArg<Args>... args, Data &p) {
     auto &fn = *static_cast<Fun *>(static_cast<void *>(&p.tiny));// call obj on stack
-    if constexpr (std::is_void<ReturnType>::value) {
+    if constexpr (is_void<ReturnType>::value) {
       fn(static_cast<Args &&>(args)...);
     } else {
       return fn(static_cast<Args &&>(args)...);
@@ -91,7 +91,7 @@ struct functionTraits<ReturnType(Args...)> {
   template<typename Fun>
   static ReturnType callBig(CallArg<Args>... args, Data &p) {
     auto &fn = *static_cast<Fun *>(p.big);// call obj on heap
-    if constexpr (std::is_void<ReturnType>::value) {
+    if constexpr (is_void<ReturnType>::value) {
       fn(static_cast<Args &&>(args)...);
     } else {
       return fn(static_cast<Args &&>(args)...);
@@ -121,7 +121,7 @@ struct functionTraits<ReturnType(Args...) const> {
   template<typename Fun>
   static ReturnType callSmall(CallArg<Args>... args, Data &p) {
     auto &fn = *static_cast<const Fun *>(static_cast<void *>(&p.tiny));
-    if constexpr (std::is_void<ReturnType>::value) {
+    if constexpr (is_void<ReturnType>::value) {
       fn(static_cast<Args &&>(args)...);
     } else {
       return fn(static_cast<Args &&>(args)...);
@@ -131,7 +131,7 @@ struct functionTraits<ReturnType(Args...) const> {
   template<typename Fun>
   static ReturnType callBig(CallArg<Args>... args, Data &p) {
     auto &fn = *static_cast<const Fun *>(p.big);
-    if constexpr (std::is_void<ReturnType>::value) {
+    if constexpr (is_void<ReturnType>::value) {
       fn(static_cast<Args &&>(args)...);
     } else {
       return fn(static_cast<Args &&>(args)...);
