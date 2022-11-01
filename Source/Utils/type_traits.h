@@ -63,6 +63,18 @@ struct is_same<T, T> : true_type {};
 template<class T, class U>
 constexpr bool is_same_v = is_same<T, U>::value;
 
+template<typename T, typename... Args>
+struct is_one_of;// only a declaration
+
+template<typename T>
+struct is_one_of<T> : false_type {};// 递归基
+
+template<typename T, typename U, typename... Args>
+struct is_one_of<T, U, Args...> : bool_constant<is_same<T, U>::value || is_one_of<T, Args...>::value> {};
+
+template<typename T>
+struct is_void : is_one_of<T, void, const void, volatile void, const volatile void> {};
+
 // 自定义类型默认为false
 template<class T>
 struct is_integral : false_type {};
@@ -409,31 +421,32 @@ add_rvalue_reference_t<T> declval() noexcept;
 
 // remove pointer
 template<class T>
-struct remove_pointer { using type = T; };
+struct remove_pointer {
+  using type = T;
+};
 
 template<class T>
-struct remove_pointer<T *> { using type = T; };
+struct remove_pointer<T *> {
+  using type = T;
+};
 
 template<class T>
-struct remove_pointer<T *const> { using type = T; };
+struct remove_pointer<T *const> {
+  using type = T;
+};
 
 template<class T>
-struct remove_pointer<T *volatile> { using type = T; };
+struct remove_pointer<T *volatile> {
+  using type = T;
+};
 
 template<class T>
-struct remove_pointer<T *const volatile> { using type = T; };
+struct remove_pointer<T *const volatile> {
+  using type = T;
+};
 
 template<class T>
 using remove_pointer_t = typename remove_pointer<T>::type;
-
-// 判断当前类型是否为某class template的实例化
-// 使用方法可见UT
-template<template<typename...> class, typename>
-constexpr bool is_instantiation_of_v = false;
-template<template<typename...> class C, typename... T>
-constexpr bool is_instantiation_of_v<C, C<T...>> = true;
-template<template<typename...> class C, typename... T>
-struct is_instantiation_of : bool_constant<is_instantiation_of_v<C, T...>> {};
 
 namespace detail {
 // aux for void_t
@@ -457,47 +470,6 @@ struct has_value_type : false_type {};
 
 template<class T>
 struct has_value_type<T, void_t<typename T::value_type>> : true_type {};
-
-namespace detail {
-//  nonesuch
-//  A tag type which traits may use to indicate lack of a result type.
-//  Similar to void in that no values of this type may be constructed. Different
-//  from void in that no functions may be defined with this return type and no
-//  complete expressions may evaluate with this expression type.
-struct nonesuch {
-  ~nonesuch() = delete;
-  nonesuch(nonesuch const &) = delete;
-  void operator=(nonesuch const &) = delete;
-};
-
-// aux for detect_xxxx
-template<typename Void, typename D, template<typename...> class, typename...>
-struct detected_ {
-  using value_t = false_type;
-  using type = D;
-};
-template<typename D, template<typename...> class T, typename... A>
-struct detected_<void_t<T<A...>>, D, T, A...> {
-  using value_t = true_type;
-  using type = T<A...>;
-};
-}// namespace detail
-
-template<typename D, template<typename...> class T, typename... A>
-using detected_or = detail::detected_<void, D, T, A...>;
-
-// return T<A...> if T<A...> is detected, otherwise return D
-template<typename D, template<typename...> class T, typename... A>
-using detected_or_t = typename detected_or<D, T, A...>::type;
-
-template<template<typename...> class T, typename... A>
-using detected_t = detected_or_t<detail::nonesuch, T, A...>;
-template<template<typename...> class T, typename... A>
-constexpr bool is_detected_v = detected_or<detail::nonesuch, T, A...>::value_t::value;
-
-// 判断是否可以构成T<A...>
-template<template<typename...> class T, typename... A>
-struct is_detected : detected_or<detail::nonesuch, T, A...>::value_t {};
 
 template<typename, typename>
 constexpr bool is_similar_instantiation_v = false;
