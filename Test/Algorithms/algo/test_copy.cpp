@@ -13,6 +13,7 @@ class CopyTest : public testing::Test {
 TEST_F(CopyTest, copy_array) {
   char string[23] = "A string to be copied.";
   char result[23];
+       char temp[23];
   copy(string, string + 23, result);
   ASSERT_TRUE(!strncmp(string, result, 23));
 }
