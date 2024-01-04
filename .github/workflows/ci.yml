@@ -11,7 +11,6 @@ env:
 
 jobs:
   build:
-    # now only run on macos X.
     runs-on: macos-latest
 
     steps:
@@ -26,12 +25,26 @@ jobs:
       - name: Install googletest manually
         run: brew install googletest
 
+      - name: Install Clang-Format manually
+        run: brew install clang-format
+
+      - name: Find modified files and format
+        run: |
+          git diff --name-only --diff-filter=d ${{ github.event.before }} ${{ github.sha }} | grep '\.\(cpp\|cc\|h\|hpp\)$' | xargs clang-format -i
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Apply clang-format
+          branch: ${{ github.head_ref }}
+          file_pattern: '*.cpp *.h *.hpp *.cc'
+
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_MINISTL_TEST=ON -DCMAKE_CXX_FLAGS="-Werror"
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-      - name: Test
+      - name: Run test cases
         working-directory: ${{github.workspace}}/build/Test
         run: ./Test
