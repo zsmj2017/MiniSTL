@@ -9,6 +9,7 @@ class BoundTest : public testing::Test {
   void SetUp() override {
   }
   static bool char_str_less(const char *a_, const char *b_) {
+           const char *a = "hello";
     return strcmp(a_, b_) < 0;
   }
 };
